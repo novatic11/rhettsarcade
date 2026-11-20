@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-labelledby="pocket-heist-t pocket-heist-d">
+<title id="pocket-heist-t">Pocket Heist — the big one</title>
+<desc id="pocket-heist-d">In a midnight museum, a masked thief creeps past red laser beams toward a glowing diamond on a spotlit pedestal while two police flashlight beams sweep the gallery.</desc>
+<defs><linearGradient id="pocket-heist-0" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a1230"/><stop offset="0.62" stop-color="#1a2650"/><stop offset="0.63" stop-color="#141c3a"/><stop offset="1" stop-color="#0a0f24"/></linearGradient><linearGradient id="pocket-heist-1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c2852"/><stop offset="1" stop-color="#0a0f24"/></linearGradient><linearGradient id="pocket-heist-2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff6d8" stop-opacity="0.4"/><stop offset="1" stop-color="#fff6d8" stop-opacity="0.05"/></linearGradient><radialGradient id="pocket-heist-3" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#fff6d8" stop-opacity="0.4"/><stop offset="1" stop-color="#fff6d8" stop-opacity="0"/></radialGradient><radialGradient id="pocket-heist-4" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#9af0ff" stop-opacity="0.75"/><stop offset="0.45" stop-color="#9af0ff" stop-opacity="0.26249999999999996"/><stop offset="1" stop-color="#9af0ff" stop-opacity="0"/></radialGradient><linearGradient id="pocket-heist-5" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="0.5" stop-color="#9af0ff"/><stop offset="1" stop-color="#3ab0e0"/></linearGradient><radialGradient id="pocket-heist-6" cx="0.5" cy="0.48" r="0.75"><stop offset="0.55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.5"/></radialGradient><linearGradient id="pocket-heist-7" x1="0" y1="0" x2="0" y2="1"><stop offset="0.62" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.32"/></linearGradient><pattern id="pocket-heist-grain" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".55" fill="#fff" opacity=".05"/><circle cx="3.5" cy="3.2" r=".5" fill="#000" opacity=".06"/></pattern></defs>
+
+<rect width="640" height="400" fill="url(#pocket-heist-0)"/>
+<g fill="#16204a" stroke="#2a3a6a" stroke-width="3"><rect x="24" y="0" width="32" height="250"/><rect x="214" y="0" width="32" height="250"/><rect x="404" y="0" width="32" height="250"/><rect x="584" y="0" width="32" height="250"/></g>
+<g><rect x="110" y="60" width="80" height="60" fill="#3a5a8a" stroke="#c8a04a" stroke-width="6"/><path d="M116 112 q26.666666666666668 -30 68 -20" stroke="#fff" stroke-opacity=".3" stroke-width="4" fill="none"/><rect x="500" y="50" width="70" height="80" fill="#7a4a6a" stroke="#c8a04a" stroke-width="6"/><path d="M506 122 q23.333333333333332 -40 58 -26.666666666666668" stroke="#fff" stroke-opacity=".3" stroke-width="4" fill="none"/></g>
+<rect x="0" y="250" width="640" height="150" fill="url(#pocket-heist-1)"/>
+<g stroke="#2a3a6a" stroke-width="1.5" opacity=".6"><path d="M200 250 L-280 400"/><path d="M230 250 L-130 400"/><path d="M260 250 L20 400"/><path d="M290 250 L170 400"/><path d="M320 250 L320 400"/><path d="M350 250 L470 400"/><path d="M380 250 L620 400"/><path d="M410 250 L770 400"/><path d="M440 250 L920 400"/><path d="M0 290 H640 M0 340 H640"/></g>
+<polygon points="300,0 340,0 400,330 240,330" fill="url(#pocket-heist-2)"/>
+<ellipse cx="320" cy="320" rx="90" ry="20" fill="url(#pocket-heist-3)"/>
+<polygon points="640,170 520,240 600,330 640,320" fill="#ffe680" opacity=".14"/>
+<polygon points="640,250 470,330 560,400 640,400" fill="#ffe680" opacity=".12"/>
+<g transform="translate(608 200)"><rect x="-12" y="-40" width="24" height="56" rx="8" fill="#1a2a5a"/><circle cx="0" cy="-50" r="11" fill="#d8b890"/><rect x="-14" y="-62" width="28" height="9" rx="3" fill="#1a2a5a"/><rect x="-2" y="-63" width="5" height="5" fill="#ffd34d"/><path d="M-12 -24 l-14 10" stroke="#1a2a5a" stroke-width="7" stroke-linecap="round"/><rect x="-32" y="-18" width="10" height="7" rx="2" fill="#3a3a3a"/></g>
+<g stroke="#ff2a4a" stroke-width="2.5" opacity=".9"><path d="M120 300 L560 270"/><path d="M80 350 L600 320"/></g>
+<g stroke="#ff2a4a" stroke-width="9" opacity=".18"><path d="M120 300 L560 270"/><path d="M80 350 L600 320"/></g>
+<rect x="290" y="250" width="60" height="80" fill="#e8e4f0" stroke="#5a5a7a" stroke-width="3"/>
+<rect x="282" y="242" width="76" height="12" rx="2" fill="#f4f2f8" stroke="#5a5a7a" stroke-width="3"/>
+<path d="M282 190 H358 V242 H282Z" fill="#cfefff" opacity=".12" stroke="#cfefff" stroke-opacity=".5" stroke-width="2"/>
+<circle cx="320" cy="214" r="60" fill="url(#pocket-heist-4)"/>
+<polygon points="302,206 312,196 328,196 338,206 320,232" fill="url(#pocket-heist-5)" stroke="#ffffff" stroke-width="1.5"/>
+<path d="M302 206 H338 M312 196 L320 232 L328 196" stroke="#3ab0e0" stroke-width="1.2" fill="none"/>
+<g fill="#fff"><path d="M350 186 l2 6 l6 2 l-6 2 l-2 6 l-2 -6 l-6 -2 l6 -2z"/></g>
+<g transform="translate(180 300)">
+  <ellipse cx="0" cy="26" rx="44" ry="8" fill="#000" opacity=".4"/>
+  <path d="M-34 -6 Q-30 -40 0 -42 Q26 -40 30 -10 L24 24 L-28 24Z" fill="#1a1a2a" stroke="#000" stroke-width="2"/>
+  <path d="M-28 -10 H26 M-30 4 H28" stroke="#3a3a5a" stroke-width="5"/>
+  <circle cx="16" cy="-50" r="18" fill="#1a1a2a" stroke="#000" stroke-width="2"/>
+  <rect x="2" y="-56" width="32" height="10" rx="5" fill="#e8564a"/>
+  <circle cx="14" cy="-51" r="3" fill="#fff"/><circle cx="26" cy="-51" r="3" fill="#fff"/>
+  <path d="M28 -18 l26 -10" stroke="#1a1a2a" stroke-width="9" stroke-linecap="round"/>
+  <path d="M-34 -28 Q-60 -40 -56 -4 Q-48 14 -30 4Z" fill="#c8a870" stroke="#3a2a10" stroke-width="2.5"/>
+  <path d="M-48 -18 l6 6 m0 -6 l-6 6" stroke="#3a2a10" stroke-width="2"/>
+  <path d="M-20 24 l-6 18 M14 24 l10 16" stroke="#1a1a2a" stroke-width="9" stroke-linecap="round"/>
+</g>
+<rect width="640" height="400" fill="url(#pocket-heist-7)"/>
+<rect width="640" height="400" fill="url(#pocket-heist-6)"/>
+<rect width="640" height="400" fill="url(#pocket-heist-grain)"/>
+</svg>

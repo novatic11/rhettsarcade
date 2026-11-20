@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b1822"><title>Deep Signal</title><link rel="stylesheet" href="style.css"><script type="module" src="game.js"></script></head>
+<body>
+ <header>
+  <div class="identity"><svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="21"/><path d="M13 25a8 8 0 0 1 8-8h9a8 8 0 0 1 0 16h-9a8 8 0 0 1-8-8Zm10-8v-5h6M8 21v9"/><circle cx="30" cy="25" r="4"/></svg><div><h1>DEEP SIGNAL</h1><span class="edition">THE ENDLESS DESCENT</span></div></div>
+  <nav aria-label="Game controls"><a href="../../" target="_top">Game library ↗</a><button id="music" aria-pressed="true">Music on</button><button id="sound" aria-pressed="true">Sound on</button><button id="restart">New dive</button><button id="pause" aria-label="Pause dive">Ⅱ <span>Pause</span></button></nav>
+ </header>
+ <main>
+  <section class="mission-line" aria-label="Current sector"><div class="sector-number"><span>SECTOR</span><strong id="sector">01</strong></div><div class="location"><h2 id="biome">The sunken shelf</h2><p id="biome-hint">Broken coral. Lost cargo.</p></div><div class="depth"><span>BELOW THE SURFACE</span><b id="depth">250 m</b></div><div class="score"><span>SALVAGE SCORE</span><b id="score">0</b></div></section>
+  <section class="vitals" aria-label="Submarine instruments">
+   <div class="air-instrument" id="air-panel"><div class="instrument-heading"><span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2C8 6 4 9 4 13a6 6 0 0 0 12 0c0-4-4-7-6-11Z"/><path d="M7 13a3 3 0 0 0 3 3"/></svg>AIR SUPPLY</span><strong><b id="air-value">90</b><small>SECONDS</small><small id="air-rate">DRAIN ×1.00 · MAX ×1.25</small></strong></div><div class="air-track" id="air-bar" role="progressbar" aria-label="Air supply" aria-valuemin="0" aria-valuemax="90" aria-valuenow="90"><i id="air-fill"></i></div><div class="air-caption" title="Oxygen drains 10% faster each descent, up to 1.25×. Salvage always restores 1.5 seconds."><span id="air-state">SUPPLY STEADY</span><span>+1.5s per pod · full refill on descent</span></div></div>
+   <div class="hull-instrument"><div class="instrument-heading"><span>HULL INTEGRITY</span><strong id="hull-value">5 / 5</strong></div><div id="hull-pips" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><p id="hull-state">+1 repair when you descend</p></div>
+   <div class="salvage-instrument"><div class="instrument-heading"><span>SALVAGE</span><strong id="salvage-value">0 / 5</strong></div><div id="salvage-pips" aria-hidden="true"></div><p>Collect all to descend ↓</p></div>
+  </section>
+  <section id="stage" aria-label="Deep Signal ocean playfield"><canvas id="game" width="1000" height="560" tabindex="0" aria-label="Pilot with WASD or arrow keys. Touch salvage pods to collect them. Space sends sonar; E recovers nearby salvage."></canvas><div class="stage-corner tl" aria-hidden="true"></div><div class="stage-corner br" aria-hidden="true"></div>
+   <div id="overlay"><article class="menu-card"><p class="eyebrow" id="menu-tag">ENDLESS SALVAGE / DEEP OCEAN</p><h2 id="menu-title">The ocean<br>keeps going.</h2><p id="menu-description">Recover every salvage pod to descend into the next screen. Keep your air up, protect your hull, and see how deep you can go.</p><button id="play" class="primary" disabled>Preparing dive…</button><div class="menu-controls"><span><b>WASD / ↑↓←→</b> Steer</span><span><b>SPACE</b> Sonar</span><span><b>TOUCH PODS / E</b> Recover</span></div><p id="menu-record"></p></article></div>
+   <div id="air-warning" hidden><b>LOW AIR</b><span>Collect salvage +1.5s · clear this screen to refill</span></div>
+  </section>
+  <section class="command-bar"><p id="objective">Recover every salvage pod. Descent is automatic.</p><div class="actions"><button id="sonar"><span class="sonar-icon" aria-hidden="true">◉</span><span id="sonar-label">Sonar</span><kbd>SPACE</kbd></button><button id="recover">Recover <kbd>E</kbd></button><span id="best">Best 0 · Sector 1</span></div></section>
+ </main><div id="announcement" role="status" aria-live="polite"></div>
+</body></html>

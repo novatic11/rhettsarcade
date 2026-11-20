@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1791843626452,
+      "tag": "0000_many_hellcat",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1793228216339,
+      "tag": "0001_large_archangel",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1794686806376,
+      "tag": "0002_arcade_presence",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1795025113890,
+      "tag": "0003_release_game_metadata",
+      "breakpoints": true
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7cc8ff"/><stop offset="1" stop-color="#d9f3ff"/></linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#sky)"/>
+  <ellipse cx="200" cy="262" rx="230" ry="70" fill="#7cc35a" stroke="#2b1e1a" stroke-width="5"/>
+  <ellipse cx="88" cy="258" rx="70" ry="22" fill="#4fb7e8" stroke="#2b1e1a" stroke-width="4"/>
+  <!-- duck -->
+  <g transform="translate(70 168)" stroke="#2b1e1a" stroke-width="4">
+    <ellipse cx="40" cy="58" rx="50" ry="38" fill="#ffd84a"/>
+    <path d="M-6 44 L-22 30 L-4 58 Z" fill="#ffd84a"/>
+    <circle cx="66" cy="18" r="28" fill="#ffd84a"/>
+    <ellipse cx="98" cy="24" rx="20" ry="8" fill="#ff9f1c"/>
+    <ellipse cx="74" cy="12" rx="7" ry="9" fill="#fff"/>
+    <circle cx="77" cy="13" r="4" fill="#2b1e1a" stroke="none"/>
+    <path d="M42 -14 h40 v-14 a14 14 0 0 0 -40 0 z" fill="#fff"/>
+    <ellipse cx="34" cy="58" rx="24" ry="13" fill="#f2c13a" transform="rotate(-15 34 58)"/>
+  </g>
+  <!-- dog -->
+  <g transform="translate(250 166)" stroke="#2b1e1a" stroke-width="4">
+    <rect x="22" y="70" width="12" height="30" rx="5" fill="#c98d4f"/>
+    <rect x="76" y="70" width="12" height="30" rx="5" fill="#c98d4f"/>
+    <ellipse cx="58" cy="60" rx="52" ry="30" fill="#c98d4f"/>
+    <path d="M108 50 q24 -26 14 -40" fill="none" stroke-width="8"/>
+    <circle cx="14" cy="24" r="30" fill="#c98d4f"/>
+    <ellipse cx="-12" cy="34" rx="18" ry="13" fill="#f0c48e"/>
+    <circle cx="-26" cy="30" r="6" fill="#2b1e1a"/>
+    <ellipse cx="34" cy="26" rx="10" ry="22" fill="#8a5a2b" transform="rotate(20 34 26)"/>
+    <ellipse cx="4" cy="16" rx="7" ry="9" fill="#fff"/>
+    <circle cx="1" cy="17" r="4" fill="#2b1e1a" stroke="none"/>
+    <path d="M-6 4 l14 4" stroke-width="4"/>
+  </g>
+  <!-- splash -->
+  <g transform="translate(200 210)"><path d="M0 -20 l6 12 l14 -4 l-8 12 l12 8 l-15 1 l2 15 l-11 -10 l-11 10 l2 -15 l-15 -1 l12 -8 l-8 -12 l14 4 z" fill="#7fd0ff" stroke="#2b1e1a" stroke-width="3"/></g>
+  <!-- title -->
+  <g font-family="Bangers, Impact, 'Arial Black', sans-serif" text-anchor="middle" stroke="#2b1e1a" stroke-width="7" paint-order="stroke fill" stroke-linejoin="round">
+    <text x="200" y="66" font-size="58" fill="#ffd23f" transform="rotate(-3 200 60)">DUCKS</text>
+    <text x="200" y="98" font-size="26" fill="#ff5a4a">vs.</text>
+    <text x="186" y="146" font-size="58" fill="#ffa65c" transform="rotate(-3 186 140)">DOGS</text>
+  </g>
+  <g transform="translate(286 118) rotate(12)"><circle r="24" fill="#ff5a4a" stroke="#2b1e1a" stroke-width="5"/><text y="12" text-anchor="middle" font-family="Bangers, Impact, 'Arial Black', sans-serif" font-size="34" fill="#fff" stroke="#2b1e1a" stroke-width="4" paint-order="stroke fill">2</text></g>
+</svg>

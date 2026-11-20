@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#11141c">
+  <meta name="description" content="A jetpack boss roguelike. Grow your arsenal, build your enemy, and survive your own choices.">
+  <title>Square Off — build your own boss</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='2' y='2' width='28' height='28' rx='7' fill='%23d5ff63'/%3E%3Ccircle cx='12' cy='15' r='2' fill='%2311141c'/%3E%3Ccircle cx='21' cy='15' r='2' fill='%2311141c'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="game-shell">
+  <header class="masthead">
+    <a class="wordmark" href="#" aria-label="Square Off"><span class="brand-face"><i></i><i></i></span>SQUARE OFF<span class="edition">PROTOTYPE / 01</span></a>
+    <div class="header-actions"><span class="record" id="record">BEST ROUND —</span><button id="music" class="quiet-button" aria-label="Turn music off" aria-pressed="true">MUSIC ON</button><button id="sound" class="quiet-button" aria-label="Turn sound effects off" aria-pressed="true">SFX ON</button><button id="pause" class="quiet-button" aria-label="Pause game">PAUSE <span>Ⅱ</span></button></div>
+  </header>
+  <section class="play-surface" aria-label="Game arena">
+    <div class="hud">
+      <div class="player-readout"><span class="eyebrow">YOU</span><div class="health-row"><div class="health-track"><div id="player-health"></div></div><span id="player-hp">30 / 30</span></div></div>
+      <div class="boss-readout"><div class="boss-label"><span class="eyebrow">YOUR CREATION</span><span id="boss-hp">400 / 400</span></div><div class="boss-health-track"><div id="boss-health"></div></div></div>
+      <div class="round-readout"><span class="eyebrow">ROUND</span><strong id="round-number">01</strong></div>
+    </div>
+    <div class="arena-wrap" id="arena-wrap">
+      <canvas id="arena" width="1280" height="720" aria-label="Side-view boss arena. A and D move, Space applies thrust, mouse aims. Your weapons fire automatically."></canvas>
+      <div class="arena-badge"><span class="dot"></span><span id="arena-status">READY WHEN YOU ARE</span></div>
+      <div class="overlay" id="overlay"></div>
+      <div class="touch-controls" id="touch-controls"><button data-control="left" aria-label="Move left">◀</button><button data-control="right" aria-label="Move right">▶</button><button data-control="thrust" class="touch-thrust" aria-label="Thrust upward">THRUST</button></div>
+    </div>
+    <div class="loadout-bar"><div><span class="eyebrow">YOUR ARSENAL</span><div class="loadout-chips" id="player-loadout"></div></div><div class="boss-loadout"><span class="eyebrow">BOSS ARSENAL</span><div class="loadout-chips" id="boss-loadout"></div></div></div>
+  </section>
+  <footer class="controls"><span><kbd>A</kbd><kbd>D</kbd> MOVE</span><span><kbd>SPACE</kbd> HOLD TO RISE · RELEASE TO FALL</span><span class="mouse-hint"><span class="mouse-icon"></span> AIM · ALWAYS FIRING</span><span class="safe-note">BODY CONTACT IS SAFE</span></footer>
+  <p class="screenreader-status" id="live-status" aria-live="polite"></p>
+</main>
+<script type="module" src="game.js"></script>
+</body>
+</html>

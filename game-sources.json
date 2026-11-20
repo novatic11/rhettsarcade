@@ -1,0 +1,248 @@
+[
+  {
+    "id": "square-off",
+    "mode": "bundled",
+    "threadId": "01a11e36-6959-7432-9876-78c7733b60b1",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-08/gam/outputs/square-off/dist",
+    "title": "Square Off"
+  },
+  {
+    "id": "neon-slip",
+    "mode": "bundled",
+    "threadId": "6aca8650-d284-83ea-bdd7-9763a28c4011",
+    "source": "public/games/neon-slip",
+    "title": "Neon Slip",
+    "originalSourceProjectId": "appgprj_6aca8660a1b88191b9584e888e3f9dd4",
+    "originalSource": "C:/Users/rhett/Documents/Codex/2026-10-10/is-x20/work/neon-slip-source/dist"
+  },
+  {
+    "id": "rustbound",
+    "mode": "bundled",
+    "threadId": "01a0ff8a-9f84-7930-962c-b8022ad192fa",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-02/i-wa/outputs/rustbound.html",
+    "title": "Rustbound"
+  },
+  {
+    "id": "the-rooms-between",
+    "mode": "bundled",
+    "threadId": "01a1034c-c092-7221-a5c3-697f3b6e77c3",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-03/files-pasted-by-the-user-create/outputs/The Rooms Between",
+    "entries": [
+      "index.html",
+      "style.css",
+      "src",
+      "vendor"
+    ],
+    "title": "The Rooms Between",
+    "collection": "junkyard"
+  },
+  {
+    "id": "stellar-forge",
+    "mode": "bundled",
+    "threadId": "01a09c8e-dbfb-7fe0-bafe-2eaae3644f8b",
+    "source": "C:/Users/rhett/Documents/Codex/2026-09-13/ex/outputs/Stellar Forge.html",
+    "title": "Stellar Forge"
+  },
+  {
+    "id": "the-undercroft",
+    "mode": "bundled",
+    "threadId": "01a1291b-a8e7-7540-a1f6-079b43a227b2",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-10/create-an-endless-dungeon-crawler-roguelite/outputs/The-Undercroft.html",
+    "title": "The Undercroft"
+  },
+  {
+    "id": "car-spleef",
+    "mode": "bundled",
+    "threadId": "01a128ee-af71-7c71-a391-bd3fc16b84ca",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-10/is-x20/outputs/game-library/public/games/car-spleef",
+    "title": "Car Spleef"
+  },
+  {
+    "id": "arcade-tycoon",
+    "mode": "bundled",
+    "threadId": "01a128ee-af71-7c71-a391-bd3fc16b84ca",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-10/is-x20/outputs/game-library/public/games/arcade-tycoon",
+    "title": "Arcade Tycoon"
+  },
+  {
+    "id": "switchyard",
+    "mode": "bundled",
+    "threadId": "01a128ee-af71-7c71-a391-bd3fc16b84ca",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-10/is-x20/outputs/game-library/public/games/switchyard",
+    "title": "Switchyard",
+    "collection": "junkyard"
+  },
+  {
+    "id": "stardust-foundry",
+    "title": "Stardust Foundry",
+    "mode": "bundled",
+    "source": "C:/Users/rhett/Documents/Codex/2026-09-12/mks/dist",
+    "threadId": "01a09655-5e24-7e61-9322-ba1494559dec",
+    "collection": "junkyard"
+  },
+  {
+    "id": "frontier",
+    "title": "Frontier",
+    "mode": "bundled",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-10/is-x20/outputs/game-library/public/games/frontier",
+    "threadId": "01a128ee-af71-7c71-a391-bd3fc16b84ca",
+    "collection": "junkyard",
+    "originalSource": "C:/Users/rhett/Documents/Codex/2026-09-19/let/dist"
+  },
+  {
+    "id": "squircle-siege",
+    "title": "Squircle Siege",
+    "mode": "bundled",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-03/time/outputs/squircle-siege.html",
+    "threadId": "01a10331-0b7f-7be1-9a0c-0ef56a17dd6e",
+    "collection": "junkyard"
+  },
+  {
+    "id": "ducks-vs-dogs",
+    "mode": "bundled",
+    "threadId": "01a128ee-af71-7c71-a391-bd3fc16b84ca",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-10/is-x20/outputs/game-library/public/games/ducks-vs-dogs",
+    "title": "Ducks vs Dogs"
+  },
+  {
+    "id": "rustbound-2",
+    "mode": "bundled",
+    "threadId": "01a128ee-af71-7c71-a391-bd3fc16b84ca",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-10/is-x20/outputs/game-library/public/games/rustbound-2",
+    "title": "Rustbound Legacy",
+    "collection": "junkyard"
+  },
+  {
+    "id": "deep-signal",
+    "title": "Deep Signal",
+    "mode": "bundled",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-10/is-x20/outputs/game-library/public/games/deep-signal",
+    "threadId": "01a128ee-af71-7c71-a391-bd3fc16b84ca"
+  },
+  {
+    "id": "afterimage",
+    "title": "Afterimage",
+    "mode": "bundled",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-10/is-x20/outputs/game-library/public/games/afterimage",
+    "threadId": "01a128ee-af71-7c71-a391-bd3fc16b84ca",
+    "collection": "junkyard"
+  },
+  {
+    "id": "midnight-kitchen",
+    "title": "Midnight Kitchen",
+    "mode": "bundled",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-10/is-x20/outputs/game-library/public/games/midnight-kitchen",
+    "threadId": "01a128ee-af71-7c71-a391-bd3fc16b84ca",
+    "collection": "junkyard"
+  },
+  {
+    "id": "cargo-swing",
+    "title": "Cargo Swing",
+    "mode": "bundled",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-10/is-x20/outputs/game-library/public/games/cargo-swing",
+    "threadId": "01a128ee-af71-7c71-a391-bd3fc16b84ca"
+  },
+  {
+    "id": "laserline",
+    "title": "Laserline",
+    "mode": "bundled",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-10/is-x20/outputs/game-library/public/games/laserline",
+    "threadId": "01a128ee-af71-7c71-a391-bd3fc16b84ca",
+    "collection": "junkyard"
+  },
+  {
+    "id": "pocket-heist",
+    "title": "Pocket Heist",
+    "mode": "bundled",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-10/is-x20/outputs/game-library/public/games/pocket-heist",
+    "threadId": "01a128ee-af71-7c71-a391-bd3fc16b84ca"
+  },
+  {
+    "id": "bridgewright",
+    "title": "Bridgewright",
+    "mode": "bundled",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-10/is-x20/outputs/game-library/public/games/bridgewright",
+    "threadId": "01a128ee-af71-7c71-a391-bd3fc16b84ca",
+    "collection": "junkyard"
+  },
+  {
+    "id": "cloudkeeper",
+    "title": "Cloudkeeper",
+    "mode": "bundled",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-10/is-x20/outputs/game-library/public/games/cloudkeeper",
+    "threadId": "01a128ee-af71-7c71-a391-bd3fc16b84ca",
+    "collection": "junkyard"
+  },
+  {
+    "id": "ricochet-club",
+    "title": "Ricochet Club",
+    "mode": "bundled",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-10/is-x20/outputs/game-library/public/games/ricochet-club",
+    "threadId": "01a128ee-af71-7c71-a391-bd3fc16b84ca"
+  },
+  {
+    "id": "starball",
+    "title": "Starball",
+    "mode": "bundled",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-10/is-x20/outputs/game-library/public/games/starball",
+    "threadId": "01a128ee-af71-7c71-a391-bd3fc16b84ca",
+    "collection": "junkyard"
+  },
+  {
+    "id": "parcel-panic",
+    "title": "Parcel Panic",
+    "mode": "bundled",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-10/is-x20/outputs/game-library/public/games/parcel-panic",
+    "threadId": "01a128ee-af71-7c71-a391-bd3fc16b84ca"
+  },
+  {
+    "id": "odd-hours",
+    "title": "Odd Hours",
+    "mode": "bundled",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-10/is-x20/outputs/game-library/public/games/odd-hours",
+    "threadId": "01a128ee-af71-7c71-a391-bd3fc16b84ca"
+  },
+  {
+    "id": "car-spleef-3d",
+    "title": "Car Spleef 3D",
+    "mode": "bundled",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-10/is-x20/outputs/game-library/public/games/car-spleef-3d",
+    "originalSource": "User-provided car-spleef-3d.html, imported 2026-10-27"
+  },
+  {
+    "id": "crazy-sort",
+    "title": "Crazy Sort",
+    "mode": "bundled",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-10/is-x20/outputs/game-library/public/games/crazy-sort",
+    "originalSource": "User-provided crazy-sort.html"
+  },
+  {
+    "id": "slide-between",
+    "title": "Slide Between",
+    "mode": "bundled",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-10/is-x20/outputs/game-library/public/games/slide-between",
+    "originalSource": "User-provided slide-between.html"
+  },
+  {
+    "id": "meridian-space-program",
+    "title": "Meridian Space Program",
+    "mode": "bundled",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-10/is-x20/outputs/game-library/public/games/meridian-space-program",
+    "originalSource": "User-provided Meridian Space Program v1.0 release folder"
+  },
+  {
+    "id": "ducks-vs-dogs-2",
+    "title": "Ducks vs. Dogs 2",
+    "mode": "bundled",
+    "source": "C:/Users/rhett/Documents/Codex/2026-10-10/is-x20/outputs/game-library/public/games/ducks-vs-dogs-2",
+    "originalSource": "C:/Users/rhett/AppData/Roaming/Claude/scratch-workspaces/8b74067e-7517-4ab3-b35b-3783836425fe/aa88b312-c274-4060-b7d5-0e8eea5688d1/scratch-2026-11-01-24b222/ducks-vs-dogs-2"
+  },
+  {
+    "id": "square-off-2",
+    "title": "Square Off 2",
+    "mode": "bundled",
+    "releaseAfter": "square-off",
+    "source": "C:/Users/rhett/Documents/Codex/2026-11-04/is-t/outputs/Rhetts-Arcade-Shared/public/games/square-off-2",
+    "originalSource": "User-provided Square Off 2 folder, imported 2026-11-04"
+  }
+]

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 625">
+  <defs>
+    <linearGradient id="wall" x2="1" y2="1"><stop stop-color="#bcaa64"/><stop offset="1" stop-color="#62522c"/></linearGradient>
+    <linearGradient id="floor" x2="0" y2="1"><stop stop-color="#80724b"/><stop offset="1" stop-color="#372e20"/></linearGradient>
+    <radialGradient id="shade"><stop offset=".43" stop-color="#171607" stop-opacity="0"/><stop offset="1" stop-color="#171607" stop-opacity=".72"/></radialGradient>
+    <pattern id="paper" width="32" height="36" patternUnits="userSpaceOnUse"><path d="M0 0v36m16-36v36" stroke="#4d4224" stroke-opacity=".22"/><path d="M0 18h32" stroke="#e5d592" stroke-opacity=".12"/></pattern>
+    <pattern id="scan" width="4" height="5" patternUnits="userSpaceOnUse"><path d="M0 1h4" stroke="#201809" stroke-opacity=".19"/></pattern>
+    <filter id="glow"><feGaussianBlur stdDeviation="10"/></filter>
+  </defs>
+  <path fill="#6c6243" d="M0 0h1000v625H0z"/>
+  <path fill="#4e432b" d="M390 177h215v195H390z"/>
+  <path fill="#252216" d="M448 208h102v151H448z"/>
+  <path fill="#322b19" d="M466 224h69v135h-69z"/>
+  <path fill="url(#wall)" d="M0 0l390 177v195L0 614zm1000 0L605 177v195l395 242z"/>
+  <path fill="url(#paper)" d="M0 0l390 177v195L0 614zm1000 0L605 177v195l395 242z"/>
+  <path fill="#5a4e33" d="M0 0h1000L605 177H390z"/>
+  <path fill="url(#floor)" d="M390 372h215l395 242v11H0v-11z"/>
+  <g fill="none" stroke="#292216" stroke-opacity=".45" stroke-width="3">
+    <path d="M200 0l239 177M799 0L559 177M100 46h800M220 101h560M323 146h354"/>
+    <path d="M435 372L203 625m272-253L397 625m125-253l83 253m-44-253l246 253M349 398h304m-362 36h421m-510 56h601m-737 86h870"/>
+  </g>
+  <g fill="#fff1a5" filter="url(#glow)" opacity=".75"><path d="M320 39h357l-61 38H381zm96 68h168l-25 17H441zm48 37h73l-14 9h-45z"/></g>
+  <path fill="#fff2b5" d="M320 39h357l-61 34H381zm96 68h168l-25 15H441zm48 37h73l-14 8h-45z"/>
+  <path fill="#1e1a12" d="M496 274c-8 0-13 8-12 15l4 13-11 17-8 38h8l12-30 2 28-3 29h10l7-33 7 33h9l-5-35 1-29 13 34h6l-10-38-12-15 4-12c1-8-5-15-14-15z"/>
+  <path fill="url(#shade)" d="M0 0h1000v625H0z"/>
+  <path fill="url(#scan)" d="M0 0h1000v625H0z"/>
+  <path d="M45 99V46h82m746 0h82v53M45 526v53h82m746 0h82v-53" fill="none" stroke="#e6d7a5" stroke-opacity=".64" stroke-width="3"/>
+  <circle cx="67" cy="77" r="6" fill="#d87956"/>
+  <text x="84" y="83" fill="#f0df9e" font-family="monospace" font-size="20" letter-spacing="3">REC · TAPE 07</text>
+  <path fill="#1f1a0e" opacity=".85" d="M42 422h605v143H42z"/>
+  <text x="66" y="491" fill="#f4e2a3" font-family="monospace" font-weight="bold" font-size="60" letter-spacing="2">BACKROOMS</text>
+  <text x="71" y="537" fill="#d5ba73" font-family="monospace" font-size="31" letter-spacing="8">FOR SCIENCE</text>
+</svg>

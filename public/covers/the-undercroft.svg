@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-labelledby="the-undercroft-t the-undercroft-d">
+<title id="the-undercroft-t">The Undercroft — swing down</title>
+<desc id="the-undercroft-d">A cloaked adventurer swings on a grappling line through a torchlit brick chamber, crossbow raised at an angry blue slime. A treasure chest glows on a ledge above a deeper shaft.</desc>
+<defs><pattern id="the-undercroft-brick" width="60" height="30" patternUnits="userSpaceOnUse"><rect width="60" height="30" fill="#2a2030"/><path d="M0 0.5 H60 M0 15 H60 M0 29.5 H60 M30 0 V15 M0 15 V30 M60 15 V30" stroke="#120c16" stroke-width="2.5"/><rect x="3" y="3" width="24" height="3" fill="#3e3046" opacity=".7"/><rect x="33" y="18" width="24" height="3" fill="#3e3046" opacity=".7"/></pattern><linearGradient id="the-undercroft-0" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a0610" stop-opacity="0.55"/><stop offset="0.5" stop-color="#0a0610" stop-opacity="0.1"/><stop offset="1" stop-color="#0a0610" stop-opacity="0.7"/></linearGradient><radialGradient id="the-undercroft-1" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#ff9a3a" stop-opacity="0.4"/><stop offset="0.45" stop-color="#ff9a3a" stop-opacity="0.13999999999999999"/><stop offset="1" stop-color="#ff9a3a" stop-opacity="0"/></radialGradient><radialGradient id="the-undercroft-2" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#ff9a3a" stop-opacity="0.4"/><stop offset="0.45" stop-color="#ff9a3a" stop-opacity="0.13999999999999999"/><stop offset="1" stop-color="#ff9a3a" stop-opacity="0"/></radialGradient><radialGradient id="the-undercroft-3" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#8a5cff" stop-opacity="0.45"/><stop offset="1" stop-color="#8a5cff" stop-opacity="0"/></radialGradient><radialGradient id="the-undercroft-4" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#ffcf5a" stop-opacity="0.55"/><stop offset="0.45" stop-color="#ffcf5a" stop-opacity="0.1925"/><stop offset="1" stop-color="#ffcf5a" stop-opacity="0"/></radialGradient><radialGradient id="the-undercroft-5" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#4fb0ff" stop-opacity="0.4"/><stop offset="0.45" stop-color="#4fb0ff" stop-opacity="0.13999999999999999"/><stop offset="1" stop-color="#4fb0ff" stop-opacity="0"/></radialGradient><linearGradient id="the-undercroft-6" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fdcff"/><stop offset="0.5" stop-color="#3a8ae0"/><stop offset="1" stop-color="#1f4aa0"/></linearGradient><radialGradient id="the-undercroft-7" cx="0.5" cy="0.48" r="0.75"><stop offset="0.55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.5"/></radialGradient><linearGradient id="the-undercroft-8" x1="0" y1="0" x2="0" y2="1"><stop offset="0.62" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.32"/></linearGradient><pattern id="the-undercroft-grain" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".55" fill="#fff" opacity=".05"/><circle cx="3.5" cy="3.2" r=".5" fill="#000" opacity=".06"/></pattern></defs>
+
+<rect width="640" height="400" fill="url(#the-undercroft-brick)"/>
+<rect width="640" height="400" fill="url(#the-undercroft-0)"/>
+<circle cx="90" cy="126" r="120" fill="url(#the-undercroft-1)"/><rect x="86" y="140" width="8" height="28" fill="#4a3022"/><path d="M80 140 h20 l-4 6 h-12z" fill="#6a4a32"/><path d="M90 110 q12 16 6 26 q-6 6 -12 0 q-6 -10 6 -26z" fill="#ffb347"/><path d="M90 122 q6 8 2 14 q-4 3 -6 0 q-2 -6 4 -14z" fill="#fff1b8"/><circle cx="560" cy="106" r="120" fill="url(#the-undercroft-2)"/><rect x="556" y="120" width="8" height="28" fill="#4a3022"/><path d="M550 120 h20 l-4 6 h-12z" fill="#6a4a32"/><path d="M560 90 q12 16 6 26 q-6 6 -12 0 q-6 -10 6 -26z" fill="#ffb347"/><path d="M560 102 q6 8 2 14 q-4 3 -6 0 q-2 -6 4 -14z" fill="#fff1b8"/>
+<path d="M200 0 V40 Q320 -20 440 40 V0Z" fill="#120c16"/>
+<path d="M0 310 H250 V400 H0Z M410 300 H640 V400 H410Z" fill="#1a1420"/>
+<path d="M0 310 H250 M410 300 H640" stroke="#7a6a86" stroke-width="4"/>
+<ellipse cx="330" cy="400" rx="110" ry="90" fill="url(#the-undercroft-3)"/>
+<path d="M250 310 V400 M410 300 V400" stroke="#0a0610" stroke-width="6"/>
+<circle cx="120" cy="290" r="80" fill="url(#the-undercroft-4)"/>
+<g transform="translate(92 268)">
+  <rect x="0" y="16" width="58" height="30" rx="3" fill="#7a4a22" stroke="#2a160a" stroke-width="3"/>
+  <path d="M0 18 Q29 -6 58 18Z" fill="#9a5e2a" stroke="#2a160a" stroke-width="3"/>
+  <path d="M0 16 H58 M8 16 V46 M50 16 V46" stroke="#d8a03a" stroke-width="4"/>
+  <rect x="24" y="12" width="10" height="12" rx="2" fill="#ffd34d" stroke="#2a160a" stroke-width="2"/>
+  <path d="M6 14 Q29 -2 52 14" stroke="#fff1b8" stroke-width="3" fill="none" opacity=".8"/>
+</g>
+<circle cx="372" cy="34" r="10" fill="none" stroke="#9aa4b4" stroke-width="5"/>
+<path d="M372 44 L290 196" stroke="#d8c8a8" stroke-width="3"/>
+<path d="M372 44 L290 196" stroke="#fff" stroke-width="1" opacity=".5"/>
+<g transform="rotate(26 284 214)">
+  <path d="M272 206 Q250 240 238 270 L296 252 Q300 226 292 208Z" fill="#a8323f" stroke="#2a0e14" stroke-width="3"/>
+  <rect x="274" y="204" width="22" height="36" rx="8" fill="#3a4a6a" stroke="#141a2a" stroke-width="3"/>
+  <circle cx="285" cy="194" r="12" fill="#f0c8a0" stroke="#2a160a" stroke-width="3"/>
+  <path d="M273 190 Q285 172 298 190" fill="#3a2a22"/>
+  <path d="M278 240 l-6 22 M292 240 l8 20" stroke="#141a2a" stroke-width="6" stroke-linecap="round"/>
+  <path d="M294 214 L330 222" stroke="#6a4a32" stroke-width="5" stroke-linecap="round"/>
+  <path d="M322 208 Q336 222 322 236" stroke="#9aa4b4" stroke-width="3" fill="none"/>
+</g>
+<path d="M346 236 L420 254" stroke="#ffe39a" stroke-width="3" stroke-linecap="round"/>
+<circle cx="510" cy="270" r="80" fill="url(#the-undercroft-5)"/>
+<path d="M462 302 Q456 236 510 228 Q566 232 560 302Z" fill="url(#the-undercroft-6)" stroke="#0e1a3a" stroke-width="4"/>
+<path d="M476 252 Q490 236 512 236" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" opacity=".6"/>
+<ellipse cx="492" cy="266" rx="8" ry="9.6" fill="#fff"/><circle cx="488.4" cy="266" r="4.4" fill="#0e1a3a"/><circle cx="486.96" cy="264.24" r="1.36" fill="#fff"/><ellipse cx="520" cy="266" rx="8" ry="9.6" fill="#fff"/><circle cx="516.4" cy="266" r="4.4" fill="#0e1a3a"/><circle cx="514.9599999999999" cy="264.24" r="1.36" fill="#fff"/>
+<path d="M486 252 l16 6 M528 252 l-16 6" stroke="#0e1a3a" stroke-width="5" stroke-linecap="round"/>
+<path d="M496 286 q10 -6 20 0" stroke="#0e1a3a" stroke-width="4" fill="none" stroke-linecap="round"/>
+<rect width="640" height="400" fill="url(#the-undercroft-8)"/>
+<rect width="640" height="400" fill="url(#the-undercroft-7)"/>
+<rect width="640" height="400" fill="url(#the-undercroft-grain)"/>
+</svg>

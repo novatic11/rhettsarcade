@@ -1,0 +1,31 @@
+import {HOME_SYSTEM} from './universe.js';
+import {BODIES,LANDABLE_IDS,SYSTEMS} from './system.js';
+const clean=v=>String(v||'').replace(/[<>\x00-\x1f]/g,'').trim().slice(0,36),clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+export const RESEARCH=[
+ {id:'orbitalIndustry',name:'Orbital manufacturing',cost:1800,requires:['industry'],detail:'Orbital production recipes run 25% faster.'},
+ {id:'orbitalPower',name:'Photovoltaic lattice',cost:1400,requires:['power'],detail:'Station solar arrays generate 20% more electricity.'},
+ {id:'colonyEfficiency',name:'Efficient industrial buses',cost:1200,requires:['industry'],detail:'All surface machine power demand falls by 15%.'},
+ {id:'containment',name:'Advanced containment',cost:3600,requires:['fieldScience','orbitalIndustry'],detail:'Orbital antimatter farms produce 50% more antimatter.'},
+ {id:'propulsion',name:'Farreach propulsion',cost:900,requires:[],detail:'Unlock the Aurora engine: more thrust and better fuel efficiency.',parts:['advancedEngine']},
+ {id:'industry',name:'Precision manufacturing',cost:650,requires:[],detail:'Drills, gas wells, refineries and refuelers produce 35% faster.'},
+ {id:'fieldScience',name:'Frontier instruments',cost:500,requires:[],detail:'Unlock magnetic, radiation and deep-ice experiments, plus a universal flight scanner.',parts:['fieldScanner']},
+ {id:'power',name:'High-density cells',cost:650,requires:[],detail:'Increase every ship battery capacity by 50%. Charge the extra capacity before departure.'},
+ {id:'stellar',name:'Stellar transit',cost:2500,requires:['propulsion','fieldScience'],detail:'Unlock interstellar jumps. Each jump uses 120 energy and 10% of tank capacity.'}
+];
+export const WORLD_FLAVORS={
+ cinder:['iron','Copper foothills','Dust-sealed survey relay','Basalt resonance vault'],luma:['ice','Glass impact terraces','Silent lunar antenna','Buried ice archive'],
+ ferrum:['cobalt','Rusted escarpment','Magnetic survey tower','Iron cathedral'],shard:['crystal','Broken needle field','Fractured beacon','Singing fracture'],
+ viridia:['copper','Verdigris flats','Overgrown mineral shelter','Green labyrinth'],nix:['ice','Blue crevasse','Frost-locked relay','Subglacial chamber'],
+ ember:['cobalt','Obsidian caldera','Ash-covered outpost','Molten echo chamber'],zephyr:['copper','Amber dune sea','Sand-scoured mast','Storm resonator'],
+ opal:['crystal','Prismatic canyon','Crystal listening post','Refractive monolith'],bastion:['iridium','Basalt staircase','Fortress relay','Black pillar complex'],plon:['ice','Pale fracture plain','Distant ice beacon','Ancient fault vault']
+};
+export function flavor(id){const b=BODIES[id],fallback=[b?.mineral||'iron',b?.region||'Crater terraces',b?.relay||'Lost survey station',b?.artifact||'Resonant vault'];return b?.realSolar?fallback:WORLD_FLAVORS[id]||fallback;}
+export class Progression{
+ constructor(raw={}){this.research=new Set(Array.isArray(raw?.research)?raw.research.filter(id=>RESEARCH.some(r=>r.id===id)):[]);this.questActive=raw?.questActive===true;this.journalSeen=raw?.journalSeen===true;this.systems=[...new Set([HOME_SYSTEM,...(Array.isArray(raw?.systems)?raw.systems.filter(id=>Object.hasOwn(SYSTEMS,id)):[])])];this.lessonDone=Array.isArray(raw?.lessonDone)?raw.lessonDone.filter(id=>['industry','science','ship','electricity','landing','wormhole'].includes(id)):[];this.practiceCompleted=raw?.practiceCompleted===true;this.lesson=raw?.lesson&&['industry','science','ship','electricity','landing','wormhole'].includes(raw.lesson.id)?{id:raw.lesson.id,step:Math.max(0,Math.min(3,Math.floor(Number(raw.lesson.step)||0)))}:null;this.tutorial={status:['active','done','skipped'].includes(raw?.tutorial?.status)?raw.tutorial.status:'pending',step:clamp(Math.floor(Number(raw?.tutorial?.step)||0)+(raw?.tutorial?.status==='active'&&raw?.tutorial?.v!==2?2:0),0,8)};this.flags=[];for(const f of (Array.isArray(raw?.flags)?raw.flags:[]).slice(0,48)){const n=f?.normal;if(!LANDABLE_IDS.includes(f?.body)||typeof f.id!=='string'||!/^flag-[0-9]+$/.test(f.id)||this.flags.some(x=>x.id===f.id)||!Array.isArray(n)||n.length!==3||!n.every(Number.isFinite)||Math.hypot(...n)<.5)continue;const len=Math.hypot(...n);this.flags.push({id:f.id,body:f.body,name:clean(f.name)||BODIES[f.body].name+' Outpost',normal:n.map(x=>x/len)});}this.serial=Math.max(1,...this.flags.map(f=>Number(f.id.slice(5))+1));this.landed=new Set(Array.isArray(raw?.landed)?raw.landed.filter(id=>LANDABLE_IDS.includes(id)):[]);}
+ has(id){return this.research.has(id);}
+ unlock(id,campaign){const r=RESEARCH.find(x=>x.id===id);if(!r||this.has(id))return {ok:false,reason:'Already researched'};if(r.requires.some(x=>!this.has(x)))return {ok:false,reason:'Research the prerequisites first'};if(campaign.money<r.cost)return {ok:false,reason:'Research requires '+r.cost+' credits'};campaign.money-=r.cost;this.research.add(id);return {ok:true,reason:r.name+' researched'};}
+ partUnlocked(type){return !RESEARCH.some(r=>r.parts?.includes(type)&&!this.has(r.id));}
+ plant(body,normal,name){if(!LANDABLE_IDS.includes(body)||!Array.isArray(normal)||normal.length!==3||!normal.every(Number.isFinite))return {ok:false,reason:'Plant flags on solid ground'};if(this.flags.length>=48)return {ok:false,reason:'Maximum 48 custom flags'};const length=Math.hypot(...normal);if(length<.5)return {ok:false,reason:'Invalid location'};const n=normal.map(v=>v/length);if(this.flags.some(f=>f.body===body&&Math.hypot(...f.normal.map((v,i)=>v-n[i]))*BODIES[body].radius<35))return {ok:false,reason:'Move at least 35 m from another custom flag'};const f={id:'flag-'+this.serial++,body,normal:n,name:clean(name)||BODIES[body].name+' Outpost '+(this.flags.filter(f=>f.body===body).length+1)};this.flags.push(f);return {ok:true,reason:'Flag planted: '+f.name,flag:f};}
+ rename(id,name){const f=this.flags.find(f=>f.id===id),value=clean(name);if(!f||!value)return {ok:false,reason:'Enter a base name'};f.name=value;return {ok:true,reason:'Base renamed'};}
+ snapshot(){return {journalSeen:this.journalSeen,systems:[...this.systems],lessonDone:[...this.lessonDone],lesson:this.lesson?{...this.lesson}:null,practiceCompleted:this.practiceCompleted,research:[...this.research],questActive:this.questActive,tutorial:{...this.tutorial,v:2},flags:this.flags.map(f=>({...f,normal:[...f.normal]})),landed:[...this.landed]};}
+}

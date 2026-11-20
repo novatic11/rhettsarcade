@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en" data-theme="blue">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0a1020">
+  <meta name="description" content="Your games. One home. Browse Rhett’s Arcade and jump into your next adventure.">
+  <title>Rhett’s Arcade — Your game library</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%235b9dff'/%3E%3Cpath d='M20 24V13' stroke='%2306122b' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='20' cy='11' r='4.5' fill='%2306122b'/%3E%3Crect x='8' y='24' width='24' height='9' rx='3' fill='%2306122b'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="arcade.css">
+  <link rel="stylesheet" href="themes.css">
+  <script src="themes.js"></script>
+  <script src="app.js" defer></script><script src="secret-games.js" defer></script><script src="junkyard.js" defer></script>
+  <script src="polish.js" defer></script><script type="module" src="hub.js"></script><script type="module" src="requests.js"></script><script type="module" src="teasers.js"></script><script type="module" src="playtest.js"></script><script type="module" src="save-manager.js"></script>
+  <script src="presence.js?v=2" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#collection">Skip to games</a>
+<div id="library">
+  <aside class="sidebar">
+    <div class="arcade-brand-area">
+      <a class="brand" href="./" aria-label="Rhett’s Arcade home">
+        <span class="brand-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M16 19.5V10.5"/><circle class="fill" cx="16" cy="8.5" r="4"/><rect x="5" y="19.5" width="22" height="8" rx="2.5"/><circle class="fill" cx="22" cy="23.5" r="1.5"/></svg></span>
+        <span class="brand-name">Rhett’s Arcade<small>Your games. One home.</small></span>
+      </a>
+      <div class="arcade-presence">
+        <button type="button" id="online-toggle" aria-expanded="false" aria-controls="online-games"><span class="online-dot" aria-hidden="true"></span><span id="online-count">Checking who’s online…</span><span aria-hidden="true">▾</span></button>
+        <section id="online-games" class="online-panel" aria-labelledby="online-games-title" hidden><h2 id="online-games-title">Games with players</h2><ul id="online-game-list"></ul><p id="online-note" role="status">Checking active games…</p></section>
+      </div>
+    </div>
+    <div class="sidebar-scroll">
+      <p class="sidebar-label">Play</p>
+      <nav aria-label="Main navigation">
+        <a href="#collection" id="library-nav" class="nav-active"><svg class="icon nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/></svg> Game library</a>
+        <button id="favorites-nav" type="button"><svg class="icon nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 7.5 2.8C19.5 15.4 12 20 12 20z"/></svg> Favorites <span id="favorite-count" class="nav-count">0</span></button>
+        <a class="sidebar-saves" href="#saves"><svg class="icon nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11.5L20 7.5V20H5z"/><path d="M8 4v5h7.5V4M8 20v-6h9v6"/></svg> Your saves</a>
+      </nav>
+      <p class="sidebar-label">Your arcade</p>
+      <nav class="hub-nav" aria-label="Your arcade">
+        <a href="?view=updates" data-hub-nav="updates"><svg class="icon nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 3.5l1.9 5.1 5.1 1.9-5.1 1.9L11 17.5l-1.9-5.1L4 10.5l5.1-1.9z"/><path d="M18.5 15l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg> What’s New</a>
+        <a href="?view=teasers" data-hub-nav="teasers"><svg class="icon nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h12.5v14H6.5A2.5 2.5 0 0 1 4 16.5z"/><path d="M16.5 9H20v7.5a2.5 2.5 0 0 1-2.5 2.5"/><path d="M7.5 9h5.5M7.5 12.5h5.5M7.5 16h3.5"/></svg> News</a>
+        <a href="?view=playtest" data-hub-nav="playtest"><svg class="icon nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3.5h6M10 3.5V9l-5.2 8.8A2.2 2.2 0 0 0 6.7 21h10.6a2.2 2.2 0 0 0 1.9-3.2L14 9V3.5"/><path d="M7.4 15h9.2"/></svg> Playtest</a>
+        <a href="?view=stats" data-hub-nav="stats"><svg class="icon nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20.5h16"/><rect x="5.5" y="11" width="3.2" height="6.5" rx="1"/><rect x="10.4" y="6.5" width="3.2" height="11" rx="1"/><rect x="15.3" y="3.5" width="3.2" height="14" rx="1"/></svg> Your stats</a>
+        <a href="?view=settings" data-hub-nav="settings"><svg class="icon nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg> Settings</a>
+        <a id="request-open" href="?view=requests" data-hub-nav="requests"><svg class="icon nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="m4.5 7.5 7.5 5.5 7.5-5.5"/></svg> Request <span id="request-notifications" class="request-notification-count" hidden aria-live="polite"></span></a>
+      </nav>
+      <div class="sidebar-admin-archives">
+        <button id="secret-entry" class="secret-entry" aria-label="Open Admin Tab" type="button"></button>
+        <a href="?junkyard=1" id="junkyard-nav" class="junkyard-link"><svg class="icon nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4" width="17" height="5" rx="1.2"/><path d="M5 9v10.5h14V9M10 13h4"/></svg> Archives <svg class="icon arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+      </div>
+    </div>
+    <div class="sidebar-bottom"><span class="status-dot" aria-hidden="true"></span><span>Your arcade<small>Link your progress below.</small></span></div>
+  </aside>
+
+  <div class="main-shell">
+    <header class="topbar">
+      <div class="breadcrumb"><i aria-hidden="true"></i> Your arcade <span aria-hidden="true">/</span> <b>LIBRARY</b></div>
+      <label class="search"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Search your games" aria-label="Search games"><kbd class="search-shortcut" aria-hidden="true">/</kbd><button id="clear-search" type="button" aria-label="Clear search" hidden>×</button></label>
+      <a class="profile-mark" href="#saves" aria-label="Go to your saves">R</a>
+    </header>
+
+    <main>
+      <section id="arcade-hub" hidden aria-live="polite"></section>
+
+      <section id="junkyard" hidden aria-labelledby="junkyard-title">
+        <div class="secret-heading"><div><p class="eyebrow">Old favorites. Odd ends.</p><h1 id="junkyard-title">Archives.</h1><p>A home for the games set aside. Still here when you want another go.</p></div></div>
+        <div class="browse-options"><label>Sort <select data-game-sort aria-label="Sort games"><option value="default">Library order</option><option value="title">A to Z</option><option value="updated">Latest updated</option></select></label><button type="button" data-compact aria-pressed="false" title="Switch between roomy and compact cards"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg> <span>Compact</span></button></div>
+        <div id="junkyard-grid" class="game-grid"></div>
+        <p class="secret-footnote">Archives games stay out of Rhett’s Choice and the main collection.</p>
+      </section>
+
+      <section id="secret-games" hidden aria-labelledby="secret-title">
+        <div class="secret-heading"><div><p class="eyebrow">Behind the scenes</p><h1 id="secret-title">Admin Tab.</h1><p>Publish news and manage game requests.</p></div></div>
+        <section id="request-inbox" aria-labelledby="inbox-title"><header><div><p class="eyebrow">Letters to Rhett</p><h2 id="inbox-title">Request inbox<span id="inbox-unread"></span></h2></div><button id="inbox-refresh" type="button" hidden>Refresh inbox</button></header><p id="inbox-status" role="status">Checking inbox access…</p><a id="inbox-sign-in" href="/signin-with-chatgpt?return_to=%2F%3Fworkshop%3D1%26inbox%3D1" target="_top" hidden>Sign in to your inbox</a><div id="request-inbox-list"></div><button id="inbox-more" type="button" hidden>Older requests</button></section>
+      </section>
+
+      <section class="page-heading">
+        <div><p class="eyebrow">Pick a world. Make it yours.</p><h1>Find your next favorite.</h1><p>A growing collection of worlds made to get lost in.</p></div>
+        <button id="random" class="random" type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 6h3c5 0 7 12 12 12h3m-3-3 3 3-3 3M3 18h3c2 0 4-3 6-6s4-6 6-6h3m-3-3 3 3-3 3"/></svg> Surprise me</button>
+      </section>
+
+      <div class="choice-header"><h2 class="choice-heading">Rhett’s Choice <span aria-hidden="true">✦</span></h2></div>
+      <section class="featured" aria-labelledby="featured-title">
+        <img class="feature-background" src="covers/square-off.svg" alt="Two square characters facing off in an arena" fetchpriority="high">
+        <div class="feature-shade"></div>
+        <div class="feature-info">
+          <div class="feature-category">Action</div>
+          <h2 id="featured-title">Square Off<span>.</span></h2>
+          <blockquote class="choice-quote">“Square Off is one of my favorites. Get upgrades for you and the boss. Choose wisely, or you may lead yourself to your own demise.”</blockquote>
+          <div class="feature-actions"><a class="primary launch" href="?play=square-off"><svg class="play-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z"/></svg> Play now</a><span class="feature-hint">Keyboard &amp; mouse. Touch controls available.</span></div>
+        </div>
+        <div class="feature-bottom"><span><i aria-hidden="true"></i>Handpicked by Rhett</span><span class="feature-number">01 / 08</span></div>
+        <div class="choice-progress" aria-hidden="true"><span></span></div>
+      </section>
+
+      <a id="continue-game" class="continue-game launch" hidden><img id="continue-cover" alt=""><span><small>JUMP BACK IN</small><strong id="continue-title"></strong></span><span class="continue-action"><span>Play again</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span></a>
+
+      <section id="collection" class="collection" aria-labelledby="collection-title">
+        <div class="collection-heading">
+          <div><h2 id="collection-title"><span id="collection-label">Your collection</span> <span id="result-count">08</span></h2><p><span id="total-games">8</span> games. Plenty of places to start.</p></div>
+          <a class="collection-note hub-shortcut" href="?view=updates" data-hub-nav="updates"><i aria-hidden="true"></i> See what’s new</a>
+        </div>
+        <div class="toolbar">
+          <div id="filters" class="filters" aria-label="Filter games"><button class="selected" data-filter="All" aria-pressed="true">All games</button><button data-filter="Mobile Friendly" aria-pressed="false">Mobile Friendly</button><button data-filter="Action" aria-pressed="false">Action</button><button data-filter="Exploration" aria-pressed="false">Exploration</button><button data-filter="Building" aria-pressed="false">Building</button><button data-filter="Strategy" aria-pressed="false">Strategy</button><button data-filter="Favorites" aria-pressed="false">Favorites</button></div>
+          <div class="browse-options"><label>Sort <select data-game-sort aria-label="Sort games"><option value="default">Library order</option><option value="title">A to Z</option><option value="updated">Latest updated</option></select></label><button type="button" data-compact aria-pressed="false" title="Switch between roomy and compact cards"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg> <span>Compact</span></button></div>
+        </div>
+        <div id="game-grid" class="game-grid" aria-live="polite"><p class="loading">Loading your library…</p></div>
+        <p id="empty" class="empty" hidden>No games match yet. Try another search or filter.</p>
+        <button id="reset-browse" class="reset-browse" type="button" hidden>Clear search &amp; filters</button>
+        <p id="library-error" class="empty" hidden>The library couldn’t load. <button id="retry" type="button">Try again</button></p>
+      </section>
+
+      <section class="next-chapter"><span class="next-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span><div><h2>More worlds are on the way.</h2><p>New games join the library as we make them.</p></div><span class="next-tag">STAY CURIOUS</span></section>
+
+      <section id="saves" class="save-transfer" aria-labelledby="saves-heading">
+        <div class="save-emblem" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M12 6h23l7 7v29H6V6Z"/><path d="M15 6v13h18V6M14 42V28h20v14"/><path d="M27 10v5"/></svg></div>
+        <div class="save-intro"><p class="eyebrow">Your progress, everywhere</p><h2 id="saves-heading">One password. All your saves.</h2><p>Link your library and Archives saves to a unique password. Continue on another device.</p><p id="save-link-status" role="status">Checking your save connection…</p></div>
+        <div class="save-transfer-actions"><button id="create-saves" type="button">Create password</button><button id="load-saves" type="button">Load saves</button><button id="save-now" type="button" hidden>Save now</button><button id="save-resolve" type="button" hidden>Choose progress</button><button id="save-disconnect" type="button" hidden>Disconnect</button><button id="save-wiper" type="button">Save Wiper</button></div>
+      </section>
+    </main>
+    <footer><span><b>RHETT’S ARCADE</b> · A place to play.</span><span>Your save password brings your progress with you.</span></footer>
+  </div>
+</div>
+
+<main id="player" hidden>
+  <header class="player-bar">
+    <a href="./" id="back"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> <span id="back-label">Library</span></a>
+    <span class="player-divider" aria-hidden="true"></span>
+    <div><strong id="player-title"></strong><span id="player-controls"></span></div>
+    <a id="standalone" target="_blank" rel="noopener">Open game <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+    <button id="player-settings" type="button" aria-label="Arcade settings"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg> Settings</button>
+    <button id="fullscreen" type="button"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg> Fullscreen</button>
+  </header>
+  <div id="game-loading" class="game-loading" role="status" hidden><span class="load-orbit" aria-hidden="true"></span><strong id="loading-title">Opening your game…</strong><p id="loading-note">Getting everything ready.</p><div id="loading-help" hidden><button id="reload-game" type="button">Try again</button><a id="loading-standalone" target="_blank" rel="noopener">Open in a new tab ↗</a></div></div>
+  <iframe id="game-frame" title="Game" allow="autoplay; fullscreen; gamepad" allowfullscreen></iframe>
+  <div id="player-error" hidden><h1>That game isn’t in the library.</h1><a href="./">Back to the library →</a></div>
+</main>
+
+<p id="toast" role="status"></p>
+<dialog id="game-details" aria-labelledby="detail-title"></dialog>
+<dialog id="quick-settings" aria-labelledby="quick-settings-title"></dialog>
+
+<dialog id="secret-dialog" aria-labelledby="secret-dialog-title"><form id="secret-form">
+  <header class="dialog-heading"><div><p class="eyebrow">Personal game panel</p><h2 id="secret-dialog-title">Add a game</h2></div><button id="secret-close" class="dialog-close" type="button" aria-label="Close game panel">×</button></header>
+  <div class="dialog-body">
+    <label>Game name<input id="secret-name" required maxlength="60" autocomplete="off"></label>
+    <label>Game address<input id="secret-url" type="url" required maxlength="2048" placeholder="https://…" autocomplete="off"></label>
+    <label>Description<textarea id="secret-description" maxlength="200" rows="2" placeholder="What are we making?"></textarea></label>
+    <label>Status<select id="secret-status"><option value="development">In development</option><option value="private">Private</option></select></label>
+    <p id="secret-message" role="status"></p>
+    <div class="secret-form-actions"><button class="primary" type="submit">Save panel</button><button id="secret-delete" type="button" hidden>Remove panel</button></div>
+    <p class="secret-footnote">Saved on this browser. Game links open in a new tab.</p>
+  </div>
+</form></dialog>
+
+<dialog id="save-dialog" aria-labelledby="save-title" aria-describedby="save-description">
+  <header class="dialog-heading"><div><p class="eyebrow">Your arcade saves</p><h2 id="save-title"></h2></div><button id="save-close" class="dialog-close" type="button" aria-label="Close save password">×</button></header>
+  <div class="dialog-body">
+    <p id="save-description"></p>
+    <label id="save-password-label" for="save-password">Save password</label>
+    <div class="save-password-row"><input id="save-password" type="password" minlength="2" maxlength="64" pattern="[A-Za-z]{2,64}" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="Letters only"><button id="save-show" type="button">Show password</button></div>
+    <ul id="save-summary" hidden></ul>
+    <p id="save-message" role="status" aria-live="polite"></p>
+    <div class="save-dialog-actions"><button id="save-check" type="button">Check availability</button><button id="save-confirm" type="button" hidden>Yes, use this password</button><button id="save-keep" type="button" hidden>Keep this device’s saves</button><button id="save-undo" type="button" hidden>Undo load</button></div>
+    <p class="save-footnote">Keep your password safe. There is no password recovery.</p>
+  </div>
+</dialog>
+
+<dialog id="wipe-dialog" aria-labelledby="wipe-title" aria-describedby="wipe-description">
+  <header class="dialog-heading"><div><p class="eyebrow">Save Wiper</p><h2 id="wipe-title">A fresh start.</h2></div><button id="wipe-close" class="dialog-close" type="button" aria-label="Close Save Wiper">×</button></header>
+  <div class="wipe-content"><p id="wipe-description">Choose one game to reset. You’ll confirm before any progress is cleared.</p><label for="wipe-game">Game</label><select id="wipe-game"></select><p id="wipe-review" class="wipe-review" hidden></p><p id="wipe-message" role="status" aria-live="polite"></p><div class="wipe-actions"><button id="wipe-cancel" class="secondary-action" type="button">Cancel</button><button id="wipe-check" class="secondary-action" type="button">Wipe selected game</button><button id="wipe-confirm" class="wipe-danger" type="button" hidden></button></div></div>
+</dialog>
+<noscript><p class="empty">Turn on JavaScript to browse the library and play games.</p></noscript>
+</body>
+</html>

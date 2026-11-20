@@ -1,0 +1,128 @@
+{
+  "earth": {
+    "file": "earth.jpg",
+    "url": "https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57752/land_shallow_topo_2048.jpg",
+    "monochrome": false,
+    "credit": "NASA GSFC / Reto Stöckli, Robert Simmon and the Blue Marble team"
+  },
+  "moon": {
+    "file": "moon.jpg",
+    "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/lroc_color_2k.jpg",
+    "monochrome": false,
+    "credit": "NASA GSFC / Ernie Wright / LRO LROC and LOLA teams"
+  },
+  "venus": {
+    "file": "venus.jpg",
+    "url": "https://maps.jpl.nasa.gov/tmaps/pix/ven0ajj2.jpg",
+    "monochrome": false,
+    "credit": "NASA / JPL / Caltech / Magellan, Venera, Pioneer"
+  },
+  "mars": {
+    "file": "mars.jpg",
+    "url": "https://maps.jpl.nasa.gov/tmaps/pix/mar0kuu2.jpg",
+    "monochrome": false,
+    "credit": "NASA / JPL / Caltech / USGS / Viking"
+  },
+  "phobos": {
+    "file": "phobos.jpg",
+    "url": "https://maps.jpl.nasa.gov/tmaps/pix/mar1kuu2.jpg",
+    "monochrome": true,
+    "credit": "NASA / JPL / Caltech / USGS / Viking"
+  },
+  "deimos": {
+    "file": "deimos.jpg",
+    "url": "https://maps.jpl.nasa.gov/tmaps/pix/mar2kuu2.jpg",
+    "monochrome": true,
+    "credit": "NASA / JPL / Caltech / USGS / Viking"
+  },
+  "io": {
+    "file": "io.jpg",
+    "url": "https://maps.jpl.nasa.gov/tmaps/pix/jup1vss2.jpg",
+    "monochrome": false,
+    "credit": "NASA / JPL / Caltech / USGS / Voyager and Galileo"
+  },
+  "europa": {
+    "file": "europa.jpg",
+    "url": "https://maps.jpl.nasa.gov/tmaps/pix/jup2vss2.jpg",
+    "monochrome": true,
+    "credit": "NASA / JPL / Caltech / USGS / Voyager"
+  },
+  "ganymede": {
+    "file": "ganymede.jpg",
+    "url": "https://maps.jpl.nasa.gov/tmaps/pix/jup3vss2.jpg",
+    "monochrome": true,
+    "credit": "NASA / JPL / Caltech / USGS / Voyager"
+  },
+  "callisto": {
+    "file": "callisto.jpg",
+    "url": "https://maps.jpl.nasa.gov/tmaps/pix/jup4vss2.jpg",
+    "monochrome": true,
+    "credit": "NASA / JPL / Caltech / USGS / Voyager"
+  },
+  "mimas": {
+    "file": "mimas.jpg",
+    "url": "https://maps.jpl.nasa.gov/tmaps/pix/sat1vss2.jpg",
+    "monochrome": true,
+    "credit": "NASA / JPL / Caltech / USGS / Voyager"
+  },
+  "enceladus": {
+    "file": "enceladus.jpg",
+    "url": "https://maps.jpl.nasa.gov/tmaps/pix/sat2vss2.jpg",
+    "monochrome": true,
+    "credit": "NASA / JPL / Caltech / USGS / Voyager"
+  },
+  "tethys": {
+    "file": "tethys.jpg",
+    "url": "https://maps.jpl.nasa.gov/tmaps/pix/sat3vss2.jpg",
+    "monochrome": true,
+    "credit": "NASA / JPL / Caltech / USGS / Voyager"
+  },
+  "dione": {
+    "file": "dione.jpg",
+    "url": "https://maps.jpl.nasa.gov/tmaps/pix/sat4vss2.jpg",
+    "monochrome": true,
+    "credit": "NASA / JPL / Caltech / USGS / Voyager"
+  },
+  "rhea": {
+    "file": "rhea.jpg",
+    "url": "https://maps.jpl.nasa.gov/tmaps/pix/sat5vss2.jpg",
+    "monochrome": true,
+    "credit": "NASA / JPL / Caltech / USGS / Voyager"
+  },
+  "iapetus": {
+    "file": "iapetus.jpg",
+    "url": "https://maps.jpl.nasa.gov/tmaps/pix/sat8vss2.jpg",
+    "monochrome": true,
+    "credit": "NASA / JPL / Caltech / USGS / Voyager"
+  },
+  "ariel": {
+    "file": "ariel.jpg",
+    "url": "https://maps.jpl.nasa.gov/tmaps/pix/ura1vuu2.jpg",
+    "monochrome": true,
+    "credit": "NASA / JPL / Caltech / USGS / Voyager"
+  },
+  "umbriel": {
+    "file": "umbriel.jpg",
+    "url": "https://maps.jpl.nasa.gov/tmaps/pix/ura2vuu2.jpg",
+    "monochrome": true,
+    "credit": "NASA / JPL / Caltech / USGS / Voyager"
+  },
+  "titania": {
+    "file": "titania.jpg",
+    "url": "https://maps.jpl.nasa.gov/tmaps/pix/ura3vuu2.jpg",
+    "monochrome": true,
+    "credit": "NASA / JPL / Caltech / USGS / Voyager"
+  },
+  "oberon": {
+    "file": "oberon.jpg",
+    "url": "https://maps.jpl.nasa.gov/tmaps/pix/ura4vuu2.jpg",
+    "monochrome": true,
+    "credit": "NASA / JPL / Caltech / USGS / Voyager"
+  },
+  "miranda": {
+    "file": "miranda.jpg",
+    "url": "https://maps.jpl.nasa.gov/tmaps/pix/ura5vuu2.jpg",
+    "monochrome": true,
+    "credit": "NASA / JPL / Caltech / USGS / Voyager"
+  }
+}

@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Build rockets, earn science and explore a scaled-down Solar System, and beyond it, the nearest stars.">
+<meta name="theme-color" content="#070b12">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23070b12'/%3E%3Cellipse cx='32' cy='32' rx='24' ry='10' fill='none' stroke='%23ffb43c' stroke-width='4' transform='rotate(-20 32 32)'/%3E%3Ccircle cx='32' cy='32' r='7' fill='%23e9eef4'/%3E%3C/svg%3E">
+<title>Meridian Space Program</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: full-screen WebGL world with mission-console panels docked to its edges. */
+:root {
+  --ink: #070b12;          /* page ground */
+  --panel: rgba(11, 19, 31, 0.88);
+  --panel-solid: #0e1826;
+  --line: rgba(130, 170, 220, 0.18);
+  --text: #dde7f3;
+  --muted: #8ea2b9;
+  --signal: #ffb43c;       /* amber: primary action, warnings of attention */
+  --cyan: #4fd1ff;         /* selection & interactive state */
+  --good: #5fe39a; --warn: #ffb13c; --bad: #ff5f4f;
+  --bp: #164a86;           /* blueprint blue */
+  --f-display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --f-body: 'IBM Plex Sans', system-ui, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body { margin: 0; overflow: hidden; background: var(--ink); color: var(--text); font: 14px/1.4 var(--f-body); user-select: none; -webkit-user-select: none; }
+#gl { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+button { font: inherit; color: var(--text); background: rgba(40, 62, 92, 0.6); border: 1px solid var(--line); border-radius: 4px; padding: 6px 11px; cursor: pointer; transition: background .12s, border-color .12s; }
+button:hover:not(:disabled) { background: rgba(70, 105, 150, 0.7); border-color: rgba(150, 190, 240, 0.4); }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--cyan); outline-offset: 1px; }
+button:disabled { opacity: .4; cursor: default; }
+button.primary { background: var(--signal); color: #1b1203; border-color: transparent; font-weight: 600; }
+button.primary:hover:not(:disabled) { background: #ffc666; }
+button.danger { border-color: rgba(255, 95, 79, .5); color: #ffb3aa; }
+button.ghost { background: transparent; }
+button.on { background: rgba(79, 209, 255, .22); border-color: var(--cyan); color: #fff; }
+button.wide { display: block; width: 100%; margin: 6px 0; }
+input[type=text], input[type=number], select { font: inherit; color: var(--text); background: #0a1320; border: 1px solid var(--line); border-radius: 4px; padding: 5px 8px; }
+input[type=range] { accent-color: var(--signal); }
+kbd { font: 11px var(--f-mono); background: rgba(255,255,255,.08); border-radius: 3px; padding: 1px 4px; color: var(--muted); }
+h3, h4 { font-family: var(--f-display); letter-spacing: .03em; margin: 12px 0 6px; text-wrap: balance; }
+h3 { font-size: 24px; } h4 { font-size: 16px; text-transform: uppercase; color: var(--muted); letter-spacing: .08em; }
+.muted { color: var(--muted); }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; backdrop-filter: blur(6px); }
+.kv { display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline; font-size: 12px; margin: 3px 0; }
+.kv span { color: var(--muted); } .kv b { font: 600 12.5px var(--f-mono); font-variant-numeric: tabular-nums; } .kv em { color: var(--muted); font-style: normal; font-size: 11px; }
+.kv b.warn { color: var(--warn); }
+.pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; background: rgba(255,255,255,.08); }
+.pill.good { background: rgba(95,227,154,.16); color: var(--good); } .pill.warn { background: rgba(255,177,60,.16); color: var(--warn); }
+[hidden] { display: none !important; }
+
+/* loading */
+#loading { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; background: radial-gradient(circle at 50% 40%, #11233b, #04070c 70%); transition: opacity .6s; }
+#loading.done { opacity: 0; pointer-events: none; }
+#title { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; padding: 0 max(6vw, 24px); background: linear-gradient(90deg, rgba(4,7,12,.94) 0, rgba(4,7,12,.72) 34%, rgba(4,7,12,.1) 68%, rgba(4,7,12,0) 100%); animation: tIn .8s ease both; }
+@keyframes tIn { from { opacity: 0; } to { opacity: 1; } }
+#title .t-card { width: min(380px, 88vw); }
+#title .orbit-mark { margin: 0 0 18px; }
+#title h1 { font: 700 clamp(40px, 6vw, 64px)/1 var(--f-display); letter-spacing: .12em; margin: 0; }
+#title h1 span { color: var(--signal); }
+#title .t-sub { font: 13px var(--f-mono); color: var(--muted); letter-spacing: .4em; margin: 6px 0 28px; }
+#title .t-btns { display: flex; flex-direction: column; gap: 8px; }
+#title .t-btns button { text-align: left; padding: 11px 16px; font: 600 16px var(--f-body); background: rgba(14,24,38,.85); border: 1px solid var(--line); color: var(--text); border-radius: 6px; cursor: pointer; transition: border-color .15s, transform .15s; }
+#title .t-btns button:hover, #title .t-btns button:focus-visible { border-color: var(--cyan); transform: translateX(3px); outline: none; }
+#title .t-btns button.primary { background: var(--signal); color: #1a1205; border-color: var(--signal); font-size: 18px; }
+#title .t-meta { margin-top: 18px; color: var(--muted); font-size: 13px; line-height: 1.5; min-height: 2.6em; }
+#title .t-ver { position: absolute; left: max(6vw, 24px); bottom: 14px; margin: 0; font: 11px var(--f-mono); color: var(--muted); letter-spacing: .06em; }
+.credits h4 { margin: 14px 0 4px; font: 600 12px var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.credits p { margin: 0 0 6px; line-height: 1.5; }
+.backup-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+@media (max-height: 600px) { #title .t-sub { margin-bottom: 14px; } #title .t-btns button { padding: 8px 14px; } }
+#loading .logo { text-align: center; }
+#loading h1 { font: 700 54px/1 var(--f-display); letter-spacing: .12em; margin: 0; }
+#loading h1 span { color: var(--signal); }
+#loading p { font: 13px var(--f-mono); color: var(--muted); letter-spacing: .1em; }
+.orbit-mark { width: 120px; height: 46px; margin: 0 auto 18px; border: 3px solid var(--signal); border-radius: 50%; transform: rotate(-20deg); position: relative; }
+.orbit-mark::after { content: ''; position: absolute; width: 26px; height: 26px; left: 44px; top: 7px; border-radius: 50%; background: #e9eef4; }
+
+/* toasts */
+#toasts { position: fixed; top: 64px; left: 50%; transform: translateX(-50%); z-index: 60; display: flex; flex-direction: column; gap: 6px; align-items: center; pointer-events: none; width: min(560px, 92vw); }
+.toast { background: rgba(10, 18, 30, .92); border: 1px solid var(--line); border-left: 3px solid var(--cyan); padding: 7px 12px; border-radius: 4px; font-size: 13px; transition: opacity .5s, transform .5s; text-align: center; }
+.toast.good { border-left-color: var(--good); } .toast.warn { border-left-color: var(--warn); } .toast.bad { border-left-color: var(--bad); } .toast.info { border-left-color: var(--cyan); }
+.toast.out { opacity: 0; transform: translateY(-6px); }
+
+/* modal & tip */
+#modal { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; background: rgba(2, 5, 10, .55); }
+#modal .box { width: min(560px, 92vw); max-height: 86vh; overflow: auto; background: var(--panel-solid); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+#modalTitle { margin-top: 0; }
+#modalFoot { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+.fail-msg { font-size: 16px; line-height: 1.5; border-left: 3px solid var(--bad); padding-left: 10px; }
+.controls-ref { font-size: 13px; line-height: 1.7; }
+.set-row { display: grid; grid-template-columns: 160px 1fr; align-items: center; gap: 10px; margin: 10px 0; }
+details { margin: 10px 0; } summary { cursor: pointer; color: var(--cyan); }
+.load-list { max-height: 40vh; overflow: auto; }
+.load-row { display: flex; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.load-row span { flex: 1; } .load-row small { color: var(--muted); }
+#tip { position: fixed; right: 16px; bottom: 16px; z-index: 70; width: min(380px, 90vw); background: var(--panel-solid); border: 1px solid rgba(255,180,60,.4); border-radius: 8px; padding: 14px 16px; box-shadow: 0 10px 40px rgba(0,0,0,.5); font-size: 13px; line-height: 1.55; }
+#tip h3 { margin: 0 0 6px; font-size: 20px; color: var(--signal); }
+#tip .row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; }
+body[data-scene=flight] #tip { bottom: auto; top: 50%; right: auto; left: 50%; transform: translate(-50%, -50%); }
+
+/* ===== space center ===== */
+#center .top { position: fixed; top: 0; left: 0; right: 0; height: 48px; display: flex; align-items: center; gap: 14px; padding: 0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left)); background: linear-gradient(rgba(5,9,15,.85), rgba(5,9,15,0)); z-index: 5; }
+.brand { font: 700 22px var(--f-display); letter-spacing: .14em; } .brand span { color: var(--signal); }
+.sci-chip { font: 600 13px var(--f-mono); background: rgba(255,180,60,.12); border: 1px solid rgba(255,180,60,.35); padding: 4px 10px; border-radius: 999px; color: #ffd38c; }
+.sp { flex: 1; }
+.ut { font: 12px var(--f-mono); color: var(--muted); }
+#bldList { position: fixed; left: max(16px, env(safe-area-inset-left)); top: 64px; width: 250px; display: flex; flex-direction: column; gap: 6px; z-index: 5; }
+.bld { text-align: left; display: flex; flex-direction: column; gap: 1px; padding: 9px 12px; background: var(--panel); backdrop-filter: blur(6px); }
+.bld b { font: 600 18px var(--f-display); letter-spacing: .04em; } .bld span { font-size: 12px; color: var(--muted); }
+#bldLabel { position: fixed; z-index: 6; transform: translate(-50%, -100%); pointer-events: none; background: rgba(10,18,30,.9); border: 1px solid var(--signal); border-radius: 4px; padding: 5px 10px; text-align: center; }
+#bldLabel b { display: block; font: 600 17px var(--f-display); } #bldLabel span { font-size: 11.5px; color: var(--muted); }
+
+/* ===== assembly building ===== */
+#editor { position: fixed; inset: 0; display: grid; grid-template-rows: 48px 1fr; z-index: 5; }
+.ed-top { display: flex; align-items: center; gap: 8px; padding: 0 12px; background: #0b1422; border-bottom: 1px solid var(--line); overflow: hidden; min-width: 0; }
+.ed-top input[type=text] { flex: 0 1 200px; min-width: 70px; width: 200px; font-weight: 600; }
+.ed-top .grp { display: flex; gap: 3px; align-items: center; flex: none; }
+.ed-top > button { flex: none; }
+.ed-top .sp { flex: 1 1 0; min-width: 0; }
+#edBody { max-width: 120px; }
+.ed-top label { font-size: 12px; color: var(--muted); }
+.sym-btn { padding: 5px 8px; font: 600 12px var(--f-mono); }
+#edLaunch { font: 700 16px var(--f-display); letter-spacing: .1em; padding: 6px 18px; }
+.ed-body { display: grid; grid-template-columns: 220px minmax(220px, 1fr) minmax(300px, 1.3fr) 190px; min-height: 0; }
+#catalog { display: grid; grid-template-columns: 46px 1fr; background: #0b1422; border-right: 1px solid var(--line); min-height: 0; }
+#catTabs { display: flex; flex-direction: column; border-right: 1px solid var(--line); overflow-y: auto; }
+.cat-tab { border: 0; border-radius: 0; background: transparent; padding: 9px 0; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.cat-tab.on { background: rgba(79,209,255,.12); box-shadow: inset 3px 0 0 var(--cyan); }
+.cat-name { font-size: 8.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); max-width: 44px; text-align: center; line-height: 1.1; overflow: hidden; }
+.cat-ico { width: 20px; height: 20px; border-radius: 4px; background: #345; position: relative; }
+.cat-ico[data-cat=command] { background: radial-gradient(circle at 50% 60%, #c3c7cc 45%, transparent 47%); }
+.cat-ico[data-cat=fuel] { background: linear-gradient(90deg, #889 0, #eee 40%, #aab 100%); border-radius: 3px; width: 12px; }
+.cat-ico[data-cat=engine] { background: conic-gradient(from 150deg at 50% 0, transparent 0 60deg, #59514b 60deg 120deg, transparent 120deg); }
+.cat-ico[data-cat=coupling] { background: repeating-linear-gradient(45deg, #f2c230 0 4px, #222 4px 8px); height: 8px; margin: 6px 0; }
+.cat-ico[data-cat=aero] { background: linear-gradient(135deg, transparent 50%, #e9e9e4 50%); }
+.cat-ico[data-cat=control] { background: radial-gradient(circle, transparent 35%, #8c939b 36% 60%, transparent 61%); }
+.cat-ico[data-cat=power] { background: linear-gradient(#1b3a8a, #3058c0); width: 12px; }
+.cat-ico[data-cat=comms] { background: radial-gradient(circle at 0 50%, transparent 40%, #e9e9e4 42% 52%, transparent 54%); }
+.cat-ico[data-cat=interstellar] { background: radial-gradient(circle, #fff 0 14%, #b9a8ff 15% 26%, transparent 27%), conic-gradient(from 0deg, transparent 0 40deg, rgba(185,168,255,.7) 40deg 50deg, transparent 50deg 130deg, rgba(185,168,255,.7) 130deg 140deg, transparent 140deg 220deg, rgba(185,168,255,.7) 220deg 230deg, transparent 230deg 310deg, rgba(185,168,255,.7) 310deg 320deg, transparent 320deg); background-color: #1c1838; }
+.cat-ico[data-cat=science] { background: linear-gradient(#e9e9e4, #e9e9e4) center/8px 12px no-repeat, radial-gradient(circle, #5fe39a 30%, transparent 32%); }
+.cat-ico[data-cat=landing] { background: radial-gradient(ellipse at 50% 100%, #e5672c 55%, transparent 57%); }
+#catList { overflow-y: auto; overflow-x: hidden; padding: 6px; display: flex; flex-direction: column; gap: 4px; }
+#catHint { margin: 6px; padding: 8px; font-size: 12px; border: 1px dashed rgba(255,180,60,.5); border-radius: 4px; color: #ffd38c; }
+.part-card { display: grid; grid-template-columns: 56px 1fr; gap: 6px; align-items: center; padding: 4px; border: 1px solid transparent; border-radius: 4px; cursor: grab; position: relative; background: rgba(255,255,255,.025); touch-action: none; }
+.part-card:hover { border-color: var(--line); background: rgba(79,209,255,.07); }
+.part-card .part-ico { width: 56px; height: 56px; background: rgba(22,74,134,.35); border-radius: 3px; }
+.part-info { min-width: 0; } .part-info b { display: block; font-size: 12.5px; line-height: 1.2; } .part-info span { display: block; font: 10.5px/1.3 var(--f-mono); color: var(--muted); }
+.part-card.locked { opacity: .45; cursor: not-allowed; }
+.part-card.gated { opacity: .35; }
+.part-card .lock { display: inline-block; margin-top: 2px; font-size: 9.5px; padding: 1px 5px; border-radius: 3px; background: rgba(0,0,0,.6); color: var(--signal); }
+#partTip { position: fixed; z-index: 40; width: 280px; background: var(--panel-solid); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; font-size: 12.5px; pointer-events: none; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+#partTip h4 { margin: 0; color: var(--text); font-size: 17px; text-transform: none; letter-spacing: .02em; }
+.tip-sub { color: var(--muted); font-size: 11.5px; } .tip-stats { font: 11px var(--f-mono); color: #b9d7f3; margin-top: 6px; } .tip-lock { color: var(--signal); margin-top: 6px; }
+#edPreview { position: relative; min-width: 0; min-height: 0; cursor: grab; }
+#edStats { position: absolute; left: 8px; top: 8px; right: 8px; display: flex; flex-wrap: wrap; gap: 6px; pointer-events: none; }
+.stat { background: rgba(8,14,24,.82); border: 1px solid var(--line); border-radius: 4px; padding: 4px 8px; }
+.stat label { display: block; font-size: 9.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.stat b { font: 600 13px var(--f-mono); font-variant-numeric: tabular-nums; } .stat.big b { font-size: 17px; } .stat small { font-size: 11px; color: var(--muted); }
+.stat.bad { border-color: var(--bad); } .stat.bad b { color: var(--bad); } .stat.warn b { color: var(--warn); }
+#edProblems { position: absolute; left: 8px; right: 8px; bottom: 8px; display: flex; flex-direction: column; gap: 4px; pointer-events: none; }
+.prob { background: rgba(8,14,24,.86); border-left: 3px solid var(--cyan); padding: 4px 9px; font-size: 12px; border-radius: 0 4px 4px 0; }
+.prob.err { border-left-color: var(--bad); color: #ffd0ca; } .prob.warn { border-left-color: var(--warn); } .prob.ok { border-left-color: var(--good); color: #c6f5da; }
+#edInspector { position: absolute; right: 8px; top: 44px; z-index: 3; width: 230px; background: rgba(8,14,24,.92); border: 1px solid var(--cyan); border-radius: 6px; padding: 8px 10px; font-size: 12px; cursor: default; }
+.insp-h { display: flex; justify-content: space-between; align-items: center; gap: 6px; } .insp-h b { font-size: 13.5px; }
+.insp-sub { font: 10.5px var(--f-mono); color: var(--muted); margin: 3px 0 6px; }
+.x { padding: 0 7px; font-size: 16px; line-height: 1.3; }
+.sl { display: grid; grid-template-columns: 80px 1fr 38px; align-items: center; gap: 6px; margin: 4px 0; color: var(--muted); }
+.sl span { font: 11px var(--f-mono); text-align: right; color: var(--text); }
+.insp-row { display: flex; align-items: center; gap: 6px; color: var(--muted); margin: 4px 0; }
+.sym-mini { display: flex; gap: 2px; } .sym-mini button { padding: 2px 5px; font: 11px var(--f-mono); }
+.insp-btns { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; } .insp-btns button { padding: 4px 7px; font-size: 11.5px; }
+#bpWrap { position: relative; min-width: 0; min-height: 0; border-left: 1px solid var(--line); }
+#bpCanvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+.bp-tools { position: absolute; left: 8px; top: 8px; display: flex; gap: 4px; }
+.bp-tools .lbl { font: 600 11px var(--f-mono); letter-spacing: .14em; color: rgba(230,245,255,.7); padding: 6px 4px; }
+.bp-help { position: absolute; left: 8px; bottom: 8px; font-size: 11px; color: rgba(230,245,255,.6); max-width: 55%; pointer-events: none; }
+#staging { background: #0b1422; border-left: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
+.stg-h { padding: 8px 10px 4px; display: flex; justify-content: space-between; align-items: center; }
+.stg-h b { font: 600 16px var(--f-display); letter-spacing: .06em; } .stg-h button { padding: 2px 6px; font-size: 11px; }
+.stg-note { padding: 0 10px 6px; font-size: 11px; color: var(--muted); }
+#stageList { overflow-y: auto; padding: 0 8px 8px; display: flex; flex-direction: column; gap: 6px; }
+.stage { border: 1px solid var(--line); border-radius: 5px; padding: 5px; background: rgba(255,255,255,.02); }
+.stage.over { border-color: var(--cyan); background: rgba(79,209,255,.08); }
+.stage.new { text-align: center; color: var(--muted); font-size: 11px; border-style: dashed; padding: 10px 4px; }
+.stage-h { display: grid; grid-template-columns: 24px 1fr auto; gap: 5px; align-items: center; margin-bottom: 4px; }
+.stage-n { font: 700 15px var(--f-display); background: var(--signal); color: #1b1203; border-radius: 3px; text-align: center; }
+.stage-m { font: 10px/1.25 var(--f-mono); color: var(--muted); }
+.stage-btns button { padding: 0 4px; font-size: 9px; line-height: 1.6; }
+.chip { display: flex; align-items: center; gap: 5px; font-size: 11px; padding: 3px 5px; margin: 2px 0; border-radius: 3px; background: rgba(255,255,255,.05); cursor: grab; }
+.chip.sel { outline: 1px solid var(--cyan); } .chip.dragging { opacity: .4; }
+.chip em { color: var(--muted); font-style: normal; margin-left: auto; }
+.chip i, .fst .ic i { width: 10px; height: 10px; border-radius: 2px; flex: none; background: #888; }
+.t-engine i { background: #ff8a3c; } .t-srb i { background: #ffc23c; } .t-decoupler i, .t-rdecoupler i { background: #f2c230; outline: 1px dashed #222; } .t-chute i { background: #e5672c; border-radius: 50% 50% 2px 2px; } .t-fairing i { background: #d8dde4; }
+#dragGhost { position: fixed; z-index: 50; pointer-events: none; width: 70px; height: 70px; filter: drop-shadow(0 4px 8px rgba(0,0,0,.6)); }
+#dragGhost.trash { filter: drop-shadow(0 0 6px var(--bad)) grayscale(1); }
+
+/* ===== flight HUD =====
+   One grid with fixed regions so panels can never overlap:
+   tl = time warp + staging | tc = altimeter, situation, warnings, messages | rt = mission/orbit/resources
+   bl = action buttons      | bc = throttle, navball, SAS                   | (rt continues) */
+#flight { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
+#fhudMain { position: absolute; inset: 0; display: grid; gap: 8px; pointer-events: none;
+  grid-template-columns: minmax(150px, 230px) minmax(0, 1fr) minmax(200px, 262px);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas: "tl tc rt" "tl . rt" "bl bc rt";
+  padding: max(8px, env(safe-area-inset-top, 0px)) max(8px, env(safe-area-inset-right, 0px)) max(8px, env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)); }
+#fhudMain > div { pointer-events: none; min-width: 0; min-height: 0; }
+#fhudMain .hud, #fhudMain button, #fStages, #fRight { pointer-events: auto; }
+.hud { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; backdrop-filter: blur(6px); }
+#fTL { grid-area: tl; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+#fTC { grid-area: tc; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+#fBL { grid-area: bl; align-self: end; }
+#fBC { grid-area: bc; align-self: end; justify-self: center; display: flex; flex-direction: column; align-items: center; gap: 6px; max-width: 100%; }
+#fTop { display: flex; gap: 2px; padding: 6px 10px; text-align: center; align-items: stretch; max-width: 100%; }
+.alt-box { padding: 0 10px; min-width: 104px; } .alt-box + .alt-box { border-left: 1px solid var(--line); }
+.alt-box button { border: 0; background: transparent; padding: 0; font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
+.alt-box b { display: block; font: 600 21px var(--f-mono); font-variant-numeric: tabular-nums; letter-spacing: -.02em; white-space: nowrap; }
+.alt-box small { font: 11px var(--f-mono); color: var(--muted); white-space: nowrap; }
+#fSit { font-size: 12px; color: #cfe0f2; text-shadow: 0 1px 3px #000; text-align: center; max-width: 100%; }
+#fWarn { display: flex; flex-direction: column; gap: 4px; align-items: center; max-width: 100%; }
+#fWarn div { background: rgba(80, 18, 10, .85); border: 1px solid var(--bad); color: #ffd6cf; padding: 4px 12px; border-radius: 4px; font-size: 13px; text-align: center; }
+#fToastSlot { width: 100%; display: flex; justify-content: center; }
+#fToastSlot #toasts { position: static; transform: none; width: min(520px, 100%); }
+#fWarpBox { padding: 6px 8px; display: flex; flex-direction: column; gap: 4px; max-width: 100%; }
+#fWarp { display: flex; gap: 2px; align-items: center; flex-wrap: wrap; }
+#fWarp button { padding: 3px 0; width: 13px; height: 18px; border-radius: 2px; background: rgba(255,255,255,.08); }
+#fWarp button.on { background: var(--signal); border-color: var(--signal); }
+#fWarp button.ph.on { background: #6ad0ff; border-color: #6ad0ff; }
+#fWarp button.iw { background: rgba(185,168,255,.16); }
+#fWarp button.iw.on { background: #b9a8ff; border-color: #b9a8ff; }
+#fWarpStop { width: auto !important; padding: 0 6px !important; font-size: 10px; }
+.warp-row { display: flex; justify-content: space-between; gap: 10px; font: 11px var(--f-mono); color: var(--muted); }
+#fWarpRate { color: var(--signal); }
+#fStages { display: flex; flex-direction: column; gap: 3px; overflow: auto; max-height: 100%; min-height: 0; flex: 1 1 auto; }
+.fst { display: flex; gap: 4px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 3px 6px; font-size: 11px; flex: none; }
+.fst.next { border-color: var(--signal); box-shadow: 0 0 0 1px rgba(255,180,60,.3); }
+.fst .n { font: 700 13px var(--f-display); width: 16px; color: var(--signal); }
+.fst .ic { display: inline-flex; align-items: center; gap: 2px; font: 10px var(--f-mono); }
+.fst.done { color: var(--muted); }
+#fRight { grid-area: rt; display: flex; flex-direction: column; gap: 6px; overflow: auto; }
+#fRight .hud { padding: 7px 10px; flex: none; }
+#fMissions:empty { display: none; }
+#fTraj { padding: 6px 8px 8px !important; }
+#fTraj .ft-h { display: flex; justify-content: space-between; align-items: baseline; font-size: 10.5px; color: var(--muted); margin-bottom: 4px; }
+#fTraj .ft-h b { font: 600 11px var(--f-mono); letter-spacing: .1em; color: var(--muted); }
+#fTrajC { display: block; width: 100%; height: 150px; border-radius: 4px; background: #04070c; }
+@media (max-height: 680px) { #fTrajC { height: 110px; } }
+#fMissions .fm { font-size: 11.5px; margin-bottom: 4px; } #fMissions .fm b { display: block; font: 600 14px var(--f-display); letter-spacing: .04em; color: var(--signal); }
+#fMissions .fm div { color: var(--muted); } #fMissions .fm div.ok { color: var(--good); }
+.rbar { display: grid; grid-template-columns: 42px 1fr 78px; gap: 6px; align-items: center; font-size: 11px; margin: 3px 0; }
+.rbar label { color: var(--muted); } .rbar span { font: 10.5px var(--f-mono); text-align: right; white-space: nowrap; overflow: hidden; }
+.rbar span small { color: var(--muted); }
+.rb { height: 7px; background: rgba(255,255,255,.08); border-radius: 2px; overflow: hidden; } .rb i { display: block; height: 100%; }
+.orbit-state { margin-top: 4px; }
+#fBottom { display: flex; align-items: flex-end; gap: 8px; }
+#navWrap { padding: 6px; display: flex; flex-direction: column; align-items: center; }
+#navball { width: 170px; height: 170px; border-radius: 50%; position: relative; box-shadow: 0 0 0 3px #1c2a3c, 0 0 0 4px rgba(150,190,240,.3); }
+#navOverlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+#navHdg { font: 11px var(--f-mono); color: #cfe0f2; margin-top: 5px; white-space: nowrap; }
+#fThrBox { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px; }
+#fThrGauge { width: 18px; height: 120px; background: rgba(255,255,255,.08); border-radius: 3px; position: relative; overflow: hidden; cursor: ns-resize; touch-action: none; pointer-events: auto; }
+#fThr { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(#ffe08a, var(--signal)); }
+#fThrTxt { font: 11px var(--f-mono); }
+#fThrBox button { padding: 1px 5px; font-size: 10px; }
+#fCtl { padding: 6px; display: grid; grid-template-columns: repeat(2, 38px); gap: 3px; }
+.sasb, .tg { padding: 0; height: 26px; font: 600 9.5px var(--f-mono); letter-spacing: .02em; }
+#tDeploy { grid-column: span 2; }
+#fActions { display: flex; flex-wrap: wrap; gap: 4px; }
+#fActions button { padding: 6px 9px; font-size: 12.5px; background: var(--panel); backdrop-filter: blur(6px); }
+#bStage, #bRecover { background: var(--signal) !important; color: #1b1203 !important; font-weight: 700; }
+#evaHelp { padding: 8px 12px; font-size: 12px; text-align: center; line-height: 1.6; max-width: 100%; }
+#sciPanel { grid-area: rt; overflow: auto; padding: 10px 12px; background: var(--panel-solid); pointer-events: auto; }
+#flight.sci-open #fRight { display: none; }
+#flight.sci-open #fhudMain { grid-template-columns: minmax(140px, 230px) minmax(0, 1fr) minmax(250px, 340px); }
+.sci-where { font: 600 16px var(--f-display); letter-spacing: .04em; color: var(--cyan); margin-bottom: 6px; }
+.sci-row { display: flex; gap: 8px; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.sci-row b { display: block; font-size: 13px; } .sci-row small { display: block; color: var(--muted); font-size: 11px; }
+.sci-row .val { font: 11px var(--f-mono); color: var(--good); } .sci-row .no { font-size: 11px; color: var(--muted); } .tag { font-size: 11px; color: var(--warn); }
+.sci-data { border: 1px solid var(--line); border-radius: 5px; padding: 7px 9px; margin: 6px 0; }
+.sci-data b { font-size: 12.5px; } .sci-data p { margin: 4px 0; font-size: 12.5px; color: #c7d6e6; font-style: italic; }
+.sci-act { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; font: 11px var(--f-mono); color: var(--muted); } .sci-act span { flex: 1; }
+.bar { flex: 1; height: 6px; background: rgba(255,255,255,.1); border-radius: 3px; overflow: hidden; } .bar i { display: block; height: 100%; background: var(--cyan); }
+/* map mode inside flight: navball, staging and the right column give way to map panels */
+#fhudMain.mapmode #fBC, #fhudMain.mapmode #fStages, #fhudMain.mapmode #fSit, #fhudMain.mapmode #fRight { display: none; }
+#pause { position: fixed; inset: 0; z-index: 75; display: grid; place-items: center; background: rgba(2,5,10,.6); }
+#pause .box { background: var(--panel-solid); border: 1px solid var(--line); border-radius: 8px; padding: 20px; width: 260px; max-height: 92vh; overflow: auto; display: flex; flex-direction: column; gap: 7px; }
+#pause h3 { margin: 0 0 6px; text-align: center; letter-spacing: .2em; }
+
+/* ===== map ===== */
+#mapUI { position: fixed; inset: 0; pointer-events: none; z-index: 4; --fbl: 48px; }
+#mapUI > * { pointer-events: auto; }
+#mapLabels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.mlabel { position: absolute; left: 0; top: 0; white-space: nowrap; font-size: 11.5px; pointer-events: auto; cursor: pointer; display: flex; align-items: center; gap: 5px; color: #d6e4f3; text-shadow: 0 1px 3px #000, 0 0 2px #000; margin: -6px 0 0 -6px; }
+.mlabel i { width: 9px; height: 9px; border-radius: 50%; border: 1px solid rgba(255,255,255,.6); flex: none; }
+.mlabel i.ves { border-radius: 2px; background: var(--cyan); transform: rotate(45deg); } .mlabel i.ves.eva { background: #fff; } .mlabel i.ves.flag { background: var(--signal); }
+.mlabel em { font-style: normal; font-size: 10px; color: #ffa3e6; }
+.mlabel.focus span { color: var(--signal); } .mlabel.tgt span { color: #ff7ad9; } .mlabel.me span { color: var(--cyan); font-weight: 600; }
+.mlabel.apsis, .mlabel.enc, .mlabel.node { cursor: default; font: 10.5px/1.3 var(--f-mono); background: rgba(8,14,24,.8); padding: 2px 5px; border-radius: 3px; border: 1px solid var(--line); margin: 0 0 0 8px; transform-origin: 0 0; }
+.mlabel.apsis b { color: var(--cyan); } .mlabel.enc { border-color: rgba(255,166,79,.6); } .mlabel.enc.tgt { border-color: #ff7ad9; } .mlabel.node { border-color: #3fb8ff; }
+.mlabel em.bad, .mlabel.bad { color: #ff9a8e; } .mlabel em.warn { color: var(--warn); }
+#mapInfo { position: absolute; right: max(8px, env(safe-area-inset-right, 0px)); top: 8px; width: min(300px, 42vw); padding: 10px 12px; font-size: 12.5px; background: var(--panel-solid); border: 1px solid var(--line); border-radius: 6px; max-height: calc(100% - 70px); overflow: auto; z-index: 2; }
+.mi-h { display: flex; justify-content: space-between; } .mi-h b { font: 600 22px var(--f-display); letter-spacing: .04em; }
+.mi-sub { color: var(--signal); font-size: 12px; margin-bottom: 6px; }
+.mi-btns { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+/* planner sits in the left column, above the flight action buttons */
+#nodePanel { position: absolute; left: max(8px, env(safe-area-inset-left, 0px)); bottom: calc(var(--fbl) + 16px); width: min(360px, 46vw); max-height: calc(100% - var(--fbl) - 110px); overflow: auto; padding: 9px 11px; background: var(--panel-solid); border: 1px solid var(--line); border-radius: 6px; font-size: 12px; }
+#nodePanel h4 { margin: 0 0 6px; }
+.np-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; } .np-grid button { font-size: 11.5px; padding: 5px; }
+.np-row { display: flex; gap: 2px; align-items: center; margin: 3px 0; flex-wrap: wrap; } .np-row span { width: 62px; font-size: 11px; } .np-row button { padding: 2px 4px; font: 10px var(--f-mono); }
+.np-row input { width: 64px; padding: 2px 4px; font: 11px var(--f-mono); }
+.np-top { display: flex; justify-content: space-between; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; } .np-top span { font: 11px var(--f-mono); color: var(--muted); }
+.np-res { font: 11px/1.45 var(--f-mono); color: #cfe0f2; margin: 6px 0; padding: 5px 7px; background: rgba(255,255,255,.04); border-radius: 4px; }
+.np-btns { display: flex; gap: 4px; flex-wrap: wrap; } .np-btns button { font-size: 11px; padding: 4px 7px; }
+#npMsg { margin-top: 6px; font-size: 12px; }
+#mapNav { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; max-width: 40vw; }
+#mapNav button { font-size: 12px; background: var(--panel); }
+body[data-scene=flight] #mapNav { left: calc(50% + 40px); }
+
+/* ===== research ===== */
+.fullpanel { position: fixed; inset: 0; z-index: 5; display: grid; grid-template-rows: 48px 1fr; background: radial-gradient(circle at 30% 20%, #0f2036, #060a10 75%); }
+.fp-top { display: flex; align-items: center; gap: 12px; padding: 0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left)); border-bottom: 1px solid var(--line); background: rgba(5,9,15,.7); }
+.fp-top h2 { font: 700 22px var(--f-display); letter-spacing: .1em; margin: 0; }
+#researchBody { display: grid; grid-template-columns: 1fr 320px; min-height: 0; }
+#techWrap { position: relative; overflow: hidden; cursor: grab; background-image: linear-gradient(rgba(130,170,220,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(130,170,220,.05) 1px, transparent 1px); background-size: 26px 26px; }
+#techCanvas { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.tech-lines { position: absolute; left: 0; top: 0; pointer-events: none; }
+.tech-lines path { fill: none; stroke-width: 2; } .tech-lines .off { stroke: rgba(130,170,220,.18); } .tech-lines .ready { stroke: rgba(255,180,60,.7); } .tech-lines .done { stroke: rgba(95,227,154,.65); }
+.tnode { position: absolute; width: 180px; height: 80px; border-radius: 6px; padding: 6px 8px; background: rgba(14,24,38,.95); border: 1px solid var(--line); cursor: pointer; display: flex; flex-direction: column; gap: 4px; }
+.tnode.done { border-color: rgba(95,227,154,.55); } .tnode.avail { border-color: var(--signal); box-shadow: 0 0 14px rgba(255,180,60,.18); } .tnode.locked { opacity: .55; }
+.tnode.sel { outline: 2px solid var(--cyan); } .tnode.star { background: rgba(18,16,44,.95); border-color: rgba(160,140,255,.35); }
+#rsTabs { display: flex; gap: 4px; }
+#rsTabs button { background: rgba(255,255,255,.04); border: 1px solid var(--line); color: var(--muted); padding: 6px 12px; border-radius: 6px; font: 600 13px var(--f-body); cursor: pointer; }
+#rsTabs button.on { background: rgba(79,209,255,.14); border-color: var(--cyan); color: var(--text); }
+#rsTabs button[data-branch=interstellar].on { background: rgba(160,140,255,.18); border-color: #a08cff; }
+#rsTabs button.dim { opacity: .6; }
+@media (max-width: 860px) { #rsTabs button { padding: 5px 8px; font-size: 12px; } }
+.tn-h { display: flex; justify-content: space-between; gap: 6px; } .tn-h b { font: 600 15px/1.1 var(--f-display); letter-spacing: .03em; } .tn-h span { font: 11px var(--f-mono); color: var(--signal); white-space: nowrap; }
+.tnode.done .tn-h span { color: var(--good); }
+.tn-icons { display: flex; gap: 3px; align-items: center; } .tn-icons canvas { width: 26px; height: 26px; background: rgba(22,74,134,.35); border-radius: 3px; } .tn-icons em { font-size: 11px; color: var(--muted); font-style: normal; }
+#techDetail { border-left: 1px solid var(--line); padding: 4px 16px 16px; overflow: auto; background: rgba(8,14,24,.8); }
+.td-part { display: grid; grid-template-columns: 44px 1fr; gap: 8px; align-items: center; margin: 6px 0; font-size: 12.5px; }
+.td-part canvas { background: rgba(22,74,134,.35); border-radius: 3px; } .td-part small { display: block; color: var(--muted); font-size: 11.5px; }
+
+/* ===== mission control ===== */
+#mcBody { display: grid; grid-template-columns: 300px 1fr 300px; min-height: 0; }
+#mcList { overflow: auto; padding: 4px 12px 12px; border-right: 1px solid var(--line); }
+.mitem { display: flex; justify-content: space-between; width: 100%; text-align: left; margin: 3px 0; padding: 7px 10px; }
+.mitem b { font-size: 13px; } .mitem span { font: 11px var(--f-mono); color: var(--signal); } .mitem.dn { opacity: .6; } .mitem.sel { border-color: var(--cyan); background: rgba(79,209,255,.12); }
+#mcDetail { overflow: auto; padding: 8px 26px 20px; max-width: 70ch; }
+#mcDetail h3 { font-size: 34px; margin: 6px 0; } .mc-reward { font: 13px var(--f-mono); color: var(--signal); }
+.objs { list-style: none; padding: 0; } .objs li { padding: 5px 0; border-bottom: 1px solid var(--line); } .objs li.ok { color: var(--good); }
+.tip { background: rgba(79,209,255,.07); border-left: 3px solid var(--cyan); padding: 8px 10px; font-size: 13px; margin: 12px 0; } .tip b { color: var(--cyan); margin-right: 6px; }
+#mcSide { border-left: 1px solid var(--line); padding: 4px 14px; overflow: auto; }
+
+/* ===== tracking ===== */
+#tracking { position: fixed; left: 0; top: 0; bottom: 0; width: 310px; z-index: 6; display: flex; flex-direction: column; background: rgba(8,14,24,.9); border-right: 1px solid var(--line); }
+#tracking .fp-top { min-height: 48px; }
+#tsWarp { display: flex; gap: 3px; padding: 8px 12px; align-items: center; } #tsWarp button { padding: 3px 7px; font: 11px var(--f-mono); }
+#tsList { padding: 0 10px; overflow: auto; max-height: 40vh; }
+.ts-row { border-bottom: 1px solid var(--line); padding: 7px 0; } .ts-row b { display: block; font-size: 13px; } .ts-row small { color: var(--muted); }
+.ts-btns { display: flex; gap: 4px; margin-top: 5px; } .ts-btns button { padding: 3px 8px; font-size: 11.5px; }
+#tsBodies { padding: 8px 10px; overflow: auto; flex: 1; display: flex; flex-wrap: wrap; gap: 3px; align-content: flex-start; }
+.tsb { padding: 3px 7px; font-size: 11.5px; display: inline-flex; align-items: center; gap: 4px; } .tsb i { width: 8px; height: 8px; border-radius: 50%; }
+.tsb.planet, .tsb.star { font-weight: 600; } .tsb.candidate { font-style: italic; opacity: .8; }
+body[data-scene=tracking] #mapNav { left: calc(50% + 155px); max-width: calc(100vw - 340px - 320px); }
+body[data-scene=tracking] #toasts { top: 12px; left: calc(310px + (100vw - 310px - min(326px, 42vw) - 10px) / 2); width: min(420px, calc(100vw - 310px - min(326px, 42vw) - 40px)); }
+body[data-scene=flight] #mapInfo { top: 100px; max-height: calc(100% - 170px); }
+
+/* ===== small screens (Chromebook 1024x600 and similar) ===== */
+@media (max-width: 1180px) {
+  .ed-body { grid-template-columns: 186px minmax(180px, 1fr) minmax(260px, 1.25fr) 160px; }
+  .part-card { grid-template-columns: 42px 1fr; } .part-card .part-ico { width: 42px; height: 42px; }
+  .part-info span { display: none; }
+  .ed-top input[type=text] { flex-basis: 120px; }
+  .ed-top { gap: 5px; padding: 0 6px; } .ed-top button { padding: 4px 7px; } .ed-top label { display: none; } .sym-btn { padding: 4px 5px; } #edLaunch { padding: 5px 10px; font-size: 15px; }
+  .stat { padding: 3px 6px; } .stat.big b { font-size: 14px; } .stat label { font-size: 8.5px; }
+  .bp-help { display: none; }
+  #mcBody { grid-template-columns: 250px 1fr; } #mcSide { display: none; }
+  #researchBody { grid-template-columns: 1fr 270px; }
+}
+@media (max-height: 680px) {
+  #navball { width: 132px; height: 132px; } #fThrGauge { height: 92px; }
+  .alt-box b { font-size: 17px; } .alt-box { min-width: 92px; }
+  #fhudMain { grid-template-columns: minmax(140px, 200px) minmax(0, 1fr) minmax(190px, 230px); }
+  .stat.big b { font-size: 14px; } #edInspector { top: 40px; } .prob { font-size: 11px; padding: 3px 7px; } #edProblems .prob:nth-child(n+3) { display: none; }
+  #bldList .bld span { display: none; }
+}
+@media (max-width: 1000px) {
+  #flight.sci-open #fBC { display: none; } /* small screens: the science panel takes the navball's space while open */
+  .ed-top .grp:nth-of-type(2) { display: none; } /* undo/redo stay on Ctrl+Z / Ctrl+Y */
+  .sym-btn[data-sym="6"], .sym-btn[data-sym="8"] { display: none; }
+}
+@media (max-width: 860px) {
+  .ed-body { grid-template-columns: 150px 1fr 140px; } #edPreview { display: none; }
+  #bldList { width: 200px; }
+  #fhudMain { grid-template-columns: 132px minmax(0, 1fr) 180px; }
+  #navball { width: 120px; height: 120px; } #fThrGauge { height: 84px; } .rbar { grid-template-columns: 36px 1fr 66px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<canvas id="gl"></canvas>
+
+<div id="loading"><div class="logo"><div class="orbit-mark"></div><h1>MERIDIAN <span>SPACE</span></h1><p>PROGRAM</p><p id="loadMsg">Starting…</p></div></div>
+<div id="toasts"></div>
+
+<!-- space center -->
+<div id="title" hidden>
+  <div class="t-card">
+    <div class="orbit-mark"></div>
+    <h1>MERIDIAN <span>SPACE</span></h1><p class="t-sub">PROGRAM</p>
+    <div class="t-btns">
+      <button id="tContinue" class="primary">Continue</button>
+      <button id="tNew">New program</button>
+      <button id="tHow">How to play</button>
+      <button id="tSettings">Settings</button>
+      <button id="tCredits">Credits</button>
+    </div>
+    <p class="t-meta" id="tMeta"></p>
+  </div>
+  <p class="t-ver" id="tVer"></p>
+</div>
+<div id="center" hidden>
+  <div class="top"><div class="brand">MERIDIAN <span>SPACE PROGRAM</span></div><span class="sci-chip">⚗ <span id="scScience">0</span> science</span><span class="sp"></span><span class="ut" id="scTime"></span><button id="scMenu" title="Back to the title screen">Menu</button><button id="scHelp">How to play</button><button data-settings>Settings</button></div>
+  <div id="bldList"></div>
+  <div id="bldLabel" hidden></div>
+</div>
+
+<!-- assembly building -->
+<div id="editor" hidden>
+  <div class="ed-top">
+    <button id="edBack" title="Back to the space center">← Center</button>
+    <input id="edName" type="text" aria-label="Rocket name" maxlength="40">
+    <div class="grp"><button id="edNew">New</button><button id="edSave">Save</button><button id="edLoad">Load</button></div>
+    <div class="grp"><button id="edUndo" title="Undo (Ctrl+Z)">↶</button><button id="edRedo" title="Redo (Ctrl+Y)">↷</button></div>
+    <div class="grp"><label>Symmetry</label><button class="sym-btn" data-sym="1">1×</button><button class="sym-btn on" data-sym="2">2×</button><button class="sym-btn" data-sym="3">3×</button><button class="sym-btn" data-sym="4">4×</button><button class="sym-btn" data-sym="6">6×</button><button class="sym-btn" data-sym="8">8×</button></div>
+    <div class="grp"><label for="edBody">Stats for</label><select id="edBody"></select></div>
+    <span class="sp" style="flex:1"></span>
+    <button data-settings>⚙</button>
+    <button id="edLaunch" class="primary">LAUNCH ▶</button>
+  </div>
+  <div class="ed-body">
+    <div id="catalog"><div id="catTabs"></div><div style="display:flex;flex-direction:column;min-height:0"><div id="catHint">Start with a command pod or probe core. Every other part snaps onto it.</div><div id="catList"></div></div></div>
+    <div id="edPreview"><div id="edStats"></div><div id="edProblems"></div></div>
+    <div id="bpWrap"><canvas id="bpCanvas"></canvas><div class="bp-tools"><span class="lbl">BLUEPRINT</span><button id="edFit" title="Fit the rocket to the view">Fit</button></div><div id="edInspector" hidden></div><div class="bp-help">Drag parts in · drag to move · drop on the parts list to delete · wheel zoom · right-drag pan</div></div>
+    <div id="staging"><div class="stg-h"><b>STAGING</b><button id="stageReset" title="Rebuild staging automatically">Auto</button></div><div class="stg-note">Stage 1 fires first. Drag items between stages.</div><div id="stageList"></div></div>
+  </div>
+</div>
+<div id="partTip" hidden></div>
+<div id="dragGhost" hidden></div>
+
+<!-- flight -->
+<div id="flight" hidden>
+  <div id="fhudMain">
+    <div id="fTL">
+    <div id="fWarpBox" class="hud">
+      <div id="fWarp"><button class="ph" data-w="0" title="1×"></button><button class="ph" data-w="1" title="2× physics"></button><button class="ph" data-w="2" title="3× physics"></button><button class="ph" data-w="3" title="4× physics"></button><button data-w="4" title="10×"></button><button data-w="5" title="50×"></button><button data-w="6" title="100×"></button><button data-w="7" title="1,000×"></button><button data-w="8" title="10,000×"></button><button data-w="9" title="100,000×"></button><button data-w="10" title="1,000,000×"></button><button data-w="11" title="10,000,000×"></button><button class="iw" data-w="12" title="100,000,000× (interstellar)"></button><button class="iw" data-w="13" title="1,000,000,000× (interstellar)"></button><button class="iw" data-w="14" title="10,000,000,000× (interstellar)"></button><button id="fWarpStop" title="Stop warp ( / )">■</button></div>
+      <div class="warp-row"><span id="fUT"></span><span id="fWarpRate">1×</span></div>
+    </div>
+    <div id="fStages"></div>
+    </div>
+    <div id="fTC">
+    <div id="fTop" class="hud">
+      <div class="alt-box"><button id="fAltMode" title="Switch sea level / above ground">Altitude</button><b id="fAlt">0 m</b></div>
+      <div class="alt-box"><button id="fSpdMode" title="Switch surface / orbit / target speed">Surface</button><b id="fSpd">0 m/s</b><small id="fVs"></small></div>
+    </div>
+    <div id="fSit"></div>
+    <div id="fWarn"></div>
+    <div id="fToastSlot"></div>
+    </div>
+    <div id="fRight">
+      <div id="fMissions" class="hud"></div>
+      <div id="fOrbit" class="hud"></div>
+      <div id="fTraj" class="hud"><div class="ft-h"><b>TRAJECTORY</b><span id="fTrajNote"></span></div><canvas id="fTrajC"></canvas></div>
+      <div id="fRes" class="hud"></div>
+    </div>
+    <div id="fBL">
+    <div id="fActions">
+      <button id="bStage" title="Next stage (Space)">STAGE ⏎</button>
+      <button id="bMap" title="Map (M)">Map</button>
+      <button id="bSci">Science</button>
+      <button id="bEVA" hidden>EVA</button>
+      <button id="bBoard" hidden title="Board (B)">Board</button>
+      <button id="bGrab" hidden title="Grab / let go (F)">Grab</button>
+      <button id="bUndock" hidden>Undock</button>
+      <button id="bRecover" hidden class="primary">Recover</button>
+      <button id="bQS" title="Quicksave (F5)">Save</button>
+      <button id="bPause" title="Pause (Esc)">Pause</button>
+    </div>
+    </div>
+    <div id="fBC">
+    <div id="fBottom">
+      <div id="fThrBox" class="hud"><button id="bThrUp" title="Full throttle (Z)">MAX</button><div id="fThrGauge" title="Throttle (Shift / Ctrl)"><div id="fThr"></div></div><button id="bThrDn" title="Cut throttle (X)">CUT</button><span id="fThrTxt">0%</span></div>
+      <div id="navWrap" class="hud"><div id="navball"><canvas id="navOverlay"></canvas></div><div id="navHdg"></div></div>
+      <div id="fCtl" class="hud">
+        <button class="tg" id="tSAS" title="SAS (T)">SAS</button><button class="tg" id="tRCS" title="RCS (R)">RCS</button>
+        <button class="sasb" data-mode="stab" title="Hold heading">HOLD</button><button class="sasb" data-mode="up" title="Point straight up">UP</button>
+        <button class="sasb" data-mode="pro" title="Prograde">PRO</button><button class="sasb" data-mode="retro" title="Retrograde">RETRO</button>
+        <button class="sasb" data-mode="nrm" title="Orbit normal">NRM</button><button class="sasb" data-mode="anti" title="Anti-normal">ANTI</button>
+        <button class="sasb" data-mode="radout" title="Radial out">RAD+</button><button class="sasb" data-mode="radin" title="Radial in">RAD−</button>
+        <button class="sasb" data-mode="target" title="Point at target">TGT</button><button class="sasb" data-mode="node" title="Point at maneuver">NODE</button>
+        <button class="tg" id="tDeploy" title="Deploy legs, panels, radiators (G)" style="grid-column: span 2">DEPLOY G</button>
+      </div>
+    </div>
+    <div id="evaHelp" class="hud" hidden><b>EVA</b> · W/A/S/D move · Shift up · Ctrl down · Q/E roll · R jetpack · Space jump/let go · F grab · B board</div>
+    </div>
+    <div id="sciPanel" class="hud" hidden><div class="mi-h"><b style="font:600 20px var(--f-display);letter-spacing:.06em">SCIENCE</b><button class="x" id="sciClose">×</button></div><div id="sciBody"></div></div>
+  </div>
+  
+</div>
+
+<!-- map overlay (flight + tracking) -->
+<div id="mapUI" hidden>
+  <div id="mapLabels"></div>
+  <div id="mapInfo" hidden></div>
+  <div id="nodePanel"><h4>Maneuver planner</h4><div id="nodeBody"></div></div>
+  <div id="mapNav"><button id="mapFocusMe">Focus vessel</button><button id="mapFocusBody">Focus world</button><button id="mapFocusUp">Zoom out a level</button></div>
+</div>
+
+<!-- research -->
+<div id="research" class="fullpanel" hidden>
+  <div class="fp-top"><button id="rsBack">← Center</button><h2>RESEARCH CENTER</h2><div id="rsTabs" class="seg"><button data-branch="main" class="on">Main tree</button><button data-branch="interstellar">✦ Interstellar</button></div><span class="sci-chip">⚗ <span id="rsScience">0</span> science</span><span class="sp" style="flex:1"></span><span class="muted" style="font-size:12px">Drag to pan · wheel to zoom</span></div>
+  <div id="researchBody"><div id="techWrap"><div id="techCanvas"></div></div><div id="techDetail"></div></div>
+</div>
+
+<!-- mission control -->
+<div id="mcontrol" class="fullpanel" hidden>
+  <div class="fp-top"><button id="mcBack">← Center</button><h2>MISSION CONTROL</h2><span class="sci-chip">⚗ <span id="mcScience">0</span> science</span></div>
+  <div id="mcBody"><div id="mcList"></div><div id="mcDetail"></div><div id="mcSide"><h4>Program</h4><div id="mcStats"></div></div></div>
+</div>
+
+<!-- tracking station -->
+<div id="tracking" hidden>
+  <div class="fp-top"><button id="tsBack">← Center</button><h2 style="font-size:19px">TRACKING</h2></div>
+  <div id="tsWarp"><span class="ut" id="tsTime"></span><span class="sp" style="flex:1"></span><button data-w="0">1×</button><button data-w="1">100×</button><button data-w="2">10k×</button><button data-w="3">1M×</button><button data-w="4">10M×</button><button data-w="5" title="For interstellar journeys">1B×</button><button data-w="6" title="For interstellar journeys">10B×</button></div>
+  <h4 style="padding:0 12px">Spacecraft</h4>
+  <div id="tsList"></div>
+  <h4 style="padding:0 12px">Worlds</h4>
+  <div id="tsBodies"></div>
+</div>
+
+<div id="pause" hidden><div class="box"><h3>PAUSED</h3><button id="pResume" class="primary">Resume</button><button id="pQS">Quicksave (F5)</button><button id="pQL">Load quicksave (F9)</button><button id="pRevert">Revert to launch</button><button id="pEditor">Back to assembly</button><button id="pSettings">Settings</button><button id="pCenter">Space Center</button></div></div>
+<div id="tip" hidden><h3 id="tipTitle"></h3><div id="tipBody"></div><div class="row"><button id="tipOff" class="ghost">Hide all tips</button><button id="tipOk" class="primary">Got it</button></div></div>
+<div id="modal" hidden><div class="box"><h3 id="modalTitle"></h3><div id="modalBody"></div><div id="modalFoot"></div></div></div>
+
+<script src="js/vendor/three.min.js"></script>
+<script src="js/util.js"></script>
+<script src="js/bodies.js"></script>
+<script src="js/orbit.js"></script>
+<script src="js/parts.js"></script>
+<script src="js/tech.js"></script>
+<script src="js/missions.js"></script>
+<script src="js/science.js"></script>
+<script src="js/save.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/vessel.js"></script>
+<script src="js/matkit.js"></script>
+<script src="js/partmesh.js"></script>
+<script src="js/sprites.js"></script>
+<script src="js/terrain.js"></script>
+<script src="js/render.js"></script>
+<script src="js/clouds.js"></script>
+<script src="js/water.js"></script>
+<script src="js/world.js"></script>
+<script src="js/physics.js"></script>
+<script src="js/eva.js"></script>
+<script src="js/editor.js"></script>
+<script src="js/flight.js"></script>
+<script src="js/mapview.js"></script>
+<script src="js/spacecenter.js"></script>
+<script src="js/buildings.js"></script>
+<script src="js/main.js"></script>
+<script src="js/admin.js"></script>
+
+</body>
+</html>

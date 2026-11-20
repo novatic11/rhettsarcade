@@ -1,0 +1,3 @@
+# Keep synced game builds byte-for-byte identical on Windows.
+dist/games/** -text
+public/games/** -text

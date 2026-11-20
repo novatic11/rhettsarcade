@@ -1,0 +1,16 @@
+/* Installed before game scripts by the arcade build. Game-owned settings stay untouched. */
+(()=>{
+ if(window.arcadeSettings)return;
+ const KEY='rhetts-arcade-settings-v1',read=()=>{let raw;try{raw=JSON.parse(localStorage.getItem(KEY)||'null');}catch{}return {volume:Number.isFinite(raw?.volume)?Math.max(0,Math.min(1,raw.volume)):1,motion:['system','reduced','full'].includes(raw?.motion)?raw.motion:'system',profile:raw?.profile==='chromebook'?'chromebook':'standard'};};
+ const settings=window.arcadeSettings=read(),nativeMatch=window.matchMedia.bind(window),systemMotion=nativeMatch('(prefers-reduced-motion: reduce)'),reduce=()=>settings.motion==='reduced'||settings.motion==='system'&&systemMotion.matches;
+ const style=document.createElement('style');style.textContent='html[data-arcade-motion="reduced"] *,html[data-arcade-motion="reduced"] *:before,html[data-arcade-motion="reduced"] *:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}';document.head.append(style);
+ const originalDPR=Object.getOwnPropertyDescriptor(window,'devicePixelRatio'),initialDPR=window.devicePixelRatio||1;
+ try{Object.defineProperty(window,'devicePixelRatio',{configurable:true,get(){const value=originalDPR?.get?originalDPR.get.call(window):initialDPR;return settings.profile==='chromebook'?Math.min(value,1):value;}});}catch{}
+ window.matchMedia=query=>{query=String(query);const media=nativeMatch(query);if(!query.includes('prefers-reduced-motion'))return media;return new Proxy(media,{get(target,key){if(key==='matches'&&settings.motion!=='system')return query.includes('no-preference')?!reduce():reduce();const value=Reflect.get(target,key,target);return typeof value==='function'?value.bind(target):value;}});};
+ const masters=new WeakMap(),live=new Set(),proto=window.AudioNode?.prototype,nativeConnect=proto?.connect,nativeDisconnect=proto?.disconnect;
+ function bus(context){let row=masters.get(context);if(!row){const gain=context.createGain();gain.gain.value=settings.volume;nativeConnect.call(gain,context.destination);row={context,gain};masters.set(context,row);live.add(row);context.addEventListener?.('statechange',()=>{if(context.state==='closed')live.delete(row);});}return row.gain;}
+ if(proto&&nativeConnect){proto.connect=function(destination,...args){if(this.context&&typeof this.context.startRendering!=='function'&&destination===this.context.destination){nativeConnect.call(this,bus(this.context),...args);return destination;}return nativeConnect.call(this,destination,...args);};proto.disconnect=function(...args){if(args.length&&this.context&&args[0]===this.context.destination){const row=masters.get(this.context);if(row)args[0]=row.gain;}return nativeDisconnect.apply(this,args);};}
+ function apply(){document.documentElement.dataset.arcadeMotion=reduce()?'reduced':'full';for(const {context,gain}of live){if(context.state==='closed')continue;gain.gain.setTargetAtTime(settings.volume,context.currentTime,.025);}}
+ window.arcadeEffectiveSettings=(id,local)=>id==='the-rooms-between'&&settings.profile==='chromebook'?{...local,resolution:.65,distance:1,texture:'low',shadow:'off',ao:false,antialias:false,effects:false}:local;
+ addEventListener('storage',event=>{if(event.key!==KEY)return;Object.assign(settings,read());apply();});systemMotion.addEventListener?.('change',apply);apply();
+})();

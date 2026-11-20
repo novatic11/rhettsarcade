@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createMobileInput} from '../public/games/slide-between/mobile-input.js';
+class Surface{
+  events={};captures=new Set();classes=new Set();classList={add:name=>this.classes.add(name),remove:name=>this.classes.delete(name)};
+  addEventListener(type,fn){(this.events[type]??=[]).push(fn);}
+  getBoundingClientRect(){return {width:400};}
+  setPointerCapture(id){this.captures.add(id);}
+  hasPointerCapture(id){return this.captures.has(id);}
+  releasePointerCapture(id){this.captures.delete(id);this.fire('lostpointercapture',{pointerId:id});}
+  fire(type,properties={}){const event={pointerId:1,pointerType:'touch',clientX:100,button:0,preventDefault(){},stopPropagation(){},...properties};for(const fn of this.events[type]||[])fn(event);}
+}
+function setup(){const surface=new Surface(),jumpButton=new Surface();let active=true,jumps=0,touch=0;const input=createMobileInput({surface,jumpButton,isPlaying:()=>active,queueJump:()=>jumps++,onTouch:()=>touch++});return {surface,jumpButton,input,get jumps(){return jumps;},get touch(){return touch;},pause:()=>active=false};}
+test('drag steering supports both directions, a dead zone and release without sticky input',()=>{const {surface,input}=setup();surface.fire('pointerdown');surface.fire('pointermove',{clientX:102});assert.equal(input.steer,0);surface.fire('pointermove',{clientX:116});assert(input.steer>.75);surface.fire('pointermove',{clientX:120});assert.equal(input.steer,1);surface.fire('pointermove',{clientX:80});assert.equal(input.steer,-1);surface.fire('pointerup');assert.equal(input.steer,0);assert.equal(surface.captures.size,0);});
+test('jump with a second finger leaves steering captured and queues only once per tap',()=>{const s=setup();s.surface.fire('pointerdown');s.surface.fire('pointermove',{clientX:160});const steer=s.input.steer;s.surface.fire('pointerdown',{pointerId:2,clientX:300});s.surface.fire('pointermove',{pointerId:2,clientX:0});assert.equal(s.input.steer,steer);s.jumpButton.fire('pointerdown',{pointerId:2});s.jumpButton.fire('click',{detail:1});s.jumpButton.fire('pointerup',{pointerId:2});assert.equal(s.jumps,1);assert.equal(s.input.steer,steer);assert(s.surface.hasPointerCapture(1));assert(!s.jumpButton.classes.has('held'));});
+test('cancel, pause, lost capture and explicit reset clear dragging; inactive controls cannot queue jumps',()=>{for(const action of ['pointercancel','lostpointercapture','reset','pause']){const s=setup();s.surface.fire('pointerdown');s.surface.fire('pointermove',{clientX:180});if(action==='reset')s.input.clear();else if(action==='pause'){s.pause();s.surface.fire('pointermove');}else s.surface.fire(action);assert.equal(s.input.steer,0,action);}const s=setup();s.pause();s.surface.fire('pointerdown');s.surface.fire('pointermove',{clientX:180});s.jumpButton.fire('pointerdown');s.jumpButton.fire('click',{detail:0});assert.equal(s.input.steer,0);assert.equal(s.jumps,0);});
+test('long drags reverse smoothly and mouse/keyboard activation remain available',()=>{const s=setup();s.surface.fire('pointerdown',{pointerType:'mouse',button:2});s.surface.fire('pointermove',{clientX:200});assert.equal(s.input.steer,0);s.surface.fire('pointerdown',{pointerType:'mouse'});s.surface.fire('pointermove',{clientX:600});assert.equal(s.input.steer,1);s.surface.fire('pointermove',{clientX:580});assert.equal(s.input.steer,0);s.surface.fire('pointermove',{clientX:560});assert.equal(s.input.steer,-1);s.jumpButton.fire('click',{detail:0});assert.equal(s.jumps,1);});

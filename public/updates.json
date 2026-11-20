@@ -1,0 +1,548 @@
+[
+  {
+    "id": "neon-slip-modular-boss",
+    "gameId": "neon-slip",
+    "date": "2026-11-08T18:48:35.733464Z",
+    "title": "Neon Slip: The Warden arrives",
+    "summary": "A modular boss with randomized attacks can intercept your run.",
+    "changes": [
+      "A fresh 25% boss roll at every 1,000 score. A successful roll waits for the current obstacle wave to clear.",
+      "Four destructible modules are chosen from eight weapons: scatter cannons, railguns, rockets, mortars, saw racks, arc gates, helix cannons, and drone bays. Destroy every module to expose the core.",
+      "Get a temporary Twin Pulse, Burst Driver, or Ion Lance, automatic firing, three combat hull points, and a full Dash charge. Rockets and drones can be shot down.",
+      "Earn +60 score per module and +400 for the core. The gun disarms after victory and your normal route resumes."
+    ]
+  },
+  {
+    "id": "neon-slip-flight-polish",
+    "gameId": "neon-slip",
+    "date": "2026-11-08T18:37:53.345226Z",
+    "title": "Neon Slip: a smoother flight",
+    "summary": "A fresh flight console, flowing trails, and sharper feedback throughout every run.",
+    "changes": [
+      "New neon menu and compact HUD, a layered starfield, ship banking, connected engine trails, and redesigned pickups.",
+      "Dash shockwaves, phase-break bursts, shield rings, multiplier popups, immediate close-call feedback, and new flight sound effects.",
+      "Consistent simulation timing across refresh rates, immediate keyboard reversals, bounded visual effects, and support for reduced motion and the Chromebook profile."
+    ]
+  },
+  {
+    "id": "neon-slip-ten-hazards",
+    "gameId": "neon-slip",
+    "date": "2026-11-08T18:28:52.471839Z",
+    "title": "Neon Slip: five new hazards",
+    "summary": "Ten distinct encounters now shuffle into each run.",
+    "changes": [
+      "Added crushing jaws, proximity mines with warning flashes, diagonal comet rain, live electric rails, and bouncing wrecking balls.",
+      "New encounters share the existing shield, dash, spark, and close-call systems. Classic keeps its original obstacles."
+    ]
+  },
+  {
+    "id": "teasers-tab-release",
+    "gameId": null,
+    "date": "2026-11-05T23:09:15.834Z",
+    "title": "A sneak peek at what’s next",
+    "summary": "The News tab is a public feed from Rhett.",
+    "changes": [
+      "Rhett can publish descriptions and up to three snapshots per post using the owner account. Everyone can read the feed.",
+      "Snapshots are resized before upload, drafts survive reloads, and published posts are stored online across browsers."
+    ]
+  },
+  {
+    "id": "square-off-2-longer-music-loops",
+    "gameId": "square-off-2",
+    "date": "2026-11-05T03:31:53.602Z",
+    "title": "Square Off 2: more of the music",
+    "summary": "Updated music loops retain more of each track.",
+    "changes": [
+      "Revised loop points for Standard, Endless and Training; Endless keeps its opening build and a longer main loop.",
+      "Updated quiet-gap handling near the beginning of a loop."
+    ]
+  },
+  {
+    "id": "square-off-2-release",
+    "gameId": "square-off-2",
+    "date": "2026-11-05T00:25:07.884Z",
+    "title": "Square Off 2 enters the Arcade",
+    "summary": "The playable sequel is now beside Square Off in the main collection.",
+    "changes": [
+      "Play the ten-round Standard Run, Endless, Practice Workshop and Tutorial with twelve playable squares.",
+      "Moved out of the Admin Tab, preserving its cover and personal quote. Its separate progress now joins Arcade password saves."
+    ]
+  },
+  {
+    "id": "your-stats-redesign",
+    "gameId": null,
+    "date": "2026-11-04T04:05:00.405Z",
+    "title": "A new home for your progress",
+    "summary": "Your Stats has been rebuilt with a clear overview, 76 achievements and a searchable game-record collection.",
+    "changes": [
+      "Separate Overview, Achievements and Game records sections keep playtime, recent games and milestones easy to find.",
+      "Expanded from 17 to 76 achievements, with progress bars, game filters, search and unlocked milestones that stay with your save password.",
+      "Added genre playtime, your next milestones, collection exploration, last-played dates, and more information from saved game records. Existing playtime and achievements are preserved."
+    ]
+  },
+  {
+    "id": "ducks-vs-dogs-2-release",
+    "gameId": "ducks-vs-dogs-2",
+    "date": "2026-11-01T20:41:34.606Z",
+    "title": "Ducks vs. Dogs 2 joins the flock",
+    "summary": "The cartoony 3D sequel is now right beside the original in the library.",
+    "changes": [
+      "Collect 34 ducks, unlock five shops, and defend six worlds with a loadout that grows from five to eight duck types.",
+      "Includes Quack Power, challenge levels and unlockable Endless Pond and Boss Rumble modes. Progress uses its own save and is included in arcade password saves."
+    ]
+  },
+  {
+    "id": "meridian-space-program-water-rings-flight",
+    "gameId": "meridian-space-program",
+    "date": "2026-10-30T22:53:39.480Z",
+    "title": "Waves, rings and smoother flights",
+    "summary": "Meridian gains animated seas, methane lakes, detailed rings and flight improvements.",
+    "changes": [
+      "Added moving water, floating capsules and swimming astronauts, with polar methane lakes on Titan and Lantern.",
+      "Updated planetary rings, ring shadows and close-up particles, plus cloud and terrain transitions.",
+      "Improved exhaust and flight trajectory displays, removed the EVA jetpack fuel limit, and added crash reports and graphics-reset recovery."
+    ]
+  },
+  {
+    "id": "meridian-space-program-clouds-names",
+    "gameId": "meridian-space-program",
+    "date": "2026-10-30T21:41:15.543Z",
+    "title": "New clouds and interstellar names",
+    "summary": "Meridian Space Program has new clouds across more worlds and fresh names for interstellar planets.",
+    "changes": [
+      "Added distinct cloud layers, colors and winds for rocky worlds and gas giants, lit by each world's local star.",
+      "Updated interstellar planet names and matching mission text while preserving existing saves and mission progress."
+    ]
+  },
+  {
+    "id": "meridian-space-program-release",
+    "gameId": "meridian-space-program",
+    "date": "2026-10-30T12:55:18.202Z",
+    "title": "Meridian Space Program is ready for launch",
+    "summary": "Build rockets, earn science and explore. Now playable from the second row of the library.",
+    "changes": [
+      "The existing Meridian card now opens the full game, including its blueprint editor, research, missions and space exploration.",
+      "Program progress and quicksaves are included in password saves. The original artwork and Rhett’s quote are preserved."
+    ]
+  },
+  {
+    "id": "slide-between-attached-lights",
+    "gameId": "slide-between",
+    "date": "2026-10-30T00:20:27.415Z",
+    "title": "Lights back on solid ground",
+    "summary": "Slide lights now attach to the surface instead of floating above the removed rails.",
+    "changes": [
+      "Moved lamp bases just inside the slide edges and embedded them slightly in the surface.",
+      "Tilted each light with the local slide surface, including banked turns."
+    ]
+  },
+  {
+    "id": "slide-between-open-side-rails",
+    "gameId": "slide-between",
+    "date": "2026-10-29T20:56:50.448Z",
+    "title": "Open sides, launch pads restored",
+    "summary": "The yellow side railings are gone; the launch pads are back.",
+    "changes": [
+      "Removed continuous yellow side rails and the player wall effect, so you can steer or jump off either edge anywhere.",
+      "Restored gold launch strips, arches, landing markings and their original extra lift and directional boosts.",
+      "Jumping off ordinary sections remains available, and the green landing guide stays active in the air."
+    ]
+  },
+  {
+    "id": "slide-between-jump-anywhere",
+    "gameId": "slide-between",
+    "date": "2026-10-29T20:52:33.977Z",
+    "title": "Jump off anywhere",
+    "summary": "Slide Between no longer needs yellow launch pads.",
+    "changes": [
+      "Removed yellow launch strips, arches and location-specific jump boosts.",
+      "Jump or Space gives a full-strength leap anywhere on the slide, with steering in the air.",
+      "Updated the instructions and shortcut count; the green landing guide still appears while airborne."
+    ]
+  },
+  {
+    "id": "slide-between-existing-map-start",
+    "gameId": "slide-between",
+    "date": "2026-10-29T20:28:32.542Z",
+    "title": "A cleaner start in Slide Between",
+    "summary": "Start on a random map from the existing collection.",
+    "changes": [
+      "Excluded the basic first layout from play. Existing layouts and their best-time records are preserved.",
+      "Removed map labels and previews from the menu and results.",
+      "Unfinished rounds retain their current map when reopened."
+    ]
+  },
+  {
+    "id": "slide-between-round-map-rotation",
+    "gameId": "slide-between",
+    "date": "2026-10-29T20:10:11.932Z",
+    "title": "A new map after every round",
+    "summary": "Slide Between automatically rotates courses after every win or loss.",
+    "changes": [
+      "The next round always uses a different course, whether you win, lose to the robot, or fall.",
+      "Removed manual map selection. Restarting, returning to the menu, and refreshing unfinished rounds keep the current course."
+    ]
+  },
+  {
+    "id": "slide-between-sensitive-steering",
+    "gameId": "slide-between",
+    "date": "2026-10-29T20:06:19.029Z",
+    "title": "More sensitive touch steering",
+    "summary": "Much smaller swipes now give full steering in Slide Between.",
+    "changes": [
+      "Increased drag steering sensitivity by roughly four times and reduced the dead zone."
+    ]
+  },
+  {
+    "id": "slide-between-mobile-controls",
+    "gameId": "slide-between",
+    "date": "2026-10-29T20:03:23.792Z",
+    "title": "Slide Between goes mobile",
+    "summary": "Drag to steer and tap Jump to leap from launch pads.",
+    "changes": [
+      "Steer with one finger while tapping the large Jump button with another, on the slide or in the air.",
+      "Touch instructions, launch hints and a Pause button fit the mobile controls.",
+      "Slide Between now appears in the Mobile Friendly library tab."
+    ]
+  },
+  {
+    "id": "crazy-sort-unlock-50",
+    "gameId": "crazy-sort",
+    "date": "2026-10-29T19:59:43.651Z",
+    "title": "Unlock Crazy Sort difficulties sooner",
+    "summary": "New difficulty tiers now unlock at 50 points.",
+    "changes": [
+      "Score 50 on Normal to unlock Hard, 50 on Hard to unlock Chaos, and 50 on Chaos to unlock Hyperchaos.",
+      "Existing best scores count toward the lower requirements."
+    ]
+  },
+  {
+    "id": "slide-between-release",
+    "gameId": "slide-between",
+    "date": "2026-10-28T23:52:50.718Z",
+    "title": "Take the leap in Slide Between",
+    "summary": "A 3D robot race through floating doors joins the second row of the library.",
+    "changes": [
+      "Jump from launch pads and land farther down the slide to gain an advantage.",
+      "Choose robot difficulty and courses, with best winning times included in password saves."
+    ]
+  },
+  {
+    "id": "request-conversations",
+    "gameId": null,
+    "date": "2026-10-28T23:02:16.280Z",
+    "title": "Follow your requests",
+    "summary": "Requests now have a full page, replies from Rhett, and progress updates.",
+    "changes": [
+      "Send a request at the top of the Request page and find your previous requests underneath.",
+      "Rhett can reply and set requests to Unread, In Progress or Released from the Admin Tab.",
+      "Each reply or status change adds a notification to Request. Open the updated request to read it and clear those notifications."
+    ]
+  },
+  {
+    "id": "crazy-sort-release",
+    "gameId": "crazy-sort",
+    "date": "2026-10-28T01:59:40.407Z",
+    "title": "The Boomkins are loose",
+    "summary": "Crazy Sort joins the library with five difficulty levels and a cast of colorful cartoon bombs.",
+    "changes": [
+      "Drag each Boomkin into its matching pen before its fuse expires.",
+      "Unlock Hard, Chaos and Hyperchaos with higher scores. Best scores and unlocks travel with password saves."
+    ]
+  },
+  {
+    "id": "car-spleef-3d-release",
+    "gameId": "car-spleef-3d",
+    "date": "2026-10-27T22:38:01.336Z",
+    "title": "Car Spleef goes 3D",
+    "summary": "Car Spleef 3D joins the library beside the original.",
+    "changes": [
+      "Thirty floating arenas, three AI rivals, drifting and switchable cockpit / chase cameras.",
+      "Includes its own progress, password-save support and Rhett’s Choice quote."
+    ]
+  },
+  {
+    "id": "choice-three-new-quotes",
+    "date": "2026-10-27T22:34:36.534Z",
+    "title": "Three more games in Rhett’s Choice",
+    "summary": "Ricochet Club, Parcel Panic and Odd Hours join the daily rotation with Rhett’s quotes.",
+    "changes": [
+      "All three games now have their own quote in Rhett’s Choice."
+    ]
+  },
+  {
+    "id": "arcade-tycoon-stable-rendering",
+    "gameId": "arcade-tycoon",
+    "date": "2026-10-27T22:18:05.611Z",
+    "title": "A steadier arcade floor",
+    "summary": "Fixed a canvas resize bug that could flash the arcade floor blank.",
+    "changes": [
+      "Unchanged resize notifications no longer clear the floor canvas. Real size changes redraw immediately, before the browser displays the next frame.",
+      "Zoom measures the stable outer viewport so scrollbar changes cannot feed back into canvas sizing. Hidden game panels keep their last complete frame.",
+      "Existing saves, business progress, artwork and gameplay are preserved."
+    ]
+  },
+  {
+    "id": "ricochet-club-public-release",
+    "gameId": "ricochet-club",
+    "date": "2026-10-23T17:15:20.108Z",
+    "title": "Ricochet Club joins the collection",
+    "summary": "Now playable from the main arcade library.",
+    "changes": [
+      "A quiet club with no final table. Master twelve opening rooms, then bank through endless generated layouts with more obstacles, smaller targets and tighter shot budgets.",
+      "Existing progress and sound preferences carry over."
+    ]
+  },
+  {
+    "id": "parcel-panic-public-release",
+    "gameId": "parcel-panic",
+    "date": "2026-10-23T17:15:20.108Z",
+    "title": "Parcel Panic joins the collection",
+    "summary": "Now playable from the main arcade library.",
+    "changes": [
+      "A little delivery depot with a very satisfying job: fit parcels into the van, dispatch full rows and columns, and build a streak. No timer. Just a good fit.",
+      "Existing progress and sound preferences carry over."
+    ]
+  },
+  {
+    "id": "odd-hours-public-release",
+    "gameId": "odd-hours",
+    "date": "2026-10-23T17:15:20.108Z",
+    "title": "Odd Hours joins the collection",
+    "summary": "Now playable from the main arcade library.",
+    "changes": [
+      "Four cameras. Forty different anomalies. Watch a detailed museum through five increasingly strange night shifts, compare reference photos, and report what changes.",
+      "Existing progress and sound preferences carry over."
+    ]
+  },
+  {
+    "id": "rustbound-2-expedition-suit",
+    "gameId": "rustbound-2",
+    "date": "2026-10-20T17:35:30.037Z",
+    "title": "A suit made for the frontier",
+    "summary": "A rebuilt astronaut, from the curved visor to the molded boot soles.",
+    "changes": [
+      "Custom sculpted surfaces replace the astronaut’s block-shaped chest unit, backpack, boots and simple capsule limbs. The suit has tailored proportions, fabric folds and seams, a conformal life-support pack, corrugated hoses and articulated fingers.",
+      "A shaped helmet has a curved optical visor, recessed seals, a retaining rim, side latches and restrained camera-following head movement.",
+      "Reworked walking and running keep the stance sole near the ground while preserving the existing footstep cadence. The knees have floating shields; rover, jump and hand-held survey-tool poses blend smoothly.",
+      "Rigid detail is batched into 69 meshes; the suit uses original code-built geometry and a small local fabric texture. The new character is shared by Helios and the Real Solar System without changing saved progress."
+    ]
+  },
+  {
+    "id": "rustbound-2-solar-system-scope",
+    "gameId": "rustbound-2",
+    "date": "2026-10-20T01:15:16.389Z",
+    "title": "Real worlds from orbit",
+    "summary": "Solar System Scope maps bring the Real Solar System closer to life.",
+    "changes": [
+      "New locally bundled Solar System Scope textures for Mercury, Venus, Earth, the Moon, Mars, Jupiter, Saturn, Uranus, Neptune and four dwarf planets. The pack’s dwarf-planet reconstructions are credited as artistic imagery.",
+      "Earth has photographic cloud patterns and night-side city lights; Venus has a separate cloud map, and Saturn has mapped rings. Other moons retain their spacecraft mosaics and original gap fills.",
+      "Orbital imagery smoothly blends into the playable terrain as you approach. Irregular shapes, physical ground and existing colonies remain intact.",
+      "Chromebook, PC and High use 512, 1024 and 2048-pixel Scope maps respectively. Textures are shared through detail changes, released when replaced, and filtered across longitude seams."
+    ]
+  },
+  {
+    "id": "rustbound-2-solar-surface-refresh",
+    "gameId": "rustbound-2",
+    "date": "2026-10-19T23:46:15.042Z",
+    "title": "Every Solar world, refreshed",
+    "summary": "New textures and geological character from Mercury to Eris.",
+    "changes": [
+      "All 41 solid planets, dwarf planets and moons have dedicated surface maps and material finishes. Earth, the Moon and selected worlds use locally bundled NASA/JPL/USGS mosaics; the remaining bodies have original authored maps.",
+      "New physical impact basins, ice fractures, volcanic shields, dunes, canyon fields and equatorial ridges give each surface more character. Ground collision, building placement and landing use the same terrain.",
+      "Earth, Venus and Titan have separated, slowly moving cloud layers. Jupiter has lacy belts and white ovals, Saturn a polar hexagon, Uranus a pale cap, and Neptune dark storms and bright cirrus.",
+      "Close-up materials distinguish dusty regolith, rock, frost and ice. Distant microdetail fades to reduce shimmer; Chromebook uses smaller maps. Historical mosaic gaps blend into original terrain rather than blank patches.",
+      "Existing colonies, science, ships, separate expedition saves and tutorial access remain intact. Landed Solar ships settle onto the refreshed ground."
+    ]
+  },
+  {
+    "id": "rustbound-2-irregular-solar-worlds",
+    "gameId": "rustbound-2",
+    "date": "2026-10-19T23:25:23.120Z",
+    "title": "Worlds with their own silhouettes",
+    "summary": "The Real Solar System now has elongated, lumpy and flattened bodies.",
+    "changes": [
+      "Haumea has a stretched, flattened ice-dwarf shape. Phobos, Deimos, Hyperion, Proteus and Pluto’s small moons have distinct irregular silhouettes; Kerberos has two joined lobes.",
+      "Ceres, several icy moons and the gas/ice giants have gentle flattening. Giant rings keep their circular geometry.",
+      "Detailed and distant terrain use the same shape as walking, construction, altitude and landing collision. Existing landed saves settle onto the corrected surface without losing progress."
+    ]
+  },
+  {
+    "id": "rustbound-2-vehicle-assembly",
+    "gameId": "rustbound-2",
+    "date": "2026-10-19T23:25:23.120Z",
+    "title": "A whole new vehicle assembly building",
+    "summary": "Pick up, snap, move and stage your own rockets in a new 3D hangar.",
+    "changes": [
+      "Pick up complete branches, snap to stack nodes or surfaces, insert tanks into existing stacks, and use mirror or up to 8-way radial symmetry.",
+      "Move and rotate parts with 3D handles or exact values, change the craft root, undo/redo, search real model thumbnails and reuse saved subassemblies.",
+      "Stage engines and decouplers, adjust fuel loads, priority, crossfeed and thrust limits, and see the effect on mass, thrust and delta-v. These settings carry into actual flight.",
+      "All five ready-to-fly presets remain available. The editor has compact Chromebook controls and separate inspector, staging and engineering tabs."
+    ]
+  },
+  {
+    "id": "launcher-requests-and-admin-tab",
+    "date": "2026-10-19T23:25:23.120Z",
+    "title": "Send Rhett a request",
+    "summary": "A signed letter form and a private owner inbox.",
+    "changes": [
+      "Request sits below Settings. Sign your name above the letter and send with the Request button beneath it.",
+      "After a successful send, the server enforces a two-minute wait. A failed send keeps your draft.",
+      "Secret games is now called Admin Tab. Its Request inbox lets Rhett read letters and see unread counts after signing in with the site owner account."
+    ]
+  },
+  {
+    "id": "rustbound-2-explorer-assist",
+    "gameId": "rustbound-2",
+    "date": "2026-10-19T21:48:13.905Z",
+    "title": "Your first space adventure, without getting stranded",
+    "summary": "Explorer assist makes Rustbound 2 easier to learn and more forgiving.",
+    "changes": [
+      "Explorer assist is recommended and enabled by default. Turn it off in the main menu for the full flying challenge.",
+      "Landing checks are optional: let autopilot land, or try the checks knowing a missed approach will be caught. Rough impacts keep your fuel.",
+      "Help & rescue explains the game in plain language, starts the guided base projects or a first moon flight, and offers free repairs with at least 40% fuel and no cooldown.",
+      "Fuel and destination stay visible while orbital readouts and manual controls can be expanded. Accidental steering keys and camera drags no longer interrupt assisted flight.",
+      "The same beginner options work in Helios and the Real Solar System, with existing colonies, cargo and separate saves preserved."
+    ]
+  },
+  {
+    "id": "rustbound-2-free-autopilot",
+    "gameId": "rustbound-2",
+    "date": "2026-10-19T21:34:30.383Z",
+    "title": "Autopilot without the power requirement",
+    "summary": "Fly with an empty battery in both expeditions.",
+    "changes": [
+      "Autopilot no longer requires or consumes electricity for travel, orbit insertion, wormhole approaches, station docking or landing.",
+      "Guided flights continue through empty batteries and resume when a zero-charge flight save is loaded.",
+      "Ship science instruments and other electrical systems still use power. Journal guidance, lessons and warnings now explain the change."
+    ]
+  },
+  {
+    "id": "rustbound-2-admin-tools",
+    "gameId": "rustbound-2",
+    "date": "2026-10-19T21:22:37.916Z",
+    "title": "Type admin. Take control of your expedition.",
+    "summary": "A hidden tools panel for Helios and the Real Solar System.",
+    "changes": [
+      "Type admin while playing or in the main menu to open a panel that pauses the game. Escape closes it. Text fields keep normal typing.",
+      "Toggle infinite ship electricity, infinite fuel, and an invulnerable hull. Overrides work with custom craft and reset on the next launch.",
+      "Teleport your current ship to any solid world or a safe circular orbit, including gas and ice giants. Cargo, colonies and rover locations are preserved.",
+      "Repair and refill the ship, add 10,000 credits, or unlock the current expedition’s research. Helios and Solar saves remain separate."
+    ]
+  },
+  {
+    "id": "rustbound-2-real-solar-system",
+    "gameId": "rustbound-2",
+    "date": "2026-10-19T20:43:34.261Z",
+    "title": "A whole new expedition: the Real Solar System",
+    "summary": "Start on Earth and build from Mercury to Eris, with an independent save.",
+    "changes": [
+      "A new button on the right of the main menu opens Real Solar System mode; Return to Helios switches back.",
+      "Eight planets, all five recognized dwarf planets and 32 selected moons include the Galilean moons, Titan, Enceladus, Triton, Charon and Dysnomia.",
+      "The same factories, resources, research, shipyard and space stations work in this mode. Earth and the Moon have starter bases.",
+      "Distances, gravity and sizes are compressed for friendly journeys. All 41 solid worlds have their own surface styling and footsteps.",
+      "Solar and Helios expeditions save separately; both travel with your Arcade save password. In-game resets affect only the current expedition."
+    ]
+  },
+  {
+    "id": "rustbound-2-far-horizons",
+    "gameId": "rustbound-2",
+    "date": "2026-10-19T20:10:00Z",
+    "title": "Far Horizons: five systems worth the journey",
+    "summary": "A rebuilt outer frontier, new Brontes, and a richer night sky.",
+    "changes": [
+      "Forty new celestial bodies include ten gas and ice giants, moon families, tilted dwarf orbits, and the Drift–Mote pair.",
+      "Each outer system now has fourteen destinations and twelve landable worlds. The full game has 71 landable worlds.",
+      "Outer worlds have new terrain, mineral palettes, resource seams, survey sites, and distinct footsteps.",
+      "Brontes has animated cloud belts, a spiral storm, polar vortices, and fine rings.",
+      "A clustered starfield and galactic dust give each system a different sky.",
+      "Journal > Stars adds a destination atlas, moon hierarchy, survey hints, and landing progress. Existing colonies and wormhole routes are preserved."
+    ]
+  },
+  {
+    "id": "launcher-save-wiper",
+    "gameId": null,
+    "date": "2026-10-19T19:45:59Z",
+    "title": "A fresh start, one game at a time",
+    "summary": "Save Wiper is now available in Your saves.",
+    "changes": [
+      "Choose any main-library or Archives game and confirm before clearing its progress.",
+      "Linked password saves update with the reset, while other games and preferences are kept.",
+      "Favorites, tracked playtime, and arcade achievements stay with you."
+    ]
+  },
+  {
+    "id": "launcher-hub",
+    "gameId": null,
+    "date": "2026-10-19T19:19:37.396Z",
+    "title": "A new home for your arcade",
+    "summary": "A fresh look, with more ways to explore your games and follow your progress.",
+    "changes": [
+      "What’s New keeps update notes in one place.",
+      "Open Details on any game for a preview, controls, and session guide.",
+      "Your stats tracks time in games, launches, records, and arcade achievements.",
+      "Shared volume, reduced motion, and Chromebook options live in Settings.",
+      "Archives games can now join your favorites."
+    ]
+  },
+  {
+    "id": "pocket-endless",
+    "gameId": "pocket-heist",
+    "date": "2026-10-19T06:20:18.064Z",
+    "title": "There’s always another heist",
+    "summary": "The campaign now leads into endless randomized jobs, and every level is tougher.",
+    "changes": [
+      "Endless heists unlock after campaign level 100.",
+      "New attempts have tighter routes, more obstacles, and extra patrols.",
+      "Later jobs include more cameras and lasers.",
+      "Saved endless jobs and retries keep their layouts."
+    ]
+  },
+  {
+    "id": "cargo-release",
+    "gameId": "cargo-swing",
+    "date": "2026-10-19T06:10:04.382Z",
+    "title": "Cargo Swing is in the library",
+    "summary": "An endless balancing act on a moving ship.",
+    "changes": [
+      "Uneven cargo weight makes the hull tilt.",
+      "Crates can slide, fall overboard, or capsize the ship.",
+      "New harbor artwork, sound effects, and original music."
+    ]
+  },
+  {
+    "id": "pocket-release",
+    "gameId": "pocket-heist",
+    "date": "2026-10-19T06:10:04.818Z",
+    "title": "The Grand Collection opens",
+    "summary": "One hundred heists across ten chapters.",
+    "changes": [
+      "New chapters introduce keycards, cameras, lasers, panels, vaults, smoke, and hiding spots.",
+      "Earn up to three stars on each campaign job.",
+      "New museum artwork, sound effects, and music."
+    ]
+  },
+  {
+    "id": "deep-release",
+    "gameId": "deep-signal",
+    "date": "2026-10-19T04:40:43.314Z",
+    "title": "Deep Signal leaves the workshop",
+    "summary": "An endless dive through increasingly dangerous waters.",
+    "changes": [
+      "Recover every salvage pod to descend to the next sector.",
+      "Sonar briefly reveals distant salvage.",
+      "New underwater graphics, clearer instruments, sound, and music."
+    ]
+  },
+  {
+    "id": "car-maps",
+    "gameId": "car-spleef",
+    "date": "2026-10-18T01:49:11.108Z",
+    "title": "More places to leave tire marks",
+    "summary": "Twenty extra symmetrical maps join Car Spleef.",
+    "changes": [
+      "Thirty layouts now make up the map pool.",
+      "Bumper-car collisions and drifting still decide who stays on the tiles."
+    ]
+  }
+]

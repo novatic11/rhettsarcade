@@ -1,0 +1,302 @@
+/* ==========================================================================
+   Rhett's Arcade — themes
+   Each theme is a full set of design tokens. arcade.css only reads tokens,
+   so a theme never has to restyle components one by one. The selectors use
+   [data-theme] (not just :root) so the Settings previews can show any theme
+   inside a small box. Decorations that only make sense for the whole page
+   are scoped to html[data-theme=…].
+   ========================================================================== */
+
+/* ---------- Basic Blue (default) ---------- */
+:root,[data-theme=blue]{
+  color-scheme:dark;
+  --font-body:'Segoe UI Variable Text','Segoe UI',system-ui,-apple-system,Roboto,'Helvetica Neue',Arial,sans-serif;
+  --font-display:'Segoe UI Variable Display','Segoe UI',system-ui,-apple-system,Roboto,'Helvetica Neue',Arial,sans-serif;
+  --font-mono:ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --display-weight:700;--display-tracking:-.025em;--display-case:none;--ds:1;--label-tracking:.12em;
+  --bg:#0a1020;
+  --page-bg:radial-gradient(1100px 600px at 85% -10%,#1b3a7a55,transparent 65%),radial-gradient(900px 600px at -10% 110%,#2a1f5a33,transparent 60%),#0a1020;
+  --text:#eaf1ff;--text-muted:#9aaccc;--text-faint:#7d90b2;--heading:#f3f7ff;
+  --accent:#5b9dff;--accent-strong:#7db1ff;--accent-text:#8dbbff;--on-accent:#06122b;--accent-soft:#5b9dff24;--accent-2:#9d8cff;
+  --success:#5fd4a8;--success-soft:#5fd4a81f;--danger:#ff8a9a;--danger-soft:#ff6b8124;--warning:#ffc46b;
+  --surface:#111a2e;--surface-bg:#111a2e;--surface-2:#16223a;--surface-sunken:#0c1426;--surface-hover:#172540;
+  --line:#22314d;--line-strong:#34486c;
+  --radius-lg:18px;--radius:13px;--radius-sm:9px;--radius-pill:999px;--border-w:1px;
+  --shadow-sm:0 2px 8px #02061233;--shadow:0 10px 30px #02061245;--shadow-lg:0 24px 70px #000a;--card-hover-shadow:0 16px 40px #0207155c;
+  --glass:none;
+  --sidebar-bg:#0c1426;--sidebar-text:#c6d4ee;--sidebar-muted:#6b7fa3;--sidebar-line:#1d2a44;
+  --nav-hover:#15223a;--nav-active-bg:#5b9dff1f;--nav-active-text:#eaf1ff;--nav-active-mark:#5b9dff;
+  --topbar-bg:#0a1020d9;--topbar-text:#c6d4ee;--topbar-line:#1d2a44;
+  --btn-bg:#16223a;--btn-text:#dbe6fb;--btn-line:#2c3d5e;--btn-hover-bg:#1e2e4c;--btn-shadow:none;
+  --primary-bg:#5b9dff;--primary-text:#06122b;--primary-line:#5b9dff;--primary-hover-bg:#7db1ff;--primary-shadow:0 6px 20px #5b9dff33;
+  --input-bg:#0c1426;--input-line:#2c3d5e;--input-text:#eaf1ff;
+  --chip-bg:transparent;--chip-text:#9aaccc;--chip-line:#22314d;--chip-hover-bg:#16223a;--chip-active-bg:#5b9dff;--chip-active-text:#06122b;--chip-active-line:#5b9dff;
+  --hero-bg:linear-gradient(110deg,#13203c,#0d1730 70%);--hero-shade:#0f1a33;--hero-text:#f3f7ff;--hero-muted:#b6c6e4;
+  --dialog-bg:#0f182b;--dialog-head-bg:#131f37;--dialog-head-text:#f3f7ff;--close-bg:#1b2944;--close-text:#dbe6fb;--close-line:#2c3d5e;
+  --scrim:#030812c4;--focus:#8dbbff;
+  --scrollbar:#2c3d5e;
+}
+
+/* ---------- Basic Dark ---------- */
+[data-theme=dark]{
+  color-scheme:dark;
+  --font-body:'Segoe UI Variable Text','Segoe UI',system-ui,-apple-system,Roboto,'Helvetica Neue',Arial,sans-serif;
+  --font-display:'Segoe UI Variable Display','Segoe UI',system-ui,-apple-system,Roboto,'Helvetica Neue',Arial,sans-serif;
+  --font-mono:ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --display-weight:700;--display-tracking:-.025em;--display-case:none;--ds:1;--label-tracking:.12em;
+  --bg:#0d0d10;
+  --page-bg:radial-gradient(900px 500px at 80% -10%,#ffffff0d,transparent 60%),#0d0d10;
+  --text:#f4f4f5;--text-muted:#a1a1aa;--text-faint:#8b8b94;--heading:#fafafa;
+  --accent:#ececef;--accent-strong:#ffffff;--accent-text:#e4e4e7;--on-accent:#111113;--accent-soft:#ffffff14;--accent-2:#a1a1aa;
+  --success:#6ee7b7;--success-soft:#6ee7b71a;--danger:#fda4af;--danger-soft:#fb718524;--warning:#fcd34d;
+  --surface:#151518;--surface-bg:#151518;--surface-2:#1c1c20;--surface-sunken:#0f0f12;--surface-hover:#1d1d22;
+  --line:#26262b;--line-strong:#3a3a42;
+  --radius-lg:16px;--radius:12px;--radius-sm:8px;--radius-pill:999px;--border-w:1px;
+  --shadow-sm:0 2px 8px #0005;--shadow:0 10px 30px #0006;--shadow-lg:0 24px 70px #000b;--card-hover-shadow:0 16px 40px #0008;
+  --glass:none;
+  --sidebar-bg:#111114;--sidebar-text:#d4d4d8;--sidebar-muted:#8b8b94;--sidebar-line:#222226;
+  --nav-hover:#1b1b1f;--nav-active-bg:#ffffff12;--nav-active-text:#fafafa;--nav-active-mark:#fafafa;
+  --topbar-bg:#0d0d10d9;--topbar-text:#d4d4d8;--topbar-line:#222226;
+  --btn-bg:#1c1c20;--btn-text:#e4e4e7;--btn-line:#2f2f36;--btn-hover-bg:#26262c;--btn-shadow:none;
+  --primary-bg:#ececef;--primary-text:#111113;--primary-line:#ececef;--primary-hover-bg:#ffffff;--primary-shadow:0 6px 20px #ffffff14;
+  --input-bg:#0f0f12;--input-line:#2f2f36;--input-text:#f4f4f5;
+  --chip-bg:transparent;--chip-text:#a1a1aa;--chip-line:#26262b;--chip-hover-bg:#1c1c20;--chip-active-bg:#ececef;--chip-active-text:#111113;--chip-active-line:#ececef;
+  --hero-bg:linear-gradient(110deg,#18181c,#111114 70%);--hero-shade:#141417;--hero-text:#fafafa;--hero-muted:#c4c4cc;
+  --dialog-bg:#131316;--dialog-head-bg:#18181c;--dialog-head-text:#fafafa;--close-bg:#222227;--close-text:#e4e4e7;--close-line:#2f2f36;
+  --scrim:#000000c4;--focus:#e4e4e7;
+  --scrollbar:#34343b;
+}
+
+/* ---------- Basic Purple ---------- */
+[data-theme=purple]{
+  color-scheme:dark;
+  --font-body:'Segoe UI Variable Text','Segoe UI',system-ui,-apple-system,Roboto,'Helvetica Neue',Arial,sans-serif;
+  --font-display:'Segoe UI Variable Display','Segoe UI',system-ui,-apple-system,Roboto,'Helvetica Neue',Arial,sans-serif;
+  --font-mono:ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --display-weight:700;--display-tracking:-.025em;--display-case:none;--ds:1;--label-tracking:.12em;
+  --bg:#110c1e;
+  --page-bg:radial-gradient(1000px 600px at 85% -10%,#5b2fb44d,transparent 62%),radial-gradient(900px 600px at -10% 110%,#b03f9a26,transparent 60%),#110c1e;
+  --text:#f3eeff;--text-muted:#b3a6d6;--text-faint:#9487bb;--heading:#f8f4ff;
+  --accent:#a87bff;--accent-strong:#bf9cff;--accent-text:#c8adff;--on-accent:#170b33;--accent-soft:#a87bff26;--accent-2:#ff8ad8;
+  --success:#7ee0c0;--success-soft:#7ee0c01f;--danger:#ff9ab4;--danger-soft:#ff6f9726;--warning:#ffd17a;
+  --surface:#1a1330;--surface-bg:#1a1330;--surface-2:#221a3c;--surface-sunken:#140e25;--surface-hover:#231b40;
+  --line:#2f2550;--line-strong:#46386f;
+  --radius-lg:18px;--radius:13px;--radius-sm:9px;--radius-pill:999px;--border-w:1px;
+  --shadow-sm:0 2px 8px #0505124d;--shadow:0 10px 30px #05031259;--shadow-lg:0 24px 70px #000a;--card-hover-shadow:0 16px 40px #0a04206b;
+  --glass:none;
+  --sidebar-bg:#140e25;--sidebar-text:#d8cdf5;--sidebar-muted:#9487bb;--sidebar-line:#251c40;
+  --nav-hover:#1d1534;--nav-active-bg:#a87bff24;--nav-active-text:#f8f4ff;--nav-active-mark:#a87bff;
+  --topbar-bg:#110c1ed9;--topbar-text:#d8cdf5;--topbar-line:#251c40;
+  --btn-bg:#221a3c;--btn-text:#e8defd;--btn-line:#3a2e60;--btn-hover-bg:#2c2250;--btn-shadow:none;
+  --primary-bg:#a87bff;--primary-text:#170b33;--primary-line:#a87bff;--primary-hover-bg:#bf9cff;--primary-shadow:0 6px 22px #a87bff3d;
+  --input-bg:#140e25;--input-line:#3a2e60;--input-text:#f3eeff;
+  --chip-bg:transparent;--chip-text:#b3a6d6;--chip-line:#2f2550;--chip-hover-bg:#221a3c;--chip-active-bg:#a87bff;--chip-active-text:#170b33;--chip-active-line:#a87bff;
+  --hero-bg:linear-gradient(110deg,#20163c,#160f2b 70%);--hero-shade:#1a1232;--hero-text:#f8f4ff;--hero-muted:#cfc2ee;
+  --dialog-bg:#181129;--dialog-head-bg:#1e1636;--dialog-head-text:#f8f4ff;--close-bg:#2a2048;--close-text:#e8defd;--close-line:#3a2e60;
+  --scrim:#07031296;--focus:#c8adff;
+  --scrollbar:#3a2e60;
+}
+
+/* ---------- Windows XP ---------- */
+[data-theme=xp]{
+  color-scheme:light;
+  --font-body:Tahoma,Verdana,'Segoe UI',sans-serif;
+  --font-display:'Trebuchet MS',Tahoma,'Segoe UI',sans-serif;
+  --font-mono:'Lucida Console',Consolas,monospace;
+  --display-weight:700;--display-tracking:-.01em;--display-case:none;--ds:.92;--label-tracking:.04em;
+  --bg:#ece9d8;
+  --page-bg:#ece9d8;
+  --text:#1b1b1b;--text-muted:#474747;--text-faint:#5c5c5c;--heading:#0b2f8a;
+  --accent:#316ac5;--accent-strong:#2558b0;--accent-text:#0b4dc4;--on-accent:#ffffff;--accent-soft:#316ac51f;--accent-2:#3a9a35;
+  --success:#1d6b1d;--success-soft:#d7f0d0;--danger:#c42b1c;--danger-soft:#fde3df;--warning:#b77900;
+  --surface:#ffffff;--surface-bg:#ffffff;--surface-2:#f6f5ee;--surface-sunken:#ffffff;--surface-hover:#f3f6fd;
+  --line:#b5b29f;--line-strong:#7f9db9;
+  --radius-lg:8px;--radius:4px;--radius-sm:3px;--radius-pill:4px;--border-w:1px;
+  --shadow-sm:1px 1px 0 #ffffff inset;--shadow:2px 2px 6px #0000002e;--shadow-lg:4px 6px 22px #00000059;--card-hover-shadow:3px 4px 12px #0a246a40;
+  --glass:none;
+  --sidebar-bg:linear-gradient(180deg,#7ba2e7 0%,#6375d6 100%);--sidebar-text:#215dc6;--sidebar-muted:#ffffff;--sidebar-line:#ffffff66;
+  --nav-hover:#ffffff;--nav-active-bg:#ffffff;--nav-active-text:#0b3a9e;--nav-active-mark:#316ac5;
+  --topbar-bg:linear-gradient(180deg,#0997ff 0%,#0053ee 8%,#0050ee 40%,#0066ff 88%,#0066ff 93%,#005bff 95%,#003dd7 96%,#003dd7 100%);--topbar-text:#ffffff;--topbar-line:#003dd7;
+  --btn-bg:linear-gradient(180deg,#ffffff 0%,#f4f3ee 60%,#e5e2d6 90%,#d6d0c5 100%);--btn-text:#000000;--btn-line:#003c74;--btn-hover-bg:linear-gradient(180deg,#ffffff 0%,#f7f6f1 60%,#ebe8dd 90%,#e0dbd0 100%);--btn-shadow:inset 0 -1px 0 #c9c3b5;
+  --primary-bg:linear-gradient(180deg,#79d273 0%,#43a63d 45%,#2f8f2b 55%,#3fa33a 90%,#2f8a2c 100%);--primary-text:#ffffff;--primary-line:#1d5c1a;--primary-hover-bg:linear-gradient(180deg,#8ade84 0%,#4fb848 45%,#389f33 55%,#49b343 90%,#36952f 100%);--primary-shadow:1px 1px 3px #0005;
+  --input-bg:#ffffff;--input-line:#7f9db9;--input-text:#000000;
+  --chip-bg:transparent;--chip-text:#0b2f8a;--chip-line:transparent;--chip-hover-bg:#ffffff;--chip-active-bg:#316ac5;--chip-active-text:#ffffff;--chip-active-line:#0a246a;
+  --hero-bg:#0d1a3b;--hero-shade:#0b1f52;--hero-text:#ffffff;--hero-muted:#dbe6ff;
+  --dialog-bg:#ece9d8;--dialog-head-bg:linear-gradient(180deg,#0997ff 0%,#0053ee 8%,#0050ee 40%,#0066ff 88%,#0066ff 93%,#005bff 95%,#003dd7 96%,#003dd7 100%);--dialog-head-text:#ffffff;
+  --close-bg:linear-gradient(180deg,#f2a68f 0%,#e05e3e 40%,#c7381c 60%,#d04b2b 100%);--close-text:#ffffff;--close-line:#ffffff;
+  --scrim:#0a246a59;--focus:#000000;
+  --scrollbar:#a9c2f4;
+}
+
+/* ---------- Frutiger Aero ---------- */
+[data-theme=aero]{
+  color-scheme:light;
+  --font-body:'Segoe UI','Frutiger','Myriad Pro','Helvetica Neue',Arial,sans-serif;
+  --font-display:'Segoe UI','Frutiger','Myriad Pro','Helvetica Neue',Arial,sans-serif;
+  --font-mono:Consolas,ui-monospace,monospace;
+  --display-weight:600;--display-tracking:-.02em;--display-case:none;--ds:1;--label-tracking:.1em;
+  --bg:#bfe9ff;
+  --page-bg:radial-gradient(1200px 380px at 50% 112%,#55c42c 0%,#7fd34a 38%,transparent 72%),radial-gradient(900px 300px at 8% 108%,#3fae22 0%,transparent 70%),linear-gradient(180deg,#45b2ef 0%,#6cc6f6 24%,#a3dffc 52%,#d9f4ff 76%,#eafaff 100%);
+  --text:#0d2c48;--text-muted:#36556f;--text-faint:#46647d;--heading:#063a66;
+  --accent:#119ae0;--accent-strong:#0a84c9;--accent-text:#055c94;--on-accent:#ffffff;--accent-soft:#119ae01f;--accent-2:#3fae22;
+  --success:#1f6e12;--success-soft:#dff6d4;--danger:#cf2f46;--danger-soft:#ffe1e6;--warning:#b87600;
+  --surface:#ffffffbf;--surface-bg:linear-gradient(180deg,#ffffffd9 0%,#ffffffa6 48%,#ffffff8c 52%,#ffffffb3 100%);--surface-2:#ffffff99;--surface-sunken:#ffffffd9;--surface-hover:#ffffffe0;
+  --line:#ffffffe6;--line-strong:#9ccbe8;
+  --radius-lg:20px;--radius:15px;--radius-sm:10px;--radius-pill:999px;--border-w:1px;
+  --shadow-sm:0 2px 6px #0b5a9a1f,inset 0 1px 0 #ffffff;--shadow:0 10px 30px #0b5a9a2e,inset 0 1px 0 #ffffff;--shadow-lg:0 24px 70px #06335a59;--card-hover-shadow:0 16px 40px #0b5a9a47,0 0 0 1px #ffffff inset;
+  --glass:blur(14px) saturate(150%);
+  --sidebar-bg:linear-gradient(180deg,#ffffffb3,#ffffff80);--sidebar-text:#0b3b62;--sidebar-muted:#3d6a8c;--sidebar-line:#ffffffcc;
+  --nav-hover:#ffffffb3;--nav-active-bg:linear-gradient(180deg,#d9f3ff 0%,#a9e1fb 48%,#7fd0f7 52%,#b9e9fd 100%);--nav-active-text:#063a66;--nav-active-mark:#119ae0;
+  --topbar-bg:linear-gradient(180deg,#ffffffbf,#ffffff80);--topbar-text:#0b3b62;--topbar-line:#ffffffcc;
+  --btn-bg:linear-gradient(180deg,#ffffff 0%,#f2f9fd 48%,#dcecf6 52%,#eff8fd 100%);--btn-text:#0b4a75;--btn-line:#9cc3dd;--btn-hover-bg:linear-gradient(180deg,#ffffff 0%,#e6f6ff 48%,#c9e8fa 52%,#e3f5ff 100%);--btn-shadow:inset 0 1px 0 #ffffff,0 1px 3px #0b5a9a24;
+  --primary-bg:linear-gradient(180deg,#c3f0ff 0%,#5ccaf7 47%,#169fe4 50%,#3ab9f3 100%);--primary-text:#ffffff;--primary-line:#0b7cc0;--primary-hover-bg:linear-gradient(180deg,#d6f5ff 0%,#74d4fa 47%,#2bb0ef 50%,#55c8f7 100%);--primary-shadow:inset 0 1px 0 #ffffffb3,0 4px 14px #0b7cc04d;
+  --input-bg:#ffffffe6;--input-line:#9cc3dd;--input-text:#0d2c48;
+  --chip-bg:#ffffff73;--chip-text:#0b4a75;--chip-line:#ffffffd9;--chip-hover-bg:#ffffffcc;--chip-active-bg:linear-gradient(180deg,#b5f08f 0%,#69c93c 47%,#3fae22 50%,#62c534 100%);--chip-active-text:#ffffff;--chip-active-line:#2f8a18;
+  --hero-bg:linear-gradient(180deg,#e8f8ff,#bfe9ff);--hero-shade:#effaff;--hero-text:#063a66;--hero-muted:#2d5677;
+  --dialog-bg:linear-gradient(180deg,#f4fbff,#e3f4fd);--dialog-head-bg:linear-gradient(180deg,#bfeaff 0%,#7fd0f7 48%,#46b6ee 52%,#8ad9fb 100%);--dialog-head-text:#ffffff;
+  --close-bg:linear-gradient(180deg,#f7b2a3 0%,#e2593f 47%,#c8331a 50%,#de5a3e 100%);--close-text:#ffffff;--close-line:#9c2a16;
+  --scrim:#0b4a7559;--focus:#0670b4;
+  --scrollbar:#8ccbec;
+}
+
+/* ---------- Retro ---------- */
+[data-theme=retro]{
+  color-scheme:dark;
+  --font-body:'VT323',ui-monospace,Consolas,monospace;
+  --font-display:'Press Start 2P','VT323',ui-monospace,monospace;
+  --font-mono:'VT323',ui-monospace,Consolas,monospace;
+  --display-weight:400;--display-tracking:0;--display-case:uppercase;--ds:.58;--label-tracking:.08em;
+  --bg:#12002a;
+  --page-bg:linear-gradient(180deg,#0a0018 0%,#1a0038 55%,#3b0a52 100%);
+  --text:#f6ecff;--text-muted:#c4a8f0;--text-faint:#9479c2;--heading:#ffffff;
+  --accent:#ff2e97;--accent-strong:#ff5cae;--accent-text:#2de2e6;--on-accent:#12002a;--accent-soft:#ff2e9729;--accent-2:#2de2e6;
+  --success:#58ff8a;--success-soft:#58ff8a1f;--danger:#ff5c7a;--danger-soft:#ff5c7a29;--warning:#ffe14d;
+  --surface:#1c0838;--surface-bg:#1c0838;--surface-2:#260c4a;--surface-sunken:#0e0020;--surface-hover:#2a0f52;
+  --line:#5b2a9c;--line-strong:#8c4fd6;
+  --radius-lg:0;--radius:0;--radius-sm:0;--radius-pill:0;--border-w:2px;
+  --shadow-sm:3px 3px 0 #000;--shadow:5px 5px 0 #000;--shadow-lg:8px 8px 0 #000;--card-hover-shadow:7px 7px 0 var(--game-tint,#ff2e97);
+  --glass:none;
+  --sidebar-bg:#0e0020;--sidebar-text:#d9c4ff;--sidebar-muted:#9479c2;--sidebar-line:#3b1a6b;
+  --nav-hover:#220a44;--nav-active-bg:#ff2e97;--nav-active-text:#12002a;--nav-active-mark:#ffe14d;
+  --topbar-bg:#0e0020f2;--topbar-text:#d9c4ff;--topbar-line:#ff2e97;
+  --btn-bg:#12002a;--btn-text:#2de2e6;--btn-line:#2de2e6;--btn-hover-bg:#0b3a4a;--btn-shadow:3px 3px 0 #000;
+  --primary-bg:#ffe14d;--primary-text:#12002a;--primary-line:#ffe14d;--primary-hover-bg:#fff07a;--primary-shadow:4px 4px 0 #ff2e97;
+  --input-bg:#0a0018;--input-line:#8c4fd6;--input-text:#f6ecff;
+  --chip-bg:transparent;--chip-text:#d9c4ff;--chip-line:#5b2a9c;--chip-hover-bg:#260c4a;--chip-active-bg:#2de2e6;--chip-active-text:#12002a;--chip-active-line:#2de2e6;
+  --hero-bg:#0e0020;--hero-shade:#12002a;--hero-text:#ffffff;--hero-muted:#e2cfff;
+  --dialog-bg:#14002e;--dialog-head-bg:linear-gradient(90deg,#ff2e97,#8c2fd6);--dialog-head-text:#ffffff;--close-bg:#ffe14d;--close-text:#12002a;--close-line:#000000;
+  --scrim:#05000ecc;--focus:#ffe14d;
+  --scrollbar:#8c4fd6;
+}
+
+/* ==========================================================================
+   Whole-page decorations
+   ========================================================================== */
+
+/* ----- Windows XP: an Explorer window with a task pane and Bliss-style hills ----- */
+html[data-theme=xp] body{font-size:13px}
+html[data-theme=xp] .sidebar{border-right:1px solid #3b55b8}
+html[data-theme=xp] .sidebar .sidebar-label{margin:16px 0 0;padding:7px 12px;border-radius:5px 5px 0 0;background:linear-gradient(90deg,#ffffff 0%,#c6d3f7 100%);color:#215dc6;font:700 12px var(--font-body);letter-spacing:0;text-transform:none}
+html[data-theme=xp] .sidebar nav{padding:8px;background:#d6dff7;border:1px solid #ffffff;border-top:0;gap:1px}
+html[data-theme=xp] .sidebar nav a,html[data-theme=xp] .sidebar nav button{border-radius:3px;font-weight:400}
+html[data-theme=xp] .sidebar nav a:hover,html[data-theme=xp] .sidebar nav button:hover{background:transparent;color:#428eff;text-decoration:underline}
+html[data-theme=xp] .sidebar nav .nav-active,html[data-theme=xp] .sidebar nav .nav-active:hover{font-weight:700;box-shadow:none;border:1px solid #9db3e6;background:#ffffff;color:var(--nav-active-text)}
+html[data-theme=xp] .sidebar nav .nav-icon{color:#215dc6}
+html[data-theme=xp] .brand,html[data-theme=xp] #online-toggle,html[data-theme=xp] .sidebar-bottom{color:#ffffff;text-shadow:1px 1px 1px #0a246a}
+html[data-theme=xp] .brand small,html[data-theme=xp] .sidebar-bottom small{color:#e6edff}
+html[data-theme=xp] .brand-icon{background:linear-gradient(180deg,#79d273,#2f8f2b);border:1px solid #1d5c1a;color:#fff;box-shadow:1px 1px 2px #0006}
+html[data-theme=xp] .junkyard-link{background:linear-gradient(90deg,#ffffff,#c6d3f7);border:1px solid #ffffff;color:#215dc6}
+html[data-theme=xp] .junkyard-link:hover,html[data-theme=xp] .junkyard-link.nav-active{color:#428eff;text-decoration:underline;background:linear-gradient(90deg,#ffffff,#d6e0fa)}
+html[data-theme=xp] .topbar{box-shadow:0 1px 0 #0a246a}
+html[data-theme=xp] .breadcrumb{font:700 13px var(--font-display);letter-spacing:0;text-shadow:1px 1px 1px #0f1089}
+html[data-theme=xp] .breadcrumb b,html[data-theme=xp] .breadcrumb span{color:#fff}
+html[data-theme=xp] .search{border-radius:0;border-color:#7f9db9}
+html[data-theme=xp] .search kbd{background:#ece9d8;color:#4b4b4b;border-color:#aca899}
+html[data-theme=xp] .profile-mark{border-radius:3px;background:linear-gradient(180deg,#fff,#d6d0c5);color:#0b2f8a;border:1px solid #003c74}
+html[data-theme=xp] :is(.page-heading,.hub-heading,.secret-heading,.sd-heading){padding:22px 24px;border:1px solid #7f9db9;border-radius:var(--radius-lg) var(--radius-lg) 0 0;background:radial-gradient(62% 58% at 24% 132%,#6cc544 0,#4fa62e 97%,transparent 100%),radial-gradient(58% 66% at 88% 142%,#58b336 0,#3f9324 97%,transparent 100%),radial-gradient(14% 18% at 66% 26%,#ffffffb3,transparent),radial-gradient(10% 12% at 72% 22%,#ffffff99,transparent),linear-gradient(180deg,#2a64d8 0%,#4f8ff0 45%,#a6d2ff 100%);color:#fff;text-shadow:1px 1px 2px #0a246acc}
+html[data-theme=xp] :is(.page-heading,.hub-heading,.secret-heading,.sd-heading) :is(h1,p,.eyebrow,.hub-description,.sd-since){color:#fff}
+html[data-theme=xp] .hub-heading{max-width:none}
+html[data-theme=xp] .choice-header{margin:0;padding:6px 10px 6px 12px;border-radius:var(--radius-lg) var(--radius-lg) 0 0;background:var(--dialog-head-bg);border:1px solid #003dd7;border-bottom:0}
+html[data-theme=xp] .choice-heading{color:#fff;font-size:15px;text-shadow:1px 1px 1px #0f1089}
+html[data-theme=xp] .choice-heading>span{color:#ffe36b}
+html[data-theme=xp] .featured{border:3px solid #0831d9;border-top:0;border-radius:0 0 4px 4px;box-shadow:var(--shadow)}
+html[data-theme=xp] .game-card{border-color:#7f9db9;box-shadow:2px 2px 0 #00000014}
+html[data-theme=xp] .game-card .card-art{border-bottom:3px solid #0831d9}
+html[data-theme=xp] .card-body h3 a:hover{color:#428eff;text-decoration:underline}
+html[data-theme=xp] .dialog-heading h2,html[data-theme=xp] .dialog-heading .eyebrow{text-shadow:1px 1px 1px #0f1089}
+html[data-theme=xp] .dialog-heading{padding-top:12px;padding-bottom:12px}
+html[data-theme=xp] .dialog-heading h2{font-size:18px}
+html[data-theme=xp] .primary{font-style:italic;text-shadow:1px 1px 1px #1a4d18;border-radius:4px 14px 14px 4px}
+html[data-theme=xp] :is(button,a):is(.secondary-action,.play-link,.random,.sd-button,.sd-link,.details-link):hover{box-shadow:inset 0 0 0 1px #f8b636,inset 0 -2px 0 #e5a01a}
+html[data-theme=xp] .play-link{background:var(--btn-bg);border-color:var(--btn-line);color:#000;box-shadow:var(--btn-shadow);border-radius:3px}
+html[data-theme=xp] .play-link:hover{background:var(--btn-hover-bg);color:#000;border-color:var(--btn-line)}
+html[data-theme=xp] .filters button{border-radius:3px}
+html[data-theme=xp] .filters button:hover{border-color:#a7b8de;text-decoration:none}
+html[data-theme=xp] .nav-count,html[data-theme=xp] .request-notification-count{background:#316ac5;color:#fff}
+html[data-theme=xp] .player-bar{border-bottom:1px solid #003dd7}
+html[data-theme=xp] .player-bar>div :is(strong,span),html[data-theme=xp] .player-bar #standalone{color:#fff;text-shadow:1px 1px 1px #0f1089}
+html[data-theme=xp] ::selection{background:#316ac5;color:#fff}
+html[data-theme=xp] *{scrollbar-color:#a9c2f4 #f0efe6}
+
+/* ----- Frutiger Aero: glass panels, sky and bubbles ----- */
+html[data-theme=aero] body{background-attachment:fixed}
+html[data-theme=aero] body::before{background:
+  radial-gradient(circle at 35% 30%,#ffffffee 0 6%,#ffffff40 30%,#ffffff14 55%,#ffffff70 68%,transparent 70%) 6% 22%/120px 120px no-repeat,
+  radial-gradient(circle at 35% 30%,#ffffffee 0 6%,#ffffff40 30%,#ffffff14 55%,#ffffff70 68%,transparent 70%) 88% 14%/180px 180px no-repeat,
+  radial-gradient(circle at 35% 30%,#ffffffee 0 6%,#ffffff40 30%,#ffffff14 55%,#ffffff70 68%,transparent 70%) 72% 58%/70px 70px no-repeat,
+  radial-gradient(circle at 35% 30%,#ffffffee 0 6%,#ffffff40 30%,#ffffff14 55%,#ffffff70 68%,transparent 70%) 22% 72%/90px 90px no-repeat,
+  radial-gradient(circle at 35% 30%,#ffffffee 0 6%,#ffffff40 30%,#ffffff14 55%,#ffffff70 68%,transparent 70%) 52% 8%/46px 46px no-repeat,
+  radial-gradient(circle at 35% 30%,#ffffffee 0 6%,#ffffff40 30%,#ffffff14 55%,#ffffff70 68%,transparent 70%) 95% 82%/130px 130px no-repeat;
+  opacity:.85}
+html[data-theme=aero] body::after{content:'';position:fixed;inset:-20% -10% auto auto;width:80vw;height:70vh;z-index:-1;pointer-events:none;background:radial-gradient(closest-side,#ffffff80,transparent);transform:rotate(-18deg);opacity:.55}
+html[data-theme=aero] .sidebar,html[data-theme=aero] .topbar{border-color:#ffffffcc;box-shadow:0 0 0 1px #0b5a9a14,0 8px 30px #0b5a9a1f}
+html[data-theme=aero] :is(.primary,.chip-active,.filters .selected,#reload-game,.request-bottom button){text-shadow:0 1px 1px #04406b99}
+/* Text that sits straight on the sky gets a soft white halo so it reads at any scroll position. */
+html[data-theme=aero] :is(.page-heading,.hub-heading,.sd-heading,.secret-heading,.choice-header,.collection-heading,.toolbar,.updates-toolbar,.main-shell>footer,.secret-footnote,.own-requests-header) :is(h1,h2,p,span,label,a,b){text-shadow:0 0 1px #fff,0 0 10px #ffffffe6,0 0 22px #ffffffb3}
+html[data-theme=aero] :is(.page-heading,.hub-heading,.sd-heading,.secret-heading,.choice-header,.collection-heading) :is(p:not(.eyebrow),.hub-description,.sd-since){color:#06375f}
+html[data-theme=aero] .filters button:not(.selected){text-shadow:none}
+html[data-theme=aero] .feature-category{background:#ffffffcc;color:#0670b4}
+html[data-theme=aero] .brand-icon{background:linear-gradient(180deg,#c3f0ff 0%,#5ccaf7 47%,#169fe4 50%,#3ab9f3 100%);border:1px solid #0b7cc0;color:#fff;box-shadow:inset 0 1px 0 #ffffffb3,0 3px 10px #0b7cc04d}
+html[data-theme=aero] .dialog-close{border-radius:7px}
+html[data-theme=aero] .dialog-heading :is(h2,.eyebrow){text-shadow:0 1px 2px #05467a99}
+html[data-theme=aero] .card-art{border-radius:calc(var(--radius) - 3px) calc(var(--radius) - 3px) 0 0;margin:4px 4px 0;border:1px solid #ffffff}
+html[data-theme=aero] .player-bar :is(strong){color:var(--heading)}
+html[data-theme=aero] ::selection{background:#5ccaf7;color:#fff}
+html[data-theme=aero] *{scrollbar-color:#8ccbec #ffffff80}
+
+/* ----- Retro: neon arcade, horizon grid and scanlines ----- */
+/* VT323 is drawn small for its size; font-size-adjust evens out its x-height so body text stays readable.
+   The wide Press Start 2P headings opt out and use the --ds scale instead. */
+/* The font shorthand in component rules resets font-size-adjust, so Retro sets it on every element. */
+html[data-theme=retro] *{font-size-adjust:.53!important}
+html[data-theme=retro] :is(h1,h2,h3,h4,.brand-name,.game-loading strong),html[data-theme=retro] :is(h1,h2,h3,h4) span:not(#result-count,#inbox-unread){font-size-adjust:none!important;line-height:1.35}
+html[data-theme=retro] :is(h3,h4,.sd-section-head h2,.next-chapter h2,.teaser-composer h2,.teaser-admin-link h2,.playtest-gate h2,.online-panel h2,.stats-panel h2,.release-scheduler h2,.game-loading strong){font-family:var(--font-body);font-size-adjust:.53!important;text-transform:none;letter-spacing:.02em;line-height:1.2}
+html[data-theme=retro] .card-body h3{font-family:var(--font-display);font-size-adjust:none!important;text-transform:uppercase;line-height:1.45}
+/* Press Start 2P is drawn on an 8px grid; whole multiples keep it crisp. */
+html[data-theme=retro] :is(.page-heading h1,.hub-heading h1,.sd-heading h1,.secret-heading h1,#player-error h1){font-size:24px}
+html[data-theme=retro] .feature-info h2{font-size:32px}
+html[data-theme=retro] :is(.collection-heading h2,.choice-heading,.dialog-heading h2,.save-transfer h2,.update-body h2,.teaser-post h2,.own-requests h2,#request-inbox h2,.request-dialog h2,.card-body h3){font-size:16px}
+@media (max-width:640px){html[data-theme=retro] body::before{height:28vh;opacity:.35}html[data-theme=retro] .feature-info h2{font-size:24px}html[data-theme=retro] :is(.page-heading h1,.hub-heading h1,.sd-heading h1,.secret-heading h1){font-size:16px;line-height:1.5}}
+html[data-theme=retro] :is(.eyebrow,.breadcrumb,.sidebar-label,.feature-category,.card-meta,.new-update,.feature-bottom,.collection-note,.teaser-byline,.continue-game small){letter-spacing:.06em}
+html[data-theme=retro] :is(.primary,.play-link,.filters button,.secondary-action,.random,.sd-tab){text-transform:uppercase;letter-spacing:.05em}
+html[data-theme=retro] body::before{content:'';position:fixed;left:-50%;right:-50%;bottom:-8vh;height:46vh;z-index:-1;pointer-events:none;background:linear-gradient(#ff2e9799 2px,transparent 2px) 0 0/80px 44px,linear-gradient(90deg,#ff2e9799 2px,transparent 2px) 0 0/80px 44px;transform:perspective(320px) rotateX(62deg);transform-origin:50% 100%;mask-image:linear-gradient(transparent,#000 45%);opacity:.5}
+html[data-theme=retro] body::after{content:'';position:fixed;inset:0;z-index:50;pointer-events:none;background:repeating-linear-gradient(180deg,#00000038 0 1px,transparent 1px 3px);opacity:.45}
+html[data-theme=retro] :is(h1,.feature-info h2){text-shadow:3px 3px 0 #ff2e97,0 0 18px #ff2e9766}
+html[data-theme=retro] :is(.collection-heading h2,.choice-heading,.hub-heading h1,.sd-heading h1,.dialog-heading h2){text-shadow:2px 2px 0 #8c2fd6}
+html[data-theme=retro] .eyebrow{color:#2de2e6}
+html[data-theme=retro] .brand-icon{background:#ff2e97;color:#12002a;box-shadow:3px 3px 0 #2de2e6}
+html[data-theme=retro] .brand-name{font-size:11px;line-height:1.5}
+html[data-theme=retro] .brand-name small{font-size:12px;font-size-adjust:.53;letter-spacing:.06em}
+html[data-theme=retro] .sidebar nav .nav-active .nav-icon{color:#12002a}
+html[data-theme=retro] .game-card:hover,html[data-theme=retro] .game-card:focus-within{transform:translate(-3px,-3px)}
+html[data-theme=retro] .card-art img{image-rendering:pixelated}
+html[data-theme=retro] .primary:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 #ff2e97}
+html[data-theme=retro] .primary:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #ff2e97}
+html[data-theme=retro] :is(.secondary-action,.play-link,.random,.sd-button,.details-link,.browse-options button,.save-transfer button):hover{color:#12002a;background:#2de2e6}
+html[data-theme=retro] .choice-progress span{background:repeating-linear-gradient(90deg,#ffe14d 0 10px,transparent 10px 14px)}
+html[data-theme=retro] .online-dot,html[data-theme=retro] .status-dot{border-radius:0}
+html[data-theme=retro] .request-notification-count,html[data-theme=retro] .nav-count{border-radius:0}
+html[data-theme=retro] ::selection{background:#ff2e97;color:#12002a}
+html[data-theme=retro] *{scrollbar-color:#8c4fd6 #0a0018}
+html[data-profile=chromebook][data-theme=retro] body::after,html[data-profile=chromebook][data-theme=retro] body::before{display:none}
+html[data-profile=chromebook][data-theme=aero] body::before,html[data-profile=chromebook][data-theme=aero] body::after{display:none}

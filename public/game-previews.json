@@ -1,0 +1,130 @@
+{
+  "square-off": {
+    "src": "previews/square-off.png",
+    "alt": "Square Off gameplay: the player and boss exchanging fire in the arena."
+  },
+  "rustbound": {
+    "src": "previews/rustbound.png",
+    "alt": "Rustbound starting colony and building shop on Cinder."
+  },
+  "rustbound-2": {
+    "src": "previews/rustbound-2.png",
+    "alt": "Rustbound Legacy gameplay: an astronaut, lander, rover, and base on Cinder."
+  },
+  "neon-slip": {
+    "src": "previews/neon-slip.png",
+    "alt": "Neon Slip gameplay with a neon flight console, glowing debris, spark pickups, and a flowing engine trail."
+  },
+  "stellar-forge": {
+    "src": "previews/stellar-forge.png",
+    "alt": "Stellar Forge entry scene: a blue planet against the stars."
+  },
+  "the-undercroft": {
+    "src": "previews/the-undercroft.png",
+    "alt": "The Undercroft gameplay: grapple points and armed enemies in a stone chamber."
+  },
+  "car-spleef": {
+    "src": "previews/car-spleef.png",
+    "alt": "Car Spleef arena at the start of a race, with four cars and symmetrical tiles."
+  },
+  "arcade-tycoon": {
+    "src": "previews/arcade-tycoon.png",
+    "alt": "Arcade Tycoon gameplay: a newly placed cabinet in the starter arcade."
+  },
+  "ducks-vs-dogs": {
+    "src": "previews/ducks-vs-dogs.png",
+    "alt": "Ducks vs Dogs gameplay: a duck defender guarding the pond lanes."
+  },
+  "deep-signal": {
+    "src": "previews/deep-signal.png",
+    "alt": "Deep Signal gameplay: a submarine, salvage, and sea creatures below the surface."
+  },
+  "cargo-swing": {
+    "src": "previews/cargo-swing.png",
+    "alt": "Cargo Swing gameplay: the crane holding cargo above a ship at Bluewater Port."
+  },
+  "pocket-heist": {
+    "src": "previews/pocket-heist.png",
+    "alt": "Pocket Heist gameplay: a thief, patrolling guards, and loot in the Blue Galleries."
+  },
+  "the-rooms-between": {
+    "src": "previews/the-rooms-between.png",
+    "alt": "The Rooms Between title menu over its first-person fluorescent hallways."
+  },
+  "switchyard": {
+    "src": "previews/switchyard.png",
+    "alt": "Switchyard gameplay: branching rails and four lettered stations in Meadow."
+  },
+  "stardust-foundry": {
+    "src": "previews/stardust-foundry.png",
+    "alt": "Stardust Foundry entry screen with its harvesting core and production shop."
+  },
+  "frontier": {
+    "src": "previews/frontier.png",
+    "alt": "Frontier gameplay: the colony hex map, resources, and construction menu."
+  },
+  "squircle-siege": {
+    "src": "previews/squircle-siege.png",
+    "alt": "Squircle Siege title menu showing its defenders and Clover Crossing."
+  },
+  "afterimage": {
+    "src": "previews/afterimage.png",
+    "alt": "Afterimage gameplay: a puzzle chamber with a pressure switch and echo door."
+  },
+  "midnight-kitchen": {
+    "src": "previews/midnight-kitchen.png",
+    "alt": "Midnight Kitchen gameplay: the chef, cooking stations, and first order."
+  },
+  "laserline": {
+    "src": "previews/laserline.png",
+    "alt": "Laserline gameplay: mirrors and a light beam in the first circuit."
+  },
+  "bridgewright": {
+    "src": "covers/bridgewright.svg",
+    "alt": "Bridgewright cover art: a loaded truck crosses a stress-colored truss bridge over a canyon river."
+  },
+  "cloudkeeper": {
+    "src": "covers/cloudkeeper.svg",
+    "alt": "Cloudkeeper cover art: a rain cloud waters a tiny floating hillside garden with a little shed."
+  },
+  "ricochet-club": {
+    "src": "previews/ricochet-club.png",
+    "alt": "Ricochet Club refreshed gameplay with its current controls and interface."
+  },
+  "starball": {
+    "src": "covers/starball.svg",
+    "alt": "Starball cover art: a silver ball streaks past ringed-planet bumpers on a cosmic pinball table."
+  },
+  "parcel-panic": {
+    "src": "previews/parcel-panic.png",
+    "alt": "Parcel Panic refreshed gameplay with its current controls and interface."
+  },
+  "odd-hours": {
+    "src": "previews/odd-hours.png",
+    "alt": "Odd Hours refreshed gameplay with its current controls and interface."
+  },
+  "car-spleef-3d": {
+    "src": "previews/car-spleef-3d.png",
+    "alt": "Car Spleef 3D gameplay: a blue car and three rivals on a floating, crumbling 3D arena."
+  },
+  "crazy-sort": {
+    "src": "previews/crazy-sort.png",
+    "alt": "Crazy Sort gameplay: colorful cartoon bombs and matching sorting pens."
+  },
+  "slide-between": {
+    "src": "previews/slide-between.png",
+    "alt": "Slide Between gameplay: a winding slide suspended among floating doors and clouds."
+  },
+  "meridian-space-program": {
+    "src": "previews/meridian-space-program.png",
+    "alt": "Meridian Space Program gameplay: the space center with rocket assembly, research and mission buildings."
+  },
+  "ducks-vs-dogs-2": {
+    "src": "previews/ducks-vs-dogs-2.png",
+    "alt": "Ducks vs. Dogs 2 gameplay: cartoony 3D ducks defend five green lanes beside a pond against a pack of dogs."
+  },
+  "square-off-2": {
+    "src": "covers/square-off-2.svg",
+    "alt": "Square Off 2 cover art: a turquoise jetpack square blasts toward a coral mech boss in a comic-book burst."
+  }
+}

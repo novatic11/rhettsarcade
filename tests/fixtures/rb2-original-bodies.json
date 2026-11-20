@@ -1,0 +1,659 @@
+{
+  "landable": [
+    "cinder",
+    "luma",
+    "ferrum",
+    "shard",
+    "viridia",
+    "nix",
+    "ember",
+    "zephyr",
+    "opal",
+    "bastion",
+    "plon",
+    "kiln",
+    "dusk",
+    "rime",
+    "saffron",
+    "moss",
+    "perle",
+    "vitria",
+    "cobalt",
+    "silva",
+    "relic",
+    "veil",
+    "hush",
+    "arc",
+    "surge",
+    "still",
+    "vanta",
+    "cauter",
+    "rill",
+    "fervor",
+    "tessera",
+    "briar",
+    "halcyon",
+    "flint",
+    "morrow",
+    "eidolon",
+    "censer",
+    "gloam",
+    "fulcrum",
+    "skein",
+    "quench"
+  ],
+  "bodies": {
+    "helios": {
+      "id": "helios",
+      "position": [
+        -600000,
+        330000,
+        -950000
+      ],
+      "radius": 21000,
+      "system": "helios"
+    },
+    "cinder": {
+      "id": "cinder",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "radius": 1600,
+      "gravity": 5.4,
+      "parent": "helios",
+      "system": "helios",
+      "orbitRadius": 1171067.888723792
+    },
+    "luma": {
+      "id": "luma",
+      "position": [
+        22000,
+        18000,
+        -75000
+      ],
+      "radius": 800,
+      "gravity": 0.9,
+      "parent": "cinder",
+      "system": "helios",
+      "orbitRadius": 80205.98481410224
+    },
+    "ferrum": {
+      "id": "ferrum",
+      "position": [
+        -817419.7199658207,
+        193878.47616122244,
+        -264505.4915480409
+      ],
+      "radius": 1984,
+      "gravity": 7.29,
+      "parent": "helios",
+      "system": "helios",
+      "orbitRadius": 731917.43045237
+    },
+    "shard": {
+      "id": "shard",
+      "position": [
+        -734628.7663844286,
+        201376.1452860943,
+        -346988.47744681715
+      ],
+      "radius": 928,
+      "gravity": 1.512,
+      "parent": "ferrum",
+      "system": "helios",
+      "orbitRadius": 117106.7888723792
+    },
+    "viridia": {
+      "id": "viridia",
+      "position": [
+        1136538.706785641,
+        -69630.04285614524,
+        -437405.8527517495
+      ],
+      "radius": 1760,
+      "gravity": 4.59,
+      "parent": "helios",
+      "system": "helios",
+      "orbitRadius": 1854190.8238126708
+    },
+    "nix": {
+      "id": "nix",
+      "position": [
+        567179.3842823168,
+        751465.4024198087,
+        -3384454.82820704
+      ],
+      "radius": 1408,
+      "gravity": 2.808,
+      "parent": "helios",
+      "system": "helios",
+      "orbitRadius": 2732491.740355515
+    },
+    "brontes": {
+      "id": "brontes",
+      "position": [
+        -2932746.533500606,
+        -147419.69653335895,
+        2445936.7799249943
+      ],
+      "radius": 6720,
+      "gravity": 4.2,
+      "parent": "helios",
+      "system": "helios",
+      "orbitRadius": 4147532.1058967635
+    },
+    "ember": {
+      "id": "ember",
+      "position": [
+        -2761389.529456551,
+        -209815.11097937508,
+        2588984.7031702017
+      ],
+      "radius": 1504,
+      "gravity": 4.05,
+      "parent": "brontes",
+      "system": "helios",
+      "orbitRadius": 231773.85297658385
+    },
+    "zephyr": {
+      "id": "zephyr",
+      "position": [
+        -2754568.4053687863,
+        -93622.03351193662,
+        2116753.944407782
+      ],
+      "radius": 1792,
+      "gravity": 3.24,
+      "parent": "brontes",
+      "system": "helios",
+      "orbitRadius": 378157.3390670578
+    },
+    "opal": {
+      "id": "opal",
+      "position": [
+        -3415373.948711652,
+        -142802.52206946764,
+        2732160.2103911005
+      ],
+      "radius": 1632,
+      "gravity": 2.052,
+      "parent": "brontes",
+      "system": "helios",
+      "orbitRadius": 561136.6966801503
+    },
+    "bastion": {
+      "id": "bastion",
+      "position": [
+        -3304953.8939929446,
+        72390.03652676253,
+        1795816.427099092
+      ],
+      "radius": 2080,
+      "gravity": 4.86,
+      "parent": "brontes",
+      "system": "helios",
+      "orbitRadius": 780711.9258158614
+    },
+    "plon": {
+      "id": "plon",
+      "position": [
+        -1139458.4152692114,
+        -1185638.5133714508,
+        3139307.0485499045
+      ],
+      "radius": 1040,
+      "gravity": 1.15,
+      "parent": "helios",
+      "system": "helios",
+      "orbitRadius": 5059989.169194051,
+      "orbit": {
+        "semiMajorAxis": 5059989.169194051,
+        "eccentricity": 0.29,
+        "inclination": 0.20943951023931953,
+        "argument": 0.72
+      }
+    },
+    "vesper": {
+      "id": "vesper",
+      "position": [
+        -12000000,
+        0,
+        0
+      ],
+      "radius": 10500,
+      "system": "vesper"
+    },
+    "amber": {
+      "id": "amber",
+      "position": [
+        12000000,
+        0,
+        0
+      ],
+      "radius": 17000,
+      "system": "amber"
+    },
+    "aster": {
+      "id": "aster",
+      "position": [
+        0,
+        0,
+        13000000
+      ],
+      "radius": 24000,
+      "system": "aster"
+    },
+    "abyss": {
+      "id": "abyss",
+      "position": [
+        -12000000,
+        0,
+        13000000
+      ],
+      "radius": 10000,
+      "system": "abyss"
+    },
+    "tempest": {
+      "id": "tempest",
+      "position": [
+        12000000,
+        0,
+        13000000
+      ],
+      "radius": 6500,
+      "system": "tempest"
+    },
+    "kiln": {
+      "id": "kiln",
+      "position": [
+        -11879826.42964577,
+        -38932.43051248608,
+        80886.20922448448
+      ],
+      "radius": 1250,
+      "gravity": 3.2,
+      "parent": "vesper",
+      "system": "vesper",
+      "orbitRadius": 150000
+    },
+    "dusk": {
+      "id": "dusk",
+      "position": [
+        -11825665.402735757,
+        52637.17839519842,
+        -322081.9393373466
+      ],
+      "radius": 1850,
+      "gravity": 4.4,
+      "parent": "vesper",
+      "system": "vesper",
+      "orbitRadius": 370000
+    },
+    "rime": {
+      "id": "rime",
+      "position": [
+        -12681784.98779096,
+        95325.29249088382,
+        46715.297648706146
+      ],
+      "radius": 970,
+      "gravity": 0.8,
+      "parent": "vesper",
+      "system": "vesper",
+      "orbitRadius": 690000
+    },
+    "saffron": {
+      "id": "saffron",
+      "position": [
+        12216899.586262617,
+        -28120.554523431252,
+        -23744.5550053147
+      ],
+      "radius": 1620,
+      "gravity": 3.5,
+      "parent": "amber",
+      "system": "amber",
+      "orbitRadius": 220000
+    },
+    "moss": {
+      "id": "moss",
+      "position": [
+        11667558.626659622,
+        144698.29644208442,
+        -372753.452429782
+      ],
+      "radius": 1970,
+      "gravity": 5.1,
+      "parent": "amber",
+      "system": "amber",
+      "orbitRadius": 520000
+    },
+    "perle": {
+      "id": "perle",
+      "position": [
+        11618129.78254308,
+        -142159.66021921005,
+        813674.2394999138
+      ],
+      "radius": 1150,
+      "gravity": 1.3,
+      "parent": "amber",
+      "system": "amber",
+      "orbitRadius": 910000
+    },
+    "vitria": {
+      "id": "vitria",
+      "position": [
+        299695.3598490825,
+        -68968.9605145443,
+        13088464.533969678
+      ],
+      "radius": 1740,
+      "gravity": 4.1,
+      "parent": "aster",
+      "system": "aster",
+      "orbitRadius": 320000
+    },
+    "cobalt": {
+      "id": "cobalt",
+      "position": [
+        -151636.38700043055,
+        201789.63603657938,
+        12283140.635183105
+      ],
+      "radius": 2210,
+      "gravity": 6.2,
+      "parent": "aster",
+      "system": "aster",
+      "orbitRadius": 760000
+    },
+    "silva": {
+      "id": "silva",
+      "position": [
+        -1020692.1812592776,
+        -31560.57045087284,
+        13771745.684477078
+      ],
+      "radius": 1380,
+      "gravity": 1.8,
+      "parent": "aster",
+      "system": "aster",
+      "orbitRadius": 1280000
+    },
+    "relic": {
+      "id": "relic",
+      "position": [
+        -11747926.634161796,
+        -65120.9136139512,
+        13103045.062206216
+      ],
+      "radius": 1490,
+      "gravity": 2.6,
+      "parent": "abyss",
+      "system": "abyss",
+      "orbitRadius": 280000
+    },
+    "veil": {
+      "id": "veil",
+      "position": [
+        -11940769.340588544,
+        139969.66812874787,
+        12398917.45908768
+      ],
+      "radius": 1830,
+      "gravity": 3.8,
+      "parent": "abyss",
+      "system": "abyss",
+      "orbitRadius": 620000
+    },
+    "hush": {
+      "id": "hush",
+      "position": [
+        -12951473.369440956,
+        33500.15340667854,
+        13466021.637873612
+      ],
+      "radius": 880,
+      "gravity": 0.65,
+      "parent": "abyss",
+      "system": "abyss",
+      "orbitRadius": 1060000
+    },
+    "arc": {
+      "id": "arc",
+      "position": [
+        12245194.466028972,
+        -43791.502504792334,
+        13021493.676678034
+      ],
+      "radius": 1320,
+      "gravity": 2.9,
+      "parent": "tempest",
+      "system": "tempest",
+      "orbitRadius": 250000
+    },
+    "surge": {
+      "id": "surge",
+      "position": [
+        11733017.884083314,
+        157668.20826392862,
+        12533672.555082276
+      ],
+      "radius": 1690,
+      "gravity": 3.6,
+      "parent": "tempest",
+      "system": "tempest",
+      "orbitRadius": 560000
+    },
+    "still": {
+      "id": "still",
+      "position": [
+        11347883.797205735,
+        -78335.63849042085,
+        13727329.351666415
+      ],
+      "radius": 1090,
+      "gravity": 1.1,
+      "parent": "tempest",
+      "system": "tempest",
+      "orbitRadius": 980000
+    },
+    "vanta": {
+      "id": "vanta",
+      "position": [
+        -12058378.145109817,
+        -111031.83633880276,
+        484008.1853572007
+      ],
+      "radius": 1360,
+      "gravity": 2.8,
+      "parent": "vesper",
+      "system": "vesper",
+      "orbitRadius": 500000
+    },
+    "cauter": {
+      "id": "cauter",
+      "position": [
+        -11882499.525975063,
+        -33275.79645438321,
+        59794.57469448606
+      ],
+      "radius": 590,
+      "gravity": 0.85,
+      "parent": "kiln",
+      "system": "vesper",
+      "orbitRadius": 22000
+    },
+    "rill": {
+      "id": "rill",
+      "position": [
+        -11833496.08685367,
+        46571.00747364784,
+        -292707.0868850195
+      ],
+      "radius": 730,
+      "gravity": 0.68,
+      "parent": "dusk",
+      "system": "vesper",
+      "orbitRadius": 31000
+    },
+    "fervor": {
+      "id": "fervor",
+      "position": [
+        12482481.103490211,
+        -198847.41195393004,
+        496056.1374825355
+      ],
+      "radius": 1660,
+      "gravity": 4.2,
+      "parent": "amber",
+      "system": "amber",
+      "orbitRadius": 720000
+    },
+    "tessera": {
+      "id": "tessera",
+      "position": [
+        12200168.694231477,
+        -24171.402861638777,
+        -29081.356762402524
+      ],
+      "radius": 620,
+      "gravity": 0.55,
+      "parent": "saffron",
+      "system": "amber",
+      "orbitRadius": 18000
+    },
+    "briar": {
+      "id": "briar",
+      "position": [
+        11645690.019001793,
+        141706.17006869562,
+        -346892.0684978728
+      ],
+      "radius": 890,
+      "gravity": 1.55,
+      "parent": "moss",
+      "system": "amber",
+      "orbitRadius": 34000
+    },
+    "halcyon": {
+      "id": "halcyon",
+      "position": [
+        242829.3992145179,
+        -286852.85645703506,
+        14001822.999146834
+      ],
+      "radius": 1620,
+      "gravity": 3.9,
+      "parent": "aster",
+      "system": "aster",
+      "orbitRadius": 1070000
+    },
+    "flint": {
+      "id": "flint",
+      "position": [
+        283918.4052553304,
+        -63348.73553398489,
+        13075795.643926956
+      ],
+      "radius": 550,
+      "gravity": 0.43,
+      "parent": "vitria",
+      "system": "aster",
+      "orbitRadius": 21000
+    },
+    "morrow": {
+      "id": "morrow",
+      "position": [
+        -991129.4350525977,
+        -33182.017902818756,
+        13759604.228844412
+      ],
+      "radius": 910,
+      "gravity": 0.91,
+      "parent": "silva",
+      "system": "aster",
+      "orbitRadius": 32000
+    },
+    "eidolon": {
+      "id": "eidolon",
+      "position": [
+        -11956639.60268672,
+        -210980.61024485304,
+        13822257.294309722
+      ],
+      "radius": 1450,
+      "gravity": 2.6,
+      "parent": "abyss",
+      "system": "abyss",
+      "orbitRadius": 850000
+    },
+    "censer": {
+      "id": "censer",
+      "position": [
+        -11761581.36461217,
+        -58373.67357446681,
+        13084497.202810122
+      ],
+      "radius": 630,
+      "gravity": 1.1,
+      "parent": "relic",
+      "system": "abyss",
+      "orbitRadius": 24000
+    },
+    "gloam": {
+      "id": "gloam",
+      "position": [
+        -11943091.507726885,
+        133104.96517143695,
+        12428029.027116377
+      ],
+      "radius": 820,
+      "gravity": 0.58,
+      "parent": "veil",
+      "system": "abyss",
+      "orbitRadius": 30000
+    },
+    "fulcrum": {
+      "id": "fulcrum",
+      "position": [
+        12242489.985284876,
+        -219333.92243407562,
+        13730130.972844066
+      ],
+      "radius": 1690,
+      "gravity": 4.6,
+      "parent": "tempest",
+      "system": "tempest",
+      "orbitRadius": 800000
+    },
+    "skein": {
+      "id": "skein",
+      "position": [
+        12230678.763014307,
+        -38741.07417951451,
+        13010322.842343872
+      ],
+      "radius": 670,
+      "gravity": 0.77,
+      "parent": "arc",
+      "system": "tempest",
+      "orbitRadius": 19000
+    },
+    "quench": {
+      "id": "quench",
+      "position": [
+        11732744.583825216,
+        149755.9308506959,
+        12565708.802882306
+      ],
+      "radius": 940,
+      "gravity": 1.38,
+      "parent": "surge",
+      "system": "tempest",
+      "orbitRadius": 33000
+    }
+  }
+}

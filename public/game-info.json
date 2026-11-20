@@ -1,0 +1,376 @@
+{
+  "square-off": {
+    "session": "5–15 min",
+    "features": [
+      "Choose upgrades for yourself and your opponent.",
+      "Build an arsenal and survive escalating boss rounds."
+    ],
+    "controls": [
+      "Use the on-screen controls to build your arsenal and fight.",
+      "Keyboard and mouse recommended; touch controls are available."
+    ]
+  },
+  "rustbound": {
+    "session": "20+ min",
+    "features": [
+      "Build ships, factories, and modular space stations.",
+      "Connect production lines, manage power, and explore other worlds."
+    ],
+    "controls": [
+      "Mouse / trackpad: select buildings, construct, and connect ports.",
+      "Scroll to zoom. Ship controls are shown when you board."
+    ]
+  },
+  "rustbound-2": {
+    "session": "20+ min",
+    "features": [
+      "Explore 71 landable worlds across six fictional star systems, or start a separate Real Solar System expedition on Earth.",
+      "Build ships, stations, and colonies with connected production.",
+      "Assemble rockets with snapping, mirror/radial symmetry, move/rotate tools, staging and saved subassemblies.",
+      "Real Solar System includes 8 planets, 5 dwarf planets, and 32 selected moons at playable distances.",
+      "Explorer assist: optional landing checks, forgiving crashes, free recovery, and guided first steps.",
+      "Real Solar System bodies have distinct elongated, irregular and flattened silhouettes, with matching landing terrain.",
+      "Every Solar planet and moon has refreshed surface maps, geological relief and material detail; the giants have distinct cloud decks.",
+      "Solar System Scope orbital maps, Earth cloud patterns and night lights, Saturn rings, and a smooth blend into playable terrain.",
+      "A sculpted astronaut suit with a curved visor, detailed gloves and boots, and smooth walking, rover and survey-tool animation."
+    ],
+    "controls": [
+      "WASD: walk or drive. Mouse: look around.",
+      "M: map. H: journal. Flight and building controls appear in their menus.",
+      "Shipyard: 1–4 tools, X symmetry, R mirror/radial, C angle snap; drag to orbit, Shift-drag to pan."
+    ]
+  },
+  "neon-slip": {
+    "session": "2–5 min",
+    "features": [
+      "Dodge ten encounter types, including crushing jaws, proximity mines, comet rain, live wires, and wrecking balls.",
+      "Unlock a collection of ship skins, including Godly crates.",
+      "Bank through a neon starfield with engine trails, phase-drive rings, and immediate close-call feedback.",
+      "Every 1,000 score rolls a 25% boss chance. Destroy four random weapon modules, then the core, using one of three temporary guns."
+    ],
+    "controls": [
+      "Drag or use A / D and arrow keys to steer. Tap Dash or press Space to phase through danger.",
+      "Choose ships and open crates from the game’s menu.",
+      "Boss fight: the gun fires automatically. Steer under a module to shoot it; use Dash to phase through attacks."
+    ]
+  },
+  "stellar-forge": {
+    "session": "10+ min",
+    "features": [
+      "Collect resources and build an automated space industry.",
+      "Explore planets, unlock achievements, and expand your production."
+    ],
+    "controls": [
+      "Click the star and resource objects to collect.",
+      "Use the game’s menus to buy producers and explore new planets."
+    ]
+  },
+  "the-undercroft": {
+    "session": "5–20 min",
+    "features": [
+      "Grapple through rooms, collect weapons, and choose upgrades.",
+      "Face a boss every five rooms, including the Blue Rival."
+    ],
+    "controls": [
+      "Use the game’s mouse or touch controls to move, grapple, and fire.",
+      "Type admin during the game to open its admin tools."
+    ]
+  },
+  "car-spleef": {
+    "session": "2–5 min",
+    "features": [
+      "Drive against three AI bumper cars on crumbling tiles.",
+      "Drift, bump rivals, and survive 30 symmetrical map layouts."
+    ],
+    "controls": [
+      "WASD / arrows: drive. Space: drift.",
+      "Keep moving: tiles disappear after you drive over them."
+    ]
+  },
+  "arcade-tycoon": {
+    "session": "10–30 min",
+    "features": [
+      "Build an arcade, hire staff, and keep customers happy.",
+      "Unlock new attractions and grow into larger locations."
+    ],
+    "controls": [
+      "Mouse / touch: choose attractions, place them, and manage the arcade.",
+      "Select people and machines to inspect their needs."
+    ]
+  },
+  "ducks-vs-dogs": {
+    "session": "5–15 min",
+    "features": [
+      "Meet 30 ducks across a campaign with three difficulties.",
+      "Play Endless with every duck unlocked."
+    ],
+    "controls": [
+      "Click / tap a duck, then a lawn tile to place it.",
+      "Collect breadcrumbs and protect each lane from the dogs."
+    ]
+  },
+  "deep-signal": {
+    "session": "3–10 min",
+    "features": [
+      "Recover salvage and descend through an endless ocean.",
+      "Manage oxygen while avoiding creatures and obstacles."
+    ],
+    "controls": [
+      "WASD / arrows: move. Space: sonar.",
+      "Touch salvage pods or press E nearby to recover them."
+    ]
+  },
+  "cargo-swing": {
+    "session": "2–10 min",
+    "features": [
+      "Stack an endless supply of cargo onto a moving ship.",
+      "Uneven weight tilts the hull; cargo can slide and the ship can capsize."
+    ],
+    "controls": [
+      "A / D or arrows: move the crane. Space: drop cargo.",
+      "P: pause. Balance heavy loads on both sides."
+    ]
+  },
+  "pocket-heist": {
+    "session": "2–5 min per heist",
+    "features": [
+      "Clear 100 campaign heists, then unlock endless randomized jobs.",
+      "Sneak past guards, cameras, lasers, and locked vaults."
+    ],
+    "controls": [
+      "WASD / arrows: move. Shift: sneak. E: interact; hold to open vaults.",
+      "Q: smoke once unlocked. P: pause."
+    ]
+  },
+  "the-rooms-between": {
+    "session": "15+ min",
+    "features": [
+      "Explore procedurally generated rooms in a sci-fi horror adventure.",
+      "Find supplies, shelter, and clues in saved worlds."
+    ],
+    "controls": [
+      "Keyboard and mouse required. WASD: move; mouse: look.",
+      "E: interact. The game includes customizable key bindings."
+    ]
+  },
+  "switchyard": {
+    "session": "2–5 min",
+    "features": [
+      "Route trains through four yards and three shifts.",
+      "Collect medals and unlock new train colors."
+    ],
+    "controls": [
+      "Click / tap switches, or use 1, 2, and 3.",
+      "S: slow trains. Keep the crossings clear."
+    ]
+  },
+  "stardust-foundry": {
+    "session": "5–15 min",
+    "features": [
+      "Harvest stardust and buy an automated fleet.",
+      "Upgrade an expanding interstellar industry."
+    ],
+    "controls": [
+      "Click / tap to harvest stardust.",
+      "Use the upgrade and producer buttons to automate production."
+    ]
+  },
+  "frontier": {
+    "session": "10–20 min",
+    "features": [
+      "Build a colony and balance food, water, and resources.",
+      "Research technology and work toward an orbital launch."
+    ],
+    "controls": [
+      "Click / tap tiles to inspect and build.",
+      "Use the colony menus to research and manage production."
+    ]
+  },
+  "squircle-siege": {
+    "session": "5–15 min",
+    "features": [
+      "Place defenses to protect a route from enemy waves.",
+      "Earn medals across maps, difficulties, and modes."
+    ],
+    "controls": [
+      "Click / tap to place and upgrade towers.",
+      "Choose a map and difficulty before each run."
+    ]
+  },
+  "afterimage": {
+    "session": "5–10 min",
+    "features": [
+      "Record your movements and cooperate with your own echoes.",
+      "Solve six puzzle rooms using switches and timing."
+    ],
+    "controls": [
+      "WASD / arrows: move. Space: record an echo.",
+      "C: clear recorded echoes."
+    ]
+  },
+  "midnight-kitchen": {
+    "session": "2 min",
+    "features": [
+      "Handle a two-minute cooking rush.",
+      "Prepare, cook, and serve three dishes as orders stack up."
+    ],
+    "controls": [
+      "Click stations, or move with WASD and press E to interact.",
+      "Work through prep, cooking, and serving before time runs out."
+    ]
+  },
+  "laserline": {
+    "session": "3–10 min",
+    "features": [
+      "Turn mirrors to guide a beam through every receiver.",
+      "Solve six light puzzles with undo and no time limit."
+    ],
+    "controls": [
+      "Click mirrors to turn them. Arrows: select. Space: rotate.",
+      "Z: undo the previous turn."
+    ]
+  },
+  "bridgewright": {
+    "session": "3–10 min",
+    "features": [
+      "Design a bridge, run a loaded truck across it, and watch every beam bend. Build lighter, stronger trusses across eight crossings.",
+      "Admin Tab prototype. Best scores and progress link to your save password."
+    ],
+    "controls": [
+      "Click joints to connect · click empty grid to add a joint · Test bridge",
+      "P or Escape pauses. Restart begins the current challenge again."
+    ]
+  },
+  "cloudkeeper": {
+    "session": "3–10 min",
+    "features": [
+      "Move the clouds. Time the rain. Keep a tiny hillside garden alive through changing winds without drowning it.",
+      "Admin Tab prototype. Best scores and progress link to your save password."
+    ],
+    "controls": [
+      "Drag clouds · click Rain or hold Space · harvest automatically",
+      "P or Escape pauses. Restart begins the current challenge again."
+    ]
+  },
+  "ricochet-club": {
+    "session": "3–10 min",
+    "features": [
+      "12 opening tables followed by endless generated rooms with increasing difficulty.",
+      "More obstacles and targets, tighter shots and smaller stars as you progress.",
+      "Felt-and-brass table art, reflected aim guides, marble impacts and an original quiet soundtrack."
+    ],
+    "controls": [
+      "Click or drag to aim and release to shoot. Arrow keys fine-tune the angle; Space shoots.",
+      "Enter endless jumps straight to Room 13. P pauses. Cleared rooms are saved."
+    ]
+  },
+  "starball": {
+    "session": "3–10 min",
+    "features": [
+      "A compact cosmic pinball table with physical flippers, lively bumpers, lit lanes and a hungry drain. Three balls. Chase your best.",
+      "Admin Tab prototype. Best scores and progress link to your save password."
+    ],
+    "controls": [
+      "A / D or arrows: flippers · Space launch · N nudge",
+      "P or Escape pauses. Restart begins the current challenge again."
+    ]
+  },
+  "parcel-panic": {
+    "session": "3–10 min",
+    "features": [
+      "Pack parcels, clear rows and columns, and build shipment streaks without a timer.",
+      "Layered packing sounds, dispatch chimes, parcel animations and shipment particles.",
+      "Your current van and best score travel with your save password."
+    ],
+    "controls": [
+      "Keys 1–3 select parcels. R rotates. Click a van grid square to pack.",
+      "U unpacks the last move. P pauses."
+    ]
+  },
+  "odd-hours": {
+    "session": "2–4 min",
+    "features": [
+      "40 distinct anomalies across four detailed camera rooms.",
+      "Five night shifts with reference photos, layered ambient sound, and report feedback."
+    ],
+    "controls": [
+      "Keys 1–4 switch cameras. Space compares reference and live images.",
+      "Click a changed object to report it. P pauses the shift."
+    ]
+  },
+  "car-spleef-3d": {
+    "session": "2–5 min",
+    "features": [
+      "Race three AI rivals across 30 symmetrical arenas that crumble beneath your wheels.",
+      "Switch between a first-person cockpit and an orbitable third-person chase camera.",
+      "Charge a drift boost, choose Easy / Normal / Hard, and track wins across the arenas."
+    ],
+    "controls": [
+      "WASD / arrows: drive. Space: drift. C / V: switch camera.",
+      "Drag to orbit in third person; scroll to zoom; R resets the camera. P / Esc pauses, M mutes."
+    ]
+  },
+  "crazy-sort": {
+    "session": "Quick score runs",
+    "features": [
+      "Drag expressive, colorful Boomkins into the pen matching their color before their fuses burn down.",
+      "Five difficulties: Easy, Normal, Hard, Chaos and Hyperchaos. Score 50 on the previous tier to unlock the next challenge.",
+      "Higher difficulties add changing colors, shuffling pens, hopping bombs and gusts of wind. One wrong pen or expired fuse ends the round."
+    ],
+    "controls": [
+      "Click and drag a Boomkin into its matching pen.",
+      "Esc / P pauses. M toggles sound; N toggles music. Space retries after a round."
+    ]
+  },
+  "slide-between": {
+    "session": "Quick races",
+    "features": [
+      "Race a visible robot through a 3D course of winding slides and floating doors.",
+      "Open sides let you steer or jump off anywhere. Gold launch pads provide extra lift or a sideways boost for shortcuts. Miss your landing and the race ends.",
+      "Choose Easy, Normal or Hard and keep your best winning times. Includes a lighter Chromebook graphics option.",
+      "A different course follows every win or loss. Restarts and unfinished rounds keep the same map; there is no manual course selector."
+    ],
+    "controls": [
+      "Mobile: drag left / right to steer on the slide and in the air. Tap Jump with another finger; tap Pause to stop the race.",
+      "A / D: steer on the slide and in the air. W: tuck / dive. S: brake / air brake.",
+      "Space or the touch Jump button: jump off anywhere on the slide. Esc: pause. R: restart."
+    ]
+  },
+  "meridian-space-program": {
+    "session": "20+ min",
+    "features": [
+      "Build staged rockets using a blueprint editor and a live 3D preview. Save designs, launch probes or crewed missions, and recover your spacecraft.",
+      "Perform science experiments and complete missions to unlock better rocket parts in the Research Center.",
+      "Explore the Solar System, track active spacecraft, plan transfers and take crew on spacewalks. Includes advanced interstellar research.",
+      "Animated seas and methane lakes, swimming astronauts, and detailed planetary rings."
+    ],
+    "controls": [
+      "Editor: drag parts onto the blueprint. X cycles symmetry; Ctrl+Z / Y undo and redo.",
+      "Flight: WASD / QE steer; Shift / Ctrl throttle; Z full throttle, X cut; Space stages. M opens the map, Esc pauses."
+    ]
+  },
+  "ducks-vs-dogs-2": {
+    "session": "5–15 min per level",
+    "features": [
+      "Collect 34 ducks and defend six worlds, each ending in a boss battle. Includes optional challenge levels.",
+      "Choose five duck types per level, with permanent loadout expansions up to eight.",
+      "Unlock five shops for ducks, upgrades, snacks and star rewards. Use each duck’s Quack Power during battle.",
+      "Includes an unlockable Endless Pond, Boss Rumble, trophies, and a Duck & Dog Field Guide."
+    ],
+    "controls": [
+      "Mouse / trackpad: choose a duck card, then click a tile to place it.",
+      "1–8 select cards. Q: Quack Power. R: remove a duck. Space / P: pause. F: battle speed."
+    ]
+  },
+  "square-off-2": {
+    "session": "10-round Standard Run · Endless · Practice · Tutorial",
+    "features": [
+      "Upgrade your square and the boss between rounds across five stages, with 36 playable characters.",
+      "Continue unfinished runs, chase Endless records, or experiment in the Practice Workshop."
+    ],
+    "controls": [
+      "A/D or arrows: move. Space/W/up: thrust. S/down: drop. Mouse: aim; weapons fire automatically.",
+      "Shift + direction: dash. E: utility. Esc/P: pause. Workshop: 1–4 select, Enter confirm, R reroll."
+    ]
+  }
+}

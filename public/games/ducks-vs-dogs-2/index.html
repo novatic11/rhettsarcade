@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#7cc8ff">
+<title>Ducks vs. Dogs 2</title>
+<meta name="description" content="Ducks vs. Dogs 2 — a cartoony 3D lane-defense sequel. Collect ducks, unlock shops, pick your team and defend the pond.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-screen="loading">
+<canvas id="gl"></canvas>
+
+<div id="loading" class="screen"><div class="load-card"><div class="logo small"><div class="logo-top">DUCKS</div><div class="logo-vs">vs.</div><div class="logo-bot">DOGS<span class="logo-2">2</span></div></div><p id="load-msg">Waking up the ducks…</p></div></div>
+
+<div id="screen-title" class="screen hidden"></div>
+<div id="screen-map" class="screen hidden"></div>
+<div id="screen-loadout" class="screen hidden"></div>
+<div id="screen-shop" class="screen hidden"></div>
+<div id="screen-result" class="screen hidden centered"></div>
+<div id="screen-reveal" class="screen hidden"></div>
+<div id="screen-guide" class="screen hidden"></div>
+<div id="screen-settings" class="screen hidden centered"></div>
+<div id="screen-trophies" class="screen hidden"></div>
+<div id="screen-battle" class="screen hidden"></div>
+
+<!-- Battle HUD -->
+<div id="hud" class="hidden">
+  <div id="hud-top">
+    <div id="hud-crumbs" title="Crumbs: spend them to place ducks"><span class="crumb-ico"></span><b id="crumb-val">50</b></div>
+    <div id="hud-cards"></div>
+    <div id="hud-tools">
+      <button id="tool-shovel" class="tool" title="Remove a duck (R)"><span>🧹</span><small>Remove</small></button>
+      <button id="tool-qp" class="tool" title="Quack Power: click, then click one of your ducks (Q)"><span>🪶</span><small>Quack Power</small><div id="qp-pips"></div></button>
+    </div>
+  </div>
+  <div id="hud-sys">
+    <button id="btn-speed" class="sys" title="Battle speed (F)">1×</button>
+    <button id="btn-sound" class="sys" title="Sound on/off">🔊</button>
+    <button id="btn-pause" class="sys" title="Pause (Space)">❚❚</button>
+  </div>
+  <div id="hud-bottom">
+    <div id="hud-level"></div>
+    <div id="hud-geese" title="Goose Patrols ready per lane"></div>
+    <div id="hud-timer" class="hidden"></div>
+    <div id="hud-endless" class="hidden"></div>
+    <div id="hud-progress"><div id="prog-bar"><div id="prog-fill"></div><div id="prog-flags"></div><span class="prog-head">🐕</span></div><span id="prog-label">Get ready</span></div>
+    <div id="hud-boss" class="hidden"><b id="boss-name"></b><div id="boss-bar"><div id="boss-fill"></div><i style="left:33%"></i><i style="left:63%"></i></div><small id="boss-phase"></small></div>
+  </div>
+</div>
+<div id="words"></div>
+<div id="fly"></div>
+<div id="banner" class="banner"></div>
+<div id="toast"></div>
+<div id="dogpop"></div>
+<div id="coach" class="hidden"><img id="coach-img" alt=""><div><b>Coach Quackers</b><p id="coach-text"></p><button id="coach-next" class="btn small">Got it ▶</button></div></div>
+<div id="rotate-hint">↻ Turn your device sideways for a bigger pond!</div>
+<div id="pause" class="hidden"></div>
+<div id="modal" class="hidden"></div>
+<div id="fatal" class="hidden"></div>
+
+<script src="lib/three.min.js"></script>
+<script src="js/data.js"></script>
+<script src="js/data2.js"></script>
+<script src="js/save.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/gfx.js"></script>
+<script src="js/gfx2.js"></script>
+<script src="js/battle.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

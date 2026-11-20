@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-labelledby="ducks-vs-dogs-2-t ducks-vs-dogs-2-d">
+<title id="ducks-vs-dogs-2-t">Ducks vs. Dogs 2 — six worlds</title>
+<desc id="ducks-vs-dogs-2-d">A glossy helmeted hero duck stands guard at the edge of a lily-pad pond with a water blaster. A grumpy dog peeks from a hedge, and floating islands in snow, desert and lava colors drift in the sky.</desc>
+<defs><linearGradient id="ducks-vs-dogs-2-0" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5ab8ff"/><stop offset="0.6" stop-color="#bfe8ff"/><stop offset="1" stop-color="#e8f8ff"/></linearGradient><radialGradient id="ducks-vs-dogs-2-1" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#fff6c8" stop-opacity="0.7"/><stop offset="0.45" stop-color="#fff6c8" stop-opacity="0.24499999999999997"/><stop offset="1" stop-color="#fff6c8" stop-opacity="0"/></radialGradient><radialGradient id="ducks-vs-dogs-2-2" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#ffb36b" stop-opacity="0.6"/><stop offset="0.45" stop-color="#ffb36b" stop-opacity="0.21"/><stop offset="1" stop-color="#ffb36b" stop-opacity="0"/></radialGradient><linearGradient id="ducks-vs-dogs-2-3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5ad0ff"/><stop offset="1" stop-color="#1f7ad0"/></linearGradient><radialGradient id="ducks-vs-dogs-2-4" cx="0.4" cy="0.3" r="0.8"><stop offset="0" stop-color="#ffffff"/><stop offset="0.7" stop-color="#f4ecd0"/><stop offset="1" stop-color="#c8b88a"/></radialGradient><radialGradient id="ducks-vs-dogs-2-5" cx="0.35" cy="0.3" r="0.8"><stop offset="0" stop-color="#fff3a8"/><stop offset="0.7" stop-color="#ffd84a"/><stop offset="1" stop-color="#e0a020"/></radialGradient><linearGradient id="ducks-vs-dogs-2-6" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9ad8ff"/><stop offset="1" stop-color="#2a7ad0"/></linearGradient><radialGradient id="ducks-vs-dogs-2-7" cx="0.5" cy="0.48" r="0.75"><stop offset="0.55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.5"/></radialGradient><linearGradient id="ducks-vs-dogs-2-8" x1="0" y1="0" x2="0" y2="1"><stop offset="0.62" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.32"/></linearGradient><pattern id="ducks-vs-dogs-2-grain" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".55" fill="#fff" opacity=".05"/><circle cx="3.5" cy="3.2" r=".5" fill="#000" opacity=".06"/></pattern></defs>
+
+<rect width="640" height="400" fill="url(#ducks-vs-dogs-2-0)"/>
+<circle cx="560" cy="70" r="120" fill="url(#ducks-vs-dogs-2-1)"/>
+<g fill="#fff" opacity=".9"><ellipse cx="120" cy="70" rx="60" ry="18"/><ellipse cx="160" cy="60" rx="40" ry="20"/><ellipse cx="420" cy="50" rx="50" ry="14"/></g>
+<g transform="translate(90 150) scale(0.7)"><path d="M-50 0 Q0 -12 50 0 Q30 40 0 56 Q-30 40 -50 0Z" fill="#8aa0c0"/><ellipse cx="0" cy="0" rx="50" ry="12" fill="#f4f8ff"/></g><g transform="translate(250 110) scale(0.55)"><path d="M-50 0 Q0 -12 50 0 Q30 40 0 56 Q-30 40 -50 0Z" fill="#c08a4a"/><ellipse cx="0" cy="0" rx="50" ry="12" fill="#f2d28a"/></g><g transform="translate(470 130) scale(0.65)"><path d="M-50 0 Q0 -12 50 0 Q30 40 0 56 Q-30 40 -50 0Z" fill="#5a2a2a"/><ellipse cx="0" cy="0" rx="50" ry="12" fill="#ff7a3a"/></g><g transform="translate(600 190) scale(0.45)"><path d="M-50 0 Q0 -12 50 0 Q30 40 0 56 Q-30 40 -50 0Z" fill="#5a3a8a"/><ellipse cx="0" cy="0" rx="50" ry="12" fill="#b48cff"/></g>
+<circle cx="470" cy="128" r="40" fill="url(#ducks-vs-dogs-2-2)"/>
+<path d="M0 260 Q160 200 330 236 T640 220 V400 H0Z" fill="#6ad05a"/>
+<path d="M0 290 Q200 250 380 280 T640 270 V400 H0Z" fill="#4ab84a"/>
+<ellipse cx="200" cy="350" rx="230" ry="60" fill="url(#ducks-vs-dogs-2-3)" stroke="#d8f4ff" stroke-width="5"/>
+<g fill="#3a9a3a"><path d="M90 340 a22 10 0 1 0 1 0z"/><path d="M300 370 a26 11 0 1 0 1 0z"/></g>
+<ellipse cx="90" cy="345" rx="22" ry="9" fill="#5ad05a"/><ellipse cx="300" cy="375" rx="26" ry="10" fill="#5ad05a"/>
+<circle cx="96" cy="340" r="5" fill="#ff8ac8"/>
+<g transform="translate(500 250)">
+  <circle cx="-50" cy="10" r="46" fill="#3a9a3a"/><circle cx="10" cy="-10" r="56" fill="#45aa45"/><circle cx="70" cy="14" r="44" fill="#3a9a3a"/>
+  <circle cx="-10" cy="-30" r="30" fill="#c08a5a" stroke="#2a1a10" stroke-width="3"/>
+  <path d="M-36 -48 Q-46 -20 -30 -10Z M16 -48 Q26 -20 10 -10Z" fill="#7a4a22" stroke="#2a1a10" stroke-width="3"/>
+  <ellipse cx="-10" cy="-18" rx="14" ry="10" fill="#f4e4cc" stroke="#2a1a10" stroke-width="2.5"/><circle cx="-10" cy="-24" r="4.5" fill="#1a1428"/>
+  <ellipse cx="-21" cy="-38" rx="6" ry="7.199999999999999" fill="#fff"/><circle cx="-23.7" cy="-36.92" r="3.3000000000000003" fill="#14161f"/><circle cx="-24.78" cy="-38.24" r="1.02" fill="#fff"/><ellipse cx="1" cy="-38" rx="6" ry="7.199999999999999" fill="#fff"/><circle cx="-1.7000000000000002" cy="-36.92" r="3.3000000000000003" fill="#14161f"/><circle cx="-2.7800000000000002" cy="-38.24" r="1.02" fill="#fff"/>
+  <path d="M-26 -50 l10 5 M6 -50 l-10 5" stroke="#2a1a10" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="-30" cy="10" r="22" fill="#45aa45"/><circle cx="20" cy="14" r="24" fill="#45aa45"/>
+</g>
+<g transform="translate(300 270)">
+  <ellipse cx="0" cy="70" rx="80" ry="14" fill="#000" opacity=".2"/>
+  <path d="M-70 30 Q-80 -30 -20 -30 L20 -30 Q80 -24 70 30 Q56 70 -10 70 Q-64 70 -70 30Z" fill="url(#ducks-vs-dogs-2-4)" stroke="#3a2a10" stroke-width="4"/>
+  <path d="M-60 20 Q-30 0 0 20" stroke="#e0d0a8" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <circle cx="30" cy="-60" r="42" fill="url(#ducks-vs-dogs-2-5)" stroke="#3a2a10" stroke-width="4"/>
+  <path d="M-8 -80 Q30 -120 70 -80 L72 -70 L-10 -70Z" fill="url(#ducks-vs-dogs-2-6)" stroke="#14306a" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M8 -92 Q30 -110 56 -94" stroke="#fff" stroke-width="5" fill="none" opacity=".6" stroke-linecap="round"/>
+  <rect x="-14" y="-74" width="88" height="10" rx="5" fill="#ffd34d" stroke="#14306a" stroke-width="3"/>
+  <path d="M62 -54 L98 -46 Q100 -38 62 -38Z" fill="#ff8a2a" stroke="#3a2a10" stroke-width="3" stroke-linejoin="round"/>
+  <ellipse cx="44" cy="-56" rx="8" ry="10" fill="#fff" stroke="#3a2a10" stroke-width="2"/><circle cx="47" cy="-54" r="5" fill="#1a1428"/><circle cx="45" cy="-57" r="1.8" fill="#fff"/>
+  <rect x="40" y="0" width="80" height="22" rx="8" fill="#ff5a6a" stroke="#3a1420" stroke-width="3.5"/>
+  <rect x="58" y="-16" width="26" height="18" rx="6" fill="#4fb0ff" stroke="#14306a" stroke-width="3"/>
+  <rect x="112" y="4" width="20" height="14" rx="4" fill="#ffd34d" stroke="#3a1420" stroke-width="3"/>
+  <ellipse cx="54" cy="20" rx="16" ry="10" fill="#ffe27a" stroke="#3a2a10" stroke-width="3"/>
+</g>
+<path d="M436 284 Q470 270 500 280" stroke="#8fd8ff" stroke-width="7" stroke-linecap="round" fill="none"/>
+<g fill="#cfefff"><circle cx="506" cy="276" r="5"/><circle cx="516" cy="288" r="4"/><circle cx="496" cy="268" r="3"/></g>
+<rect width="640" height="400" fill="url(#ducks-vs-dogs-2-8)"/>
+<rect width="640" height="400" fill="url(#ducks-vs-dogs-2-7)"/>
+<rect width="640" height="400" fill="url(#ducks-vs-dogs-2-grain)"/>
+</svg>

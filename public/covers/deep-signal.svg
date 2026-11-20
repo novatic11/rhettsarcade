@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-labelledby="deep-signal-t deep-signal-d">
+<title id="deep-signal-t">Deep Signal — what waits below</title>
+<desc id="deep-signal-d">A small yellow and teal salvage submarine pings the dark with mint sonar rings. Its headlamp finds a glowing salvage pod on a ledge beneath drifting jellyfish, while a huge eye opens in the depths.</desc>
+<defs><linearGradient id="deep-signal-0" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0f4a6a"/><stop offset="0.45" stop-color="#0a2440"/><stop offset="1" stop-color="#02060e"/></linearGradient><radialGradient id="deep-signal-1" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#ffcf3a" stop-opacity="0.18"/><stop offset="1" stop-color="#ffcf3a" stop-opacity="0"/></radialGradient><linearGradient id="deep-signal-2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff6c8" stop-opacity="0.55"/><stop offset="1" stop-color="#fff6c8" stop-opacity="0"/></linearGradient><radialGradient id="deep-signal-3" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#7fffd8" stop-opacity="0.8"/><stop offset="0.45" stop-color="#7fffd8" stop-opacity="0.27999999999999997"/><stop offset="1" stop-color="#7fffd8" stop-opacity="0"/></radialGradient><radialGradient id="deep-signal-4" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#ff9af0" stop-opacity="0.4"/><stop offset="0.45" stop-color="#ff9af0" stop-opacity="0.13999999999999999"/><stop offset="1" stop-color="#ff9af0" stop-opacity="0"/></radialGradient><radialGradient id="deep-signal-5" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#b48cff" stop-opacity="0.4"/><stop offset="0.45" stop-color="#b48cff" stop-opacity="0.13999999999999999"/><stop offset="1" stop-color="#b48cff" stop-opacity="0"/></radialGradient><radialGradient id="deep-signal-6" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#9ad8ff" stop-opacity="0.4"/><stop offset="0.45" stop-color="#9ad8ff" stop-opacity="0.13999999999999999"/><stop offset="1" stop-color="#9ad8ff" stop-opacity="0"/></radialGradient><linearGradient id="deep-signal-7" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3a8"/><stop offset="0.5" stop-color="#ffcf3a"/><stop offset="1" stop-color="#c08a10"/></linearGradient><radialGradient id="deep-signal-8" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#fff6c8" stop-opacity="0.9"/><stop offset="0.45" stop-color="#fff6c8" stop-opacity="0.315"/><stop offset="1" stop-color="#fff6c8" stop-opacity="0"/></radialGradient><radialGradient id="deep-signal-9" cx="0.5" cy="0.48" r="0.75"><stop offset="0.55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.5"/></radialGradient><linearGradient id="deep-signal-10" x1="0" y1="0" x2="0" y2="1"><stop offset="0.62" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.32"/></linearGradient><pattern id="deep-signal-grain" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".55" fill="#fff" opacity=".05"/><circle cx="3.5" cy="3.2" r=".5" fill="#000" opacity=".06"/></pattern></defs>
+
+<rect width="640" height="400" fill="url(#deep-signal-0)"/>
+<g opacity=".12" fill="#cfefff"><polygon points="160,0 210,0 120,400 60,400"/><polygon points="300,0 330,0 300,400 240,400"/><polygon points="440,0 480,0 540,400 470,400"/></g>
+<path d="M0 0 H120 Q90 60 110 120 Q80 200 120 260 Q60 330 90 400 H0Z" fill="#071826"/>
+<path d="M640 0 H560 Q600 80 570 150 Q610 210 600 260 L470 300 Q440 330 640 340Z" fill="#071826"/>
+<path d="M640 340 L470 300 Q430 312 420 330 Q500 340 640 400Z" fill="#0b2232"/>
+<path d="M470 300 Q440 310 420 330" stroke="#3a7a8a" stroke-width="3" fill="none"/>
+<path d="M0 360 Q200 330 640 380 V400 H0Z" fill="#040c16"/>
+<ellipse cx="150" cy="360" rx="90" ry="30" fill="url(#deep-signal-1)"/>
+<path d="M110 360 Q150 340 190 360 Q150 372 110 360Z" fill="#ffcf3a"/>
+<ellipse cx="150" cy="360" rx="6" ry="13" fill="#140a02"/>
+<polygon points="330,200 500,260 520,330 360,226" fill="url(#deep-signal-2)"/>
+<circle cx="490" cy="300" r="50" fill="url(#deep-signal-3)"/>
+<g transform="translate(490 300) rotate(-10)"><rect x="-22" y="-12" width="44" height="24" rx="10" fill="#d6dff0" stroke="#0a2440" stroke-width="3"/><rect x="-6" y="-12" width="12" height="24" fill="#7fffd8"/><circle cx="0" cy="-16" r="3" fill="#7fffd8"/></g>
+<ellipse cx="270" cy="190" rx="60" ry="42" fill="none" stroke="#7fffd8" stroke-width="3" opacity="0.5"/><ellipse cx="270" cy="190" rx="100" ry="70" fill="none" stroke="#7fffd8" stroke-width="2.3" opacity="0.37"/><ellipse cx="270" cy="190" rx="140" ry="98" fill="none" stroke="#7fffd8" stroke-width="1.6" opacity="0.24"/>
+<g transform="translate(420 90) scale(1.1)" opacity=".85"><circle cx="0" cy="0" r="34" fill="url(#deep-signal-4)"/><path d="M-18 4 Q-18 -18 0 -18 Q18 -18 18 4 Q9 0 0 4 Q-9 0 -18 4Z" fill="#ff9af0" opacity=".7"/><path d="M-10 4 q-4 14 2 26 M0 4 q4 16 -2 32 M10 4 q4 12 -2 24" stroke="#ff9af0" stroke-width="2" fill="none" opacity=".7"/></g><g transform="translate(500 150) scale(0.7)" opacity=".85"><circle cx="0" cy="0" r="34" fill="url(#deep-signal-5)"/><path d="M-18 4 Q-18 -18 0 -18 Q18 -18 18 4 Q9 0 0 4 Q-9 0 -18 4Z" fill="#b48cff" opacity=".7"/><path d="M-10 4 q-4 14 2 26 M0 4 q4 16 -2 32 M10 4 q4 12 -2 24" stroke="#b48cff" stroke-width="2" fill="none" opacity=".7"/></g><g transform="translate(200 70) scale(0.6)" opacity=".85"><circle cx="0" cy="0" r="34" fill="url(#deep-signal-6)"/><path d="M-18 4 Q-18 -18 0 -18 Q18 -18 18 4 Q9 0 0 4 Q-9 0 -18 4Z" fill="#9ad8ff" opacity=".7"/><path d="M-10 4 q-4 14 2 26 M0 4 q4 16 -2 32 M10 4 q4 12 -2 24" stroke="#9ad8ff" stroke-width="2" fill="none" opacity=".7"/></g>
+<g transform="translate(270 190)">
+  <path d="M-70 0 l-20 -14 v28z" fill="#3a4a5a" stroke="#0a1420" stroke-width="2.5"/>
+  <ellipse cx="-74" cy="0" rx="4" ry="16" fill="#9aa4b4"/>
+  <ellipse cx="0" cy="0" rx="70" ry="32" fill="url(#deep-signal-7)" stroke="#0a1420" stroke-width="3"/>
+  <path d="M-62 10 Q0 24 62 10 L60 16 Q0 34 -60 16Z" fill="#2ab8a8"/>
+  <path d="M-30 -30 h40 l6 -18 h-38z" fill="#ffcf3a" stroke="#0a1420" stroke-width="3"/>
+  <path d="M-4 -48 v-14 h12" stroke="#0a1420" stroke-width="3" fill="none"/>
+  <circle cx="-30" cy="-4" r="9" fill="#9ad8ff" stroke="#0a1420" stroke-width="3"/><circle cx="-33" cy="-7" r="3" fill="#fff" opacity=".8"/><circle cx="-6" cy="-4" r="9" fill="#9ad8ff" stroke="#0a1420" stroke-width="3"/><circle cx="-9" cy="-7" r="3" fill="#fff" opacity=".8"/><circle cx="18" cy="-4" r="9" fill="#9ad8ff" stroke="#0a1420" stroke-width="3"/><circle cx="15" cy="-7" r="3" fill="#fff" opacity=".8"/>
+  <path d="M-50 -18 Q0 -34 50 -18" stroke="#fff" stroke-width="4" fill="none" opacity=".45" stroke-linecap="round"/>
+  <circle cx="64" cy="6" r="8" fill="#fff6c8" stroke="#0a1420" stroke-width="2.5"/>
+</g>
+<circle cx="334" cy="196" r="30" fill="url(#deep-signal-8)"/>
+<g fill="#cfefff" opacity=".5"><circle cx="190" cy="150" r="3"/><circle cx="182" cy="134" r="2"/><circle cx="196" cy="118" r="2.5"/></g>
+<rect width="640" height="400" fill="url(#deep-signal-10)"/>
+<rect width="640" height="400" fill="url(#deep-signal-9)"/>
+<rect width="640" height="400" fill="url(#deep-signal-grain)"/>
+</svg>

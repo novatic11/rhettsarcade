@@ -1,0 +1,12 @@
+[
+  {
+    "id": "backrooms-for-science",
+    "title": "Backrooms For Science",
+    "genre": "Horror",
+    "description": "Explore the Backrooms and study its entities. Survive your shifts, meet your research quota, and spend your pay on better gear.",
+    "controls": "WASD · Mouse · E to interact",
+    "cover": "/api/playtest/game/backrooms-for-science/cover.svg",
+    "coverAlt": "A dim yellow hallway with fluorescent lights and a distant silhouette",
+    "url": "/api/playtest/game/backrooms-for-science/index.html"
+  }
+]

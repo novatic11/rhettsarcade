@@ -1,0 +1,5 @@
+import {CargoDock,PORTS} from './model.js';
+import {boot} from './runtime.js';
+import {draw} from './render.js';
+document.querySelector('#controls').textContent='A / D or arrows move the crane · Space drops cargo · P pauses. The dotted guide predicts your landing. Heavy crates pull harder: balance the left and right sides before the ship tips.';
+boot({id:'cargo-swing',title:'Cargo Swing',endless:true,description:'Stack cargo for as long as you can. Your ship leans under uneven weight, crates can slide, and rough weather grows with your score. Keep both sides balanced. Five crates overboard—or a capsize—ends the run.',levels:PORTS,unit:'run',win:'A fine delivery.',make:()=>new CargoDock(),restore:CargoDock.restore,action:'Drop cargo · Space',canAct:g=>g.held,draw,danger:g=>Math.min(1,Math.abs(g.roll)/.5),brief:g=>'SPARES '+g.lives+'/5 · NEXT '+g.cargo.label.toUpperCase()+' '+g.cargo.mass+'t',hud:g=>[['CARGO STACKED',g.delivered],['SHIP LEAN',Math.round(Math.abs(g.roll)*180/Math.PI)+'° '+(g.roll>.02?'RIGHT':g.roll<-.02?'LEFT':'LEVEL')],['SCORE',g.score]]});
