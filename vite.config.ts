@@ -20,6 +20,8 @@ const managedLinux = readExecutionProfile() === "managed-linux";
 
 const localBindingConfig = {
   name: WORKER_NAME,
+  // Serve on the free <name>.<account>.workers.dev URL.
+  workers_dev: true,
   main: "./build/sites-worker.ts",
   compatibility_flags: ["nodejs_compat"],
   d1_databases: d1
