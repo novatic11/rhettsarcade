@@ -1,125 +1,309 @@
-// Stable key keeps every pre-release arcade intact.
-export const SAVE_KEY='arcade-tycoon-prototype-v1';
-export const SETTINGS_KEY='arcade-tycoon-settings-v1';
+// Arcade Tycoon 2.0 simulation. Pure logic: no DOM, deterministic with an injected random source.
+export const DAY_LENGTH=90,SAVE_KEY='arcade-tycoon-prototype-v1',SETTINGS_KEY='arcade-tycoon-settings-v1';
+export const LOCATIONS=[
+ {name:'Corner Arcade',w:8,h:6,rent:20,move:0,goal:null,blurb:'A narrow room beside the laundromat. Every empire starts somewhere.'},
+ {name:'Strip Mall Unit',w:10,h:7,rent:45,move:1500,goal:{earned:4000,rep:55,types:3},blurb:'A real storefront with parking out front.'},
+ {name:'Boardwalk Pier',w:12,h:8,rent:80,move:5000,goal:{earned:15000,rep:60,types:6},blurb:'Sea air, tourists and a lot more floor.'},
+ {name:'Downtown Loft',w:14,h:9,rent:130,move:12000,goal:{earned:45000,rep:66,types:9},blurb:'Brick walls, big windows and a crowd that expects the best.'},
+ {name:'Megaplex Wing',w:16,h:10,rent:200,move:30000,goal:{earned:120000,rep:72,types:12},blurb:'An entire wing of the cinema complex.'},
+ {name:'The Grand Arcade',w:18,h:11,rent:300,move:70000,goal:{earned:300000,rep:78,types:15},blurb:'The landmark. People plan trips around it.'}
+];
+// tag: what kind of fun it is. seats: players at once. tickets: ticket payout per play.
 export const TYPES={
- cabinet:{name:'Classic cabinet',cost:180,pay:6,duration:7,unlock:0,color:'#79bed7',kind:'game',description:'The dependable crowd-pleaser. $6 per play.'},
- pinball:{name:'Pinball table',cost:340,pay:10,duration:9,unlock:8,color:'#b5a1df',kind:'game',description:'A silver-ball classic. $10 per play.'},
- claw:{name:'Claw machine',cost:520,pay:15,duration:11,unlock:25,color:'#de9bb6',kind:'game',description:'Plush prizes and big dreams. $15 per play.'},
- racer:{name:'Racing cabinet',cost:680,pay:18,duration:12,unlock:50,color:'#e49a76',kind:'game',description:'Coastal roads and friendly competition. $18 per play.'},
- basketball:{name:'Hoop shot',cost:850,pay:23,duration:13,unlock:85,color:'#edb576',kind:'game',description:'A miniature basketball court. $23 per play.'},
- dance:{name:'Dance stage',cost:1100,pay:30,duration:14,unlock:125,color:'#ed91ae',kind:'game',description:'Light-up arrows, loud beats, a crowd favorite. $30 per play.'},
- hockey:{name:'Air hockey',cost:1400,pay:38,duration:16,unlock:180,color:'#7ed6d2',kind:'game',description:'Fast pucks and friendly rivalries. $38 per play.'},
- snack:{name:'Snack machine',cost:290,pay:8,duration:5,unlock:0,color:'#c5cf8b',kind:'game',description:'Customers get hungry. Give them a quick snack between games.'},
- plant:{name:'Potted plant',cost:45,color:'#8fc49c',kind:'decor',description:'A little greenery brings more visitors.'},
- bench:{name:'Waiting bench',cost:65,color:'#a2bad7',kind:'decor',description:'Gives waiting customers eight seconds more patience.'},
- lamp:{name:'Floor lamp',cost:90,color:'#f1c997',kind:'decor',description:'Warm pools of light make your arcade more inviting.'},
- poster:{name:'Poster stand',cost:75,color:'#b9a4dd',kind:'decor',description:'Local character helps bring visitors through the door.'}
+ cabinet:{name:'Classic Cabinet',cat:'games',tag:'retro',cost:180,price:2,dur:7,fun:14,seats:1,w:1,unlock:0,tickets:2,color:'#f2a65a',desc:'Joystick, two buttons, one more try.'},
+ pinball:{name:'Pinball Table',cat:'games',tag:'retro',cost:420,price:3,dur:9,fun:19,seats:1,w:1,unlock:0,tickets:4,color:'#7cc6d6',desc:'Flippers, bumpers and a satisfying tilt.'},
+ claw:{name:'Claw Machine',cat:'games',tag:'prize',cost:350,price:2,dur:5,fun:12,seats:1,w:1,unlock:0,tickets:0,color:'#f2b8d0',desc:'Plush prizes and a famously weak claw.'},
+ hockey:{name:'Air Hockey',cat:'games',tag:'sport',cost:700,price:3,dur:10,fun:22,seats:2,w:2,unlock:1,tickets:6,color:'#9ad0a0',desc:'Two players. Loud, fast and friendly.'},
+ racer:{name:'Twin Racer',cat:'games',tag:'speed',cost:900,price:4,dur:11,fun:24,seats:2,w:2,unlock:1,tickets:5,color:'#e46c6c',desc:'Two bucket seats and a big wheel.'},
+ skeeball:{name:'Roll Lane',cat:'games',tag:'prize',cost:600,price:2,dur:8,fun:16,seats:1,w:1,unlock:1,tickets:12,color:'#d8b36a',desc:'Roll the ball up the ramp. Tickets galore.'},
+ dance:{name:'Dance Stage',cat:'games',tag:'rhythm',cost:1300,price:4,dur:12,fun:28,seats:2,w:2,unlock:2,tickets:6,color:'#b79cf2',desc:'Arrows on the floor, music in the air.'},
+ drums:{name:'Rhythm Drums',cat:'games',tag:'rhythm',cost:1000,price:3,dur:10,fun:22,seats:1,w:1,unlock:2,tickets:5,color:'#ef8f5c',desc:'Hit the pads in time with the chart.'},
+ lightgun:{name:'Blaster Booth',cat:'games',tag:'speed',cost:1500,price:4,dur:11,fun:26,seats:2,w:2,unlock:3,tickets:6,color:'#6cb2e4',desc:'Two plastic blasters versus a screen of robots.'},
+ coinpush:{name:'Coin Pusher',cat:'games',tag:'prize',cost:1100,price:2,dur:7,fun:15,seats:1,w:1,unlock:3,tickets:14,color:'#e9d27a',desc:'The shelf slides. The tickets almost fall.'},
+ vr:{name:'VR Pod',cat:'games',tag:'future',cost:3200,price:7,dur:14,fun:36,seats:1,w:1,unlock:4,tickets:8,color:'#82e0c8',desc:'A headset, a harness and another world.'},
+ bowling:{name:'Mini Bowling',cat:'games',tag:'sport',cost:2600,price:5,dur:13,fun:30,seats:2,w:2,unlock:4,tickets:10,color:'#c99be0',desc:'A short lane with real pins.'},
+ simulator:{name:'Motion Simulator',cat:'games',tag:'future',cost:5200,price:9,dur:16,fun:44,seats:2,w:2,unlock:5,tickets:10,color:'#7fa4f2',desc:'A pod that tilts with every turn.'},
+ snack:{name:'Snack Bar',cat:'service',tag:'food',cost:500,price:4,dur:4,fun:4,seats:1,w:1,unlock:0,need:'hunger',color:'#f0c070',desc:'Pretzels and nachos. Fixes hunger.'},
+ soda:{name:'Soda Fountain',cat:'service',tag:'drink',cost:400,price:2,dur:3,fun:3,seats:1,w:1,unlock:1,need:'thirst',color:'#78c8f0',desc:'Cold drinks. Fixes thirst.'},
+ restroom:{name:'Restroom',cat:'service',tag:'rest',cost:600,price:0,dur:5,fun:2,seats:1,w:1,unlock:1,need:'bladder',color:'#c8d4dc',desc:'Free and very appreciated.'},
+ prizes:{name:'Prize Counter',cat:'service',tag:'prizes',cost:900,price:0,dur:4,fun:10,seats:1,w:2,unlock:2,need:'tickets',color:'#f29ac0',desc:'Trade tickets for prizes. Big happiness boost.'},
+ photo:{name:'Photo Booth',cat:'service',tag:'photo',cost:800,price:5,dur:6,fun:16,seats:1,w:1,unlock:3,color:'#e0e0a0',desc:'Silly strips of four.'},
+ bench:{name:'Bench',cat:'decor',tag:'seat',cost:60,price:0,dur:5,fun:1,seats:2,w:2,unlock:0,need:'energy',color:'#a88466',desc:'Tired visitors rest here.'},
+ plant:{name:'Potted Plant',cat:'decor',cost:40,price:0,unlock:0,w:1,appeal:4,color:'#6fbf73',desc:'Makes nearby machines a bit more inviting.'},
+ bin:{name:'Trash Bin',cat:'decor',cost:50,price:0,unlock:0,w:1,appeal:1,bin:true,color:'#7d8c95',desc:'Visitors nearby rarely litter.'},
+ neon:{name:'Neon Sign',cat:'decor',cost:240,price:0,unlock:1,w:1,appeal:8,color:'#ff7ad9',desc:'A glowing sign. Strong appeal.'},
+ fountain:{name:'Light Fountain',cat:'decor',cost:900,price:0,unlock:3,w:1,appeal:14,color:'#8fe3ff',desc:'A shimmering centerpiece.'},
+ statue:{name:'Mascot Statue',cat:'decor',cost:2000,price:0,unlock:4,w:1,appeal:20,color:'#ffd27a',desc:'A big golden quarter with a smile.'}
 };
-export const EXPANSIONS=[
- {w:9,h:6,cost:0,plays:0,name:'Corner Arcade',rent:20},
- {w:11,h:7,cost:1200,plays:45,name:'Neighborhood Favorite',rent:30},
- {w:13,h:8,cost:2800,plays:120,name:'High Street Arcade',rent:40},
- {w:15,h:9,cost:6000,plays:250,name:'Downtown Destination',rent:55},
- {w:17,h:10,cost:12000,plays:450,name:'The Grand Arcade',rent:75}
-];
-export const STAFF={mechanic:{name:'Mechanic',cost:220,wage:18,description:'Walks to damaged machines and repairs them. $18 per day.'},host:{name:'Floor host',cost:160,wage:12,description:'Welcomes more visitors and gives them eight seconds more patience. $12 per day.'}};
-export const UPGRADES={tokens:{name:'Token club',cost:650,description:'Members pay 20% more at every attraction.'},service:{name:'Quick-start kits',cost:900,description:'All attractions finish games 15% faster.'}};
+export const GAME_TYPES=Object.keys(TYPES).filter(k=>TYPES[k].cat==='games');
+export const STAFF={
+ mechanic:{name:'Mechanic',hire:250,wage:30,desc:'Repairs worn and broken machines.'},
+ janitor:{name:'Janitor',hire:150,wage:20,desc:'Sweeps up litter so visitors stay happy.'},
+ host:{name:'Floor Host',hire:200,wage:25,desc:'Keeps queues patient and cheerful.'},
+ mascot:{name:'Mascot',hire:600,wage:45,unlock:2,desc:'Wanders the floor. Visitors love it and more arrive.'}
+};
+export const IMPROVEMENTS={
+ tokens:{name:'Custom tokens',costs:[600,1600,4000],desc:'+10% on every paid play per level.'},
+ service:{name:'Service contract',costs:[500,1400,3600],desc:'Machines wear 25% slower per level.'},
+ carpet:{name:'Comfy carpet',costs:[400,1200],desc:'Visitors wait 30% longer per level.'},
+ marquee:{name:'Light-up marquee',costs:[700,1800,4500],desc:'15% more visitors per level.'},
+ loyalty:{name:'Loyalty cards',costs:[900,2600],desc:'Happy visitors raise reputation faster.'},
+ catalog:{name:'Prize catalog',costs:[800,2400],desc:'Prize counter trips make visitors much happier.'},
+ sound:{name:'Sound system',costs:[1200],desc:'Background music: everyone is a little happier.'},
+ hvac:{name:'Air conditioning',costs:[1500],desc:'Visitors tire and thirst 25% slower.'}
+};
+export const CAMPAIGNS={
+ flyers:{name:'Neighborhood flyers',cost:150,time:45,boost:1.6,unlock:0,desc:'A rush of visitors for 45 seconds.'},
+ radio:{name:'Radio spot',cost:700,time:90,boost:2,unlock:2,desc:'Twice the visitors for 90 seconds, with bigger wallets.'},
+ tournament:{name:'Weekend tournament',cost:500,time:60,boost:1.4,unlock:1,desc:'Competitive teens arrive. Paid plays earn 50% more.'}
+};
+export const KINDS={
+ kid:{name:'Kid',budget:[10,18],likes:{prize:1.6,retro:1,sport:1.2,rhythm:1.1,speed:.9,future:.8},speed:2.3,shirt:['#ffb36b','#7fd1ff','#ffd86b','#a8e68a']},
+ teen:{name:'Teen',budget:[14,26],likes:{speed:1.5,rhythm:1.5,future:1.3,sport:1.1,retro:.8,prize:.7},speed:2.1,shirt:['#c58bff','#ff7a9c','#6be0c0','#7d8bff']},
+ adult:{name:'Adult',budget:[20,40],likes:{retro:1.6,sport:1.2,future:1.1,prize:.8,speed:1,rhythm:.8},speed:1.9,shirt:['#e6e0d0','#98b7c8','#c8a07c','#9fc39a']},
+ collector:{name:'Collector',budget:[24,46],likes:{prize:1.8,retro:1.4,future:1,speed:.8,sport:.9,rhythm:.9},speed:1.8,shirt:['#f2d16b','#e89a6b']}
+};
+export const EVENTS={
+ rain:{name:'Rainy day',desc:'Nobody wants to be outside. More visitors today.'},
+ school:{name:'School’s out',desc:'Kids everywhere. Prize games are popular.'},
+ critic:{name:'A critic visits',desc:'A reviewer is on the floor. Their verdict moves your reputation.'},
+ outage:{name:'Power flicker',desc:'A surge knocked one machine offline.'},
+ party:{name:'Birthday party',desc:'A group of kids arrives together with spending money.'},
+ heat:{name:'Heat wave',desc:'Visitors get thirsty fast. Drinks sell well.'}
+};
 export const MILESTONES=[
- {id:'first-ten',name:'A proper opening',detail:'Complete 10 paid plays',reward:100,test:g=>g.plays>=10},
- {id:'variety',name:'Something for everyone',detail:'Own 5 different attractions',reward:250,test:g=>new Set(g.games.map(i=>i.type)).size>=5},
- {id:'regulars',name:'Neighborhood favorite',detail:'Reach 80 reputation',reward:300,test:g=>g.reputation>=80},
- {id:'turnover',name:'The quarters add up',detail:'Earn $3,000 in total',reward:500,test:g=>g.totalEarned>=3000},
- {id:'empire',name:'Room for an empire',detail:'Reach High Street (third location)',reward:900,test:g=>g.level>=2},
- {id:'downtown',name:'The place to be',detail:'Reach Downtown and own 10 attractions',reward:1500,test:g=>g.level>=3&&g.games.length>=10},
- {id:'grand',name:'Your arcade empire',detail:'Grand Arcade · 16 attractions · all 8 types · 85 reputation · $40,000 earned',reward:5000,test:g=>g.level===4&&g.games.length>=16&&new Set(g.games.map(i=>i.type)).size===8&&g.reputation>=85&&g.totalEarned>=40000}
+ {id:'first',text:'Place your first attraction',reward:50,test:g=>g.items.some(i=>TYPES[i.type].cat==='games')},
+ {id:'open',text:'Welcome 10 visitors',reward:80,test:g=>g.served>=10},
+ {id:'hundred',text:'Earn $500 in total',reward:100,test:g=>g.totalEarned>=500},
+ {id:'snack',text:'Build a snack bar',reward:100,test:g=>g.items.some(i=>i.type==='snack')},
+ {id:'staff',text:'Hire your first staff member',reward:150,test:g=>g.staff.length>0},
+ {id:'three',text:'Run 3 different attraction types',reward:200,test:g=>g.distinctTypes()>=3},
+ {id:'upgrade',text:'Upgrade an attraction to level 3',reward:250,test:g=>g.items.some(i=>i.level>=3)},
+ {id:'rep70',text:'Reach 70 reputation',reward:400,test:g=>g.reputation>=70},
+ {id:'visitors',text:'Welcome 250 visitors',reward:500,test:g=>g.served>=250},
+ {id:'ten-k',text:'Earn $10,000 in total',reward:600,test:g=>g.totalEarned>=10000},
+ {id:'improve',text:'Buy 5 business improvements',reward:700,test:g=>Object.values(g.upgrades).reduce((a,b)=>a+b,0)>=5},
+ {id:'staff4',text:'Run a team of 4 staff',reward:800,test:g=>g.staff.length>=4},
+ {id:'loc3',text:'Move to the Boardwalk Pier',reward:1000,test:g=>g.level>=2},
+ {id:'max',text:'Upgrade an attraction to level 5',reward:1200,test:g=>g.items.some(i=>i.level>=5)},
+ {id:'hundred-k',text:'Earn $100,000 in total',reward:3000,test:g=>g.totalEarned>=100000},
+ {id:'rep90',text:'Reach 90 reputation',reward:4000,test:g=>g.reputation>=90},
+ {id:'all',text:'Run every attraction type at once',reward:8000,test:g=>GAME_TYPES.every(t=>g.items.some(i=>i.type===t))},
+ {id:'grand',text:'Open The Grand Arcade',reward:5000,test:g=>g.level>=5},
+ {id:'million',text:'Earn $1,000,000 in total',reward:20000,test:g=>g.totalEarned>=1e6}
 ];
-const pos=(x,y)=>x+','+y;
-const finite=(n,max=1e12)=>Number.isFinite(n)&&n>=0&&n<=max;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const NEEDS=['hunger','thirst','bladder','energy'],NEED_ITEM={hunger:'snack',thirst:'soda',bladder:'restroom',energy:'bench'};
+
 export class Tycoon{
- constructor(random=Math.random){Object.assign(this,{random,cash:700,totalEarned:0,plays:0,day:1,dayTime:0,level:0,reputation:50,open:false,items:[],guests:[],nextId:1,spawnIn:1,events:[],time:0,staff:{mechanic:false,host:false},upgrades:{tokens:false,service:false},claimed:[],campaign:0,theme:'midnight',dailyIncome:0,lastDay:null,mechanic:null,served:0,lost:0,tutorial:{status:'new',step:0}});}
- get floor(){return EXPANSIONS[this.level];}get door(){return {x:0,y:2};}
- get games(){return this.items.filter(i=>TYPES[i.type].kind==='game');}
- get dailyCost(){return this.floor.rent+Object.entries(STAFF).reduce((n,[id,s])=>n+(this.staff[id]?s.wage:0),0);}
- get unlockedTypes(){return Object.keys(TYPES).filter(type=>this.isUnlocked(type));}
- isUnlocked(type){return !!TYPES[type]&&(this.plays>=(TYPES[type].unlock||0)||this.items.some(i=>i.type===type));}
- payFor(item){return Math.round(TYPES[item.type].pay*(1+.5*(item.level-1))*(this.upgrades.tokens?1.2:1));}
- playDuration(item){return TYPES[item.type].duration*(1-.1*(item.level-1))*(this.upgrades.service?0.85:1);}
- hire(id){if(!STAFF[id])throw Error('Choose a staff member.');if(this.staff[id])throw Error('Already hired.');if(this.cash<STAFF[id].cost)throw Error('Not enough cash to hire.');this.cash-=STAFF[id].cost;this.staff[id]=true;}
- dismiss(id){if(!STAFF[id]||!this.staff[id])throw Error('That role is not hired.');this.staff[id]=false;if(id==='mechanic')this.mechanic=null;}
- improve(id){if(!UPGRADES[id]||this.upgrades[id])throw Error('Already purchased.');if(this.cash<UPGRADES[id].cost)throw Error('Not enough cash for that improvement.');this.cash-=UPGRADES[id].cost;this.upgrades[id]=true;}
- advertise(){if(this.campaign>0)throw Error('Your flyers are still running.');if(!this.open)throw Error('Open your doors before advertising.');if(this.cash<80)throw Error('A flyer campaign costs $80.');this.cash-=80;this.campaign=45;this.spawnIn=Math.min(this.spawnIn,1);}
- claim(id){const m=MILESTONES.find(m=>m.id===id);if(!m||this.claimed.includes(id)||!m.test(this))throw Error('That goal is not ready.');this.claimed.push(id);this.cash+=m.reward;return m.reward;}
- occupancy(x,y,items=this.items){return items.find(i=>i.x===x&&i.y===y);}
- path(start,end,items=this.items){const {w,h}=this.floor;if(end.x<0||end.y<0||end.x>=w||end.y>=h||this.occupancy(end.x,end.y,items))return null;const queue=[start],seen=new Map([[pos(start.x,start.y),null]]);for(let p=0;p<queue.length;p++){const at=queue[p];if(at.x===end.x&&at.y===end.y){const out=[];let key=pos(at.x,at.y);while(seen.get(key)!==null){const [x,y]=key.split(',').map(Number);out.unshift({x,y});key=seen.get(key);}return out;}for(const [dx,dy] of [[1,0],[0,1],[-1,0],[0,-1]]){const x=at.x+dx,y=at.y+dy,key=pos(x,y);if(x<0||y<0||x>=w||y>=h||seen.has(key)||this.occupancy(x,y,items))continue;seen.set(key,pos(at.x,at.y));queue.push({x,y});}}return null;}
- route(actor,to){const start={x:Math.round(actor.x),y:Math.round(actor.y)},path=this.path(start,to);if(!path)return null;if(Math.hypot(start.x-actor.x,start.y-actor.y)>.001)path.unshift(start);return path;}
- walk(actor,dt,speed=2.1){let remaining=dt;while(actor.path.length&&remaining>0){const at=actor.path[0],dx=at.x-actor.x,dy=at.y-actor.y,d=Math.hypot(dx,dy),needed=d/speed;if(needed<=remaining){actor.x=at.x;actor.y=at.y;actor.path.shift();remaining-=needed;}else{actor.x+=dx/d*remaining*speed;actor.y+=dy/d*remaining*speed;remaining=0;}}return remaining;}
- validate(type,x,y,exclude=null){if(!TYPES[type]||!Number.isInteger(x)||!Number.isInteger(y))return 'Choose a tile inside your arcade.';const {w,h}=this.floor;if(x<0||y<0||x>=w||y>=h)return 'That space needs a room expansion.';if(x===this.door.x&&y===this.door.y)return 'Keep the entrance clear.';const items=this.items.filter(i=>i.id!==exclude);if(this.occupancy(x,y,items))return 'There’s already something on that tile.';if([...this.guests,...(this.mechanic?[this.mechanic]:[])].some(g=>Math.round(g.x)===x&&Math.round(g.y)===y))return 'Wait for that person to pass.';const candidate=[...items,{type,x,y}];for(const item of candidate){if(TYPES[item.type].kind==='game'&&!this.path(this.door,{x:item.x,y:item.y+1},candidate))return 'Leave a clear path to the front of every machine.';}for(const actor of [...this.guests,...(this.mechanic?[this.mechanic]:[])])if(!this.path({x:Math.round(actor.x),y:Math.round(actor.y)},this.door,candidate))return 'Keep an exit path clear for your visitors.';return null;}
- place(type,x,y){const error=this.validate(type,x,y);if(error)throw Error(error);if(!this.isUnlocked(type))throw Error('Unlock '+TYPES[type].name+' at '+TYPES[type].unlock+' paid plays.');if(this.cash<TYPES[type].cost)throw Error('You need $'+TYPES[type].cost+' for that.');this.cash-=TYPES[type].cost;const item={id:this.nextId++,type,x,y,level:1,condition:100,plays:0,earned:0,busy:null};this.items.push(item);this.repath();return item;}
- upgradeCost(item){return Math.round(TYPES[item.type].cost*.65*item.level);}repairCost(item){return Math.max(12,Math.round(TYPES[item.type].cost*.06));}
- upgrade(id){const i=this.items.find(i=>i.id===id);if(!i||TYPES[i.type].kind!=='game'||i.level>=3)throw Error('This machine is already at its best.');const cost=this.upgradeCost(i);if(this.cash<cost)throw Error('Not enough cash to upgrade.');this.cash-=cost;i.level++;return cost;}
- repair(id){const i=this.items.find(i=>i.id===id);if(!i||TYPES[i.type].kind!=='game'||i.condition>=100)throw Error('This machine doesn’t need a repair.');const cost=this.repairCost(i);if(this.cash<cost)throw Error('Not enough cash to repair.');this.cash-=cost;i.condition=100;return cost;}
- emergencyRepair(id){const item=this.games.find(i=>i.id===id);if(!item||item.condition>0||this.staff.mechanic||this.games.some(i=>i.condition>0)||this.cash>=this.repairCost(item))throw Error('Emergency tune-ups are for a cash-strapped arcade with every machine down.');item.condition=30;}
- move(id,x,y){const i=this.items.find(i=>i.id===id);if(!i)throw Error('Select an item first.');if(i.busy!==null||this.guests.some(g=>g.target===id))throw Error('Let this machine’s queue finish first.');const error=this.validate(i.type,x,y,id);if(error)throw Error(error);i.x=x;i.y=y;this.repath();}
- sell(id){const i=this.items.find(i=>i.id===id);if(!i)throw Error('Select an item first.');if(i.busy!==null||this.guests.some(g=>g.target===id))throw Error('Let this machine’s queue finish first.');const amount=Math.floor(TYPES[i.type].cost*.7+(i.level-1)*TYPES[i.type].cost*.25);this.cash+=amount;this.items=this.items.filter(i=>i.id!==id);this.repath();return amount;}
- expand(){const next=EXPANSIONS[this.level+1];if(!next)throw Error('You own the Grand Arcade.');if(this.plays<next.plays)throw Error('Reach '+next.plays+' paid plays to unlock this location.');if(this.cash<next.cost)throw Error('Save $'+next.cost+' for the next location.');this.cash-=next.cost;this.level++;return next;}
- toggleOpen(){if(!this.open&&!this.games.length)throw Error('Place your first arcade machine before opening.');this.open=!this.open;if(this.open)this.spawnIn=Math.min(this.spawnIn,1);return this.open;}
- queue(item){return this.guests.filter(g=>g.target===item.id&&!g.gone&&g.state!=='leaving').sort((a,b)=>a.id-b.id);}
- queueSpot(item,used){for(const [dx,dy] of [[0,2],[0,3],[1,2],[-1,2],[1,1],[-1,1]]){const to={x:item.x+dx,y:item.y+dy};if(!used.has(pos(to.x,to.y))&&this.path(this.door,to))return to;}return null;}
- arrangeQueue(item){const guests=this.queue(item);if(!guests.length){item.busy=null;return;}const current=guests.find(g=>g.id===item.busy)||guests[0];item.busy=current.id;const order=[current,...guests.filter(g=>g!==current)],used=new Set(this.guests.filter(g=>g.target!==item.id&&g.destination).map(g=>pos(g.destination.x,g.destination.y)));
-  for(let n=0;n<order.length;n++){const guest=order[n],to=n===0?{x:item.x,y:item.y+1}:this.queueSpot(item,used);if(!to){this.leave(guest,false);continue;}used.add(pos(to.x,to.y));if(guest.state==='playing')continue;const changed=!guest.destination||guest.destination.x!==to.x||guest.destination.y!==to.y;guest.destination=to;if(changed||guest.state==='waiting'){const path=this.route(guest,to);if(!path){this.leave(guest,false);continue;}guest.path=path;guest.state='walking';}guest.queued=n>0;}
+ constructor(random=Math.random){
+  this.random=random;this.cash=800;this.totalEarned=0;this.plays=0;this.day=1;this.dayTime=0;this.level=0;this.reputation=50;this.nextId=1;
+  this.open=false;this.items=[];this.staff=[];this.customers=[];this.litter=[];this.upgrades={};this.claimed=[];this.campaign=null;this.event=null;
+  this.served=0;this.lost=0;this.today=this.blankDay();this.history=[];this.popups=[];this.log=[];this.typePlays={};this.time=0;this.spawnTimer=2;this.critic=null;
  }
- choose(guest){const used=new Set(this.guests.filter(g=>g!==guest&&g.destination).map(g=>pos(g.destination.x,g.destination.y)));const options=this.games.filter(i=>i.condition>0&&!guest.visited.includes(i.id)).map(item=>{const queue=this.queue(item),to=queue.length?this.queueSpot(item,used):{x:item.x,y:item.y+1};return {item,to,count:queue.length,path:to?this.route(guest,to):null,score:10+this.random()*6+(guest.favorite===item.type?10:0)+(item.type==='snack'?(guest.hunger||0)/8:0)-queue.length*6};}).filter(o=>o.path&&o.count<3).sort((a,b)=>b.score-a.score);if(!options.length)return false;const {item}=options[0];guest.target=item.id;guest.wait=0;guest.destination=null;this.arrangeQueue(item);return guest.target!==null;}
- leave(guest,rearrange=true){const old=this.items.find(i=>i.id===guest.target);if(old?.busy===guest.id)old.busy=null;guest.target=null;guest.destination=this.door;guest.state='leaving';guest.path=this.route(guest,this.door)||[];guest.queued=false;if(rearrange&&old)this.arrangeQueue(old);}
- react(guest,text){guest.bubble=text;guest.bubbleTime=3;}
- repath(){if(this.mechanic?.target!=null){const item=this.items.find(i=>i.id===this.mechanic.target),route=item?this.route(this.mechanic,{x:item.x,y:item.y+1}):null;this.mechanic.path=route||[];if(!route)this.mechanic.target=null;}for(const item of this.games)this.arrangeQueue(item);for(const g of this.guests){if(g.state==='leaving')g.path=this.route(g,this.door)||[];else if(g.target===null&&g.destination)g.path=this.route(g,g.destination)||[];}}
- stepMechanic(dt){if(!this.staff.mechanic){this.mechanic=null;return;}const worker=this.mechanic||={id:-2,x:this.door.x,y:this.door.y,path:[],target:null,state:'waiting',color:3};let target=this.games.find(i=>i.id===worker.target&&i.condition<100);if(!target){worker.target=null;worker.path=[];worker.state='waiting';for(const item of this.games.filter(i=>i.condition<100).sort((a,b)=>a.condition-b.condition)){const path=this.route(worker,{x:item.x,y:item.y+1});if(path){worker.path=path;worker.target=item.id;target=item;break;}}}if(!target)return;worker.state='walking';const remaining=this.walk(worker,dt);if(!worker.path.length){worker.state='playing';target.condition=Math.min(100,target.condition+remaining*2.2);}}
+ blankDay(){return {income:0,visitors:0,happy:0,left:0,plays:0};}
+ get loc(){return LOCATIONS[this.level];}
+ get w(){return this.loc.w;}
+ get h(){return this.loc.h;}
+ get door(){return {x:Math.floor(this.w/2),y:this.h-1};}
+ rand(a,b){return a+(b-a)*this.random();}
+ pick(list){return list[Math.floor(this.random()*list.length)%list.length];}
+ pop(p){this.popups.push(p);if(this.popups.length>60)this.popups.shift();}
+ note(text){this.log.unshift(text);this.log.length=Math.min(this.log.length,40);}
+ unlocked(type){return (TYPES[type].unlock||0)<=this.level;}
+ distinctTypes(){return new Set(this.items.filter(i=>TYPES[i.type].cat==='games').map(i=>i.type)).size;}
+ cells(item){const t=TYPES[item.type],out=[];for(let i=0;i<(t.w||1);i++)out.push(item.rot?{x:item.x,y:item.y+i}:{x:item.x+i,y:item.y});return out;}
+ occupied(ignore){const set=new Set();for(const it of this.items)if(it!==ignore)for(const c of this.cells(it))set.add(c.x+','+c.y);return set;}
+ itemAt(x,y){return this.items.find(it=>this.cells(it).some(c=>c.x===x&&c.y===y));}
+ inside(x,y){return x>=0&&y>=0&&x<this.w&&y<this.h;}
+ walkable(x,y,occ=this.occupied()){return this.inside(x,y)&&!occ.has(x+','+y);}
+ distField(fromX,fromY,occ=this.occupied()){
+  const d=new Int16Array(this.w*this.h).fill(-1);if(!this.walkable(fromX,fromY,occ))return d;const q=[[fromX,fromY]];d[fromY*this.w+fromX]=0;
+  for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [dx,dy]of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy;if(this.walkable(nx,ny,occ)&&d[ny*this.w+nx]<0){d[ny*this.w+nx]=d[y*this.w+x]+1;q.push([nx,ny]);}}}
+  return d;
+ }
+ spots(item,occ=this.occupied()){const out=[],seen=new Set();for(const c of this.cells(item))for(const [dx,dy]of [[0,1],[0,-1],[1,0],[-1,0]]){const x=c.x+dx,y=c.y+dy,k=x+','+y;if(!seen.has(k)&&this.walkable(x,y,occ)){seen.add(k);out.push({x,y});}}return out;}
+ canPlace(type,x,y,rot=0,ignore=null){
+  const t=TYPES[type];if(!t)return 'Unknown item.';if(!this.unlocked(type))return 'Unlocks at '+LOCATIONS[t.unlock].name+'.';
+  const probe={type,x,y,rot},cells=this.cells(probe),occ=this.occupied(ignore),door=this.door;
+  for(const c of cells){if(!this.inside(c.x,c.y))return 'That does not fit there.';if(occ.has(c.x+','+c.y))return 'That space is taken.';if(c.x===door.x&&c.y===door.y)return 'Keep the entrance clear.';if(this.customers.some(p=>Math.floor(p.x)===c.x&&Math.floor(p.y)===c.y)||this.staff.some(p=>Math.floor(p.x)===c.x&&Math.floor(p.y)===c.y))return 'Someone is standing there.';}
+  for(const c of cells)occ.add(c.x+','+c.y);
+  const d=this.distField(door.x,door.y,occ);
+  // Every used item must keep a reachable spot, and no floor tile may become sealed off.
+  for(const it of [...this.items.filter(i=>i!==ignore),probe]){if(TYPES[it.type].cat==='decor'&&!TYPES[it.type].seats)continue;if(!this.spots(it,occ).some(s=>d[s.y*this.w+s.x]>=0))return it===probe?'Visitors need a way to reach it.':'That would block another machine.';}
+  for(let yy=0;yy<this.h;yy++)for(let xx=0;xx<this.w;xx++)if(!occ.has(xx+','+yy)&&d[yy*this.w+xx]<0)return 'That would wall off part of the floor.';
+  return '';
+ }
+ place(type,x,y,rot=0){
+  const t=TYPES[type],why=this.canPlace(type,x,y,rot);if(why)throw new Error(why);if(this.cash<t.cost)throw new Error('Not enough cash.');
+  this.cash-=t.cost;const item={id:this.nextId++,type,x,y,rot:rot?1:0,level:1,condition:100,broken:false,users:[],queue:[],earned:0,plays:0,anim:0};
+  this.items.push(item);this.note('Built a '+t.name+'.');this.checkMilestones();return item;
+ }
+ move(id,x,y,rot){const it=this.items.find(i=>i.id===id);if(!it||it.users.length||it.queue.length)throw new Error('Wait until nobody is using it.');const why=this.canPlace(it.type,x,y,rot??it.rot,it);if(why)throw new Error(why);it.x=x;it.y=y;it.rot=(rot??it.rot)?1:0;return it;}
+ sellValue(it){const t=TYPES[it.type];return Math.floor((t.cost+this.upgradeSpent(it))*.5);}
+ upgradeSpent(it){let s=0;for(let l=1;l<it.level;l++)s+=this.upgradeCost({...it,level:l});return s;}
+ upgradeCost(it){return Math.round(TYPES[it.type].cost*.6*it.level);}
+ upgrade(id){const it=this.items.find(i=>i.id===id);if(!it||!TYPES[it.type].seats||TYPES[it.type].cat==='decor')throw new Error('This cannot be upgraded.');if(it.level>=5)throw new Error('Already at max level.');const c=this.upgradeCost(it);if(this.cash<c)throw new Error('Not enough cash.');this.cash-=c;it.level++;it.condition=100;it.broken=false;this.checkMilestones();return it;}
+ repairCost(it){return Math.round(20+TYPES[it.type].cost*.08*(1-it.condition/100+(it.broken?.5:0)));}
+ repair(id){const it=this.items.find(i=>i.id===id);if(!it)return;const c=this.repairCost(it);if(this.cash<c)throw new Error('Not enough cash.');this.cash-=c;it.condition=100;it.broken=false;return it;}
+ sell(id){const it=this.items.find(i=>i.id===id);if(!it)return;if(it.users.length)throw new Error('Wait until nobody is using it.');for(const c of this.customers)if(c.target===id)this.retarget(c);this.cash+=this.sellValue(it);this.items=this.items.filter(i=>i!==it);}
+ hire(role){const s=STAFF[role];if(!s)throw new Error('Unknown role.');if((s.unlock||0)>this.level)throw new Error('Unlocks later.');if(this.staff.length>=this.staffCap())throw new Error('Your team is full for this location.');if(this.cash<s.hire)throw new Error('Not enough cash.');this.cash-=s.hire;const d=this.door;const p={id:this.nextId++,role,x:d.x+.5,y:d.y+.5,path:[],task:null,timer:0,name:this.pick(['Sam','Rae','Jo','Kit','Lou','Max','Ash','Bo','Cy','Dee','Eli','Fin'])};this.staff.push(p);this.note('Hired '+p.name+' as '+s.name.toLowerCase()+'.');this.checkMilestones();return p;}
+ fire(id){this.staff=this.staff.filter(s=>s.id!==id);}
+ staffCap(){return 2+this.level*2;}
+ improve(key){const u=IMPROVEMENTS[key],lvl=this.upgrades[key]||0;if(!u||lvl>=u.costs.length)throw new Error('Fully improved.');const c=u.costs[lvl];if(this.cash<c)throw new Error('Not enough cash.');this.cash-=c;this.upgrades[key]=lvl+1;this.checkMilestones();}
+ up(k){return this.upgrades[k]||0;}
+ launch(key){const c=CAMPAIGNS[key];if(!c||c.unlock>this.level)throw new Error('Not available yet.');if(this.campaign)throw new Error('A campaign is already running.');if(this.cash<c.cost)throw new Error('Not enough cash.');this.cash-=c.cost;this.campaign={key,left:c.time};this.note(c.name+' launched.');}
+ goalStatus(){const next=LOCATIONS[this.level+1];if(!next)return null;const g=next.goal;return {next,parts:[{label:'Lifetime earnings',have:this.totalEarned,need:g.earned,money:true},{label:'Reputation',have:Math.round(this.reputation),need:g.rep},{label:'Attraction types',have:this.distinctTypes(),need:g.types},{label:'Moving cost',have:this.cash,need:next.move,money:true}]};}
+ canRelocate(){const s=this.goalStatus();return !!s&&s.parts.every(p=>p.have>=p.need);}
+ relocate(){if(!this.canRelocate())throw new Error('Not ready to move yet.');const next=LOCATIONS[this.level+1];this.cash-=next.move;for(const c of this.customers)this.release(c);this.customers=[];this.level++;for(const s of this.staff){s.x=this.door.x+.5;s.y=this.door.y+.5;s.path=[];s.task=null;}this.note('Moved into '+next.name+'!');this.checkMilestones();return next;}
+ toggleOpen(){this.open=!this.open;this.note(this.open?'Doors open.':'Doors closed. Visitors finish up and head home.');if(!this.open)for(const c of this.customers){c.leaving=true;if(c.state!=='play'&&c.state!=='exit'){this.release(c);this.goHome(c);}}return this.open;}
+ checkMilestones(){for(const m of MILESTONES)if(!this.claimed.includes(m.id)&&m.test(this)){this.claimed.push(m.id);this.cash+=m.reward;this.pop({kind:'milestone',text:m.text,reward:m.reward});this.note('Goal: '+m.text+' (+$'+m.reward+')');}}
+ spawnInterval(){const capacity=this.items.filter(i=>TYPES[i.type].cat==='games').reduce((a,i)=>a+TYPES[i.type].seats,0);if(!capacity)return Infinity;let rate=.14+capacity*.085;rate*=.55+this.reputation/100;rate*=1+.15*this.up('marquee');rate*=1+.1*this.staff.filter(s=>s.role==='mascot').length;rate*=1+this.decorAppeal()/400;if(this.campaign)rate*=CAMPAIGNS[this.campaign.key].boost;if(this.event?.key==='rain')rate*=1.3;return 1/rate;}
+ maxCustomers(){const seats=this.items.reduce((a,i)=>a+(TYPES[i.type].seats||0),0);return Math.min(60,4+seats*2);}
+ decorAppeal(){return this.items.reduce((a,i)=>a+(TYPES[i.type].appeal||0),0);}
+ appealNear(x,y){let a=0;for(const it of this.items){const t=TYPES[it.type];if(!t.appeal)continue;const d=Math.hypot(it.x-x,it.y-y);if(d<=3.2)a+=t.appeal*(1-d/4);}for(const s of this.staff)if(s.role==='mascot'&&Math.hypot(s.x-x,s.y-y)<3)a+=6;return a;}
+ spawn(kind,extra={}){
+  const d=this.door,k=KINDS[kind];let budget=this.rand(...k.budget)*(1+this.level*.35);if(this.campaign?.key==='radio')budget*=1.3;
+  const c={id:this.nextId++,kind,x:d.x+.5,y:this.h+.4,path:[{x:d.x,y:d.y}],state:'enter',target:null,timer:0,budget,spent:0,happiness:62,fun:0,tickets:0,patience:0,visited:{},played:0,maxPlays:2+Math.floor(this.random()*4),leaving:false,shirt:this.pick(k.shirt),hunger:this.rand(0,40),thirst:this.rand(0,40),bladder:this.rand(0,30),energy:this.rand(70,100),thought:null,thoughtTime:0,...extra};
+  this.customers.push(c);this.today.visitors++;return c;
+ }
+ chooseKind(){const r=this.random();if(this.event?.key==='school'&&r<.5)return 'kid';if(this.campaign?.key==='tournament'&&r<.5)return 'teen';const opts=['kid','teen','adult','adult','teen','kid'];if(this.level>=2)opts.push('collector');return this.pick(opts);}
+ // Visitor brain
+ desire(c,it,dist){
+  const t=TYPES[it.type];if(it.broken)return -1;if(t.cat==='decor'&&!t.need)return -1;if(t.price>c.budget-c.spent)return -1;
+  const queue=it.queue.length+Math.max(0,it.users.length-t.seats+1);let s;
+  if(t.need){const v=t.need==='tickets'?(c.tickets>=20?60+c.tickets/2:-1):t.need==='energy'?100-c.energy:c[t.need];if(v<0)return -1;s=v>55?v:v*.25;}
+  else{if((c.visited[it.type]||0)>=2||c.played>=c.maxPlays)return -1;s=t.fun*(KINDS[c.kind].likes[t.tag]||1)*(1+.12*(it.level-1))*(.6+it.condition/250)-(c.visited[it.type]?8:0);if(this.event?.key==='school'&&t.tag==='prize')s*=1.3;}
+  return s+this.appealNear(it.x,it.y)*.4-dist*.35-queue*4+this.random()*4;
+ }
+ decide(c){
+  if(c.leaving||!this.open)return this.goHome(c);
+  if(c.played>=c.maxPlays&&!(c.tickets>=20&&this.items.some(i=>i.type==='prizes'))&&c.hunger<70&&c.thirst<70&&c.bladder<70)return this.goHome(c);
+  const occ=this.occupied(),fx=Math.floor(c.x),fy=Math.floor(c.y),d=this.distField(clamp(fx,0,this.w-1),clamp(fy,0,this.h-1),occ);let best=null,bs=0,bestSpot=null;
+  for(const it of this.items){const spots=this.spots(it,occ).filter(s=>d[s.y*this.w+s.x]>=0);if(!spots.length)continue;spots.sort((a,b)=>d[a.y*this.w+a.x]-d[b.y*this.w+b.x]);const dist=d[spots[0].y*this.w+spots[0].x],v=this.desire(c,it,dist);if(v>bs){bs=v;best=it;bestSpot=spots[0];}}
+  if(!best){c.thought=this.items.some(i=>TYPES[i.type].cat==='games'&&!i.broken)?'money':'bored';c.thoughtTime=3;return this.goHome(c);}
+  c.target=best.id;c.state='walk';c.path=this.route(fx,fy,bestSpot.x,bestSpot.y,occ);
+ }
+ route(fx,fy,tx,ty,occ=this.occupied()){const d=this.distField(tx,ty,occ);const path=[];let x=clamp(fx,0,this.w-1),y=clamp(fy,0,this.h-1);if(d[y*this.w+x]<0)return [{x:tx,y:ty}];let guard=0;while((x!==tx||y!==ty)&&guard++<400){let nx=x,ny=y,bv=d[y*this.w+x];for(const [dx,dy]of [[1,0],[-1,0],[0,1],[0,-1]]){const ax=x+dx,ay=y+dy;if(this.inside(ax,ay)){const v=d[ay*this.w+ax];if(v>=0&&v<bv){bv=v;nx=ax;ny=ay;}}}if(nx===x&&ny===y)break;x=nx;y=ny;path.push({x,y});}return path;}
+ goHome(c){c.state='exit';c.target=null;const d=this.door;c.path=[...this.route(Math.floor(c.x),Math.floor(c.y),d.x,d.y),{x:d.x,y:this.h+1}];}
+ release(c){for(const it of this.items){it.users=it.users.filter(u=>u!==c.id);it.queue=it.queue.filter(u=>u!==c.id);}}
+ retarget(c){this.release(c);c.target=null;c.state='think';c.timer=.2;}
+ walk(p,dt,speed){if(!p.path.length)return true;const n=p.path[0],tx=n.x+.5,ty=n.y+.5,dx=tx-p.x,dy=ty-p.y,dist=Math.hypot(dx,dy),step=speed*dt;if(dist<=step){p.x=tx;p.y=ty;p.path.shift();return !p.path.length;}p.x+=dx/dist*step;p.y+=dy/dist*step;p.face=dx<0?-1:dx>0?1:p.face;return false;}
+ stepCustomer(c,dt){
+  const hv=this.up('hvac')?.75:1,heat=this.event?.key==='heat'?1.8:1;
+  c.hunger=clamp(c.hunger+dt*.55,0,100);c.thirst=clamp(c.thirst+dt*.7*hv*heat,0,100);c.bladder=clamp(c.bladder+dt*.45,0,100);c.energy=clamp(c.energy-dt*.35*hv*(c.state==='play'?1.6:1),0,100);
+  for(const n of NEEDS){if(!this.unlocked(NEED_ITEM[n]))continue;const v=n==='energy'?100-c.energy:c[n];if(v>80)c.happiness-=dt*.9;}
+  if(this.up('sound'))c.happiness+=dt*.08;c.happiness+=this.appealNear(c.x,c.y)*dt*.006;
+  for(const l of this.litter)if(Math.abs(l.x-c.x)<1.2&&Math.abs(l.y-c.y)<1.2)c.happiness-=dt*.5;
+  if(c.thoughtTime>0)c.thoughtTime-=dt;
+  if(c.happiness<12&&c.state!=='exit'&&c.state!=='play'){c.thought='angry';c.thoughtTime=3;this.release(c);c.leaving=true;this.goHome(c);}
+  c.happiness=clamp(c.happiness,0,100);
+  const t=c.target!=null?this.items.find(i=>i.id===c.target):null,speed=KINDS[c.kind].speed;
+  switch(c.state){
+   case 'enter':if(this.walk(c,dt,speed)){c.state='think';c.timer=.3;}break;
+   case 'think':c.timer-=dt;if(c.timer<=0)this.decide(c);break;
+   case 'walk':if(!t||t.broken){this.retarget(c);break;}if(this.walk(c,dt,speed)){c.state='queue';c.patience=0;t.queue.push(c.id);}break;
+   case 'queue':{
+    if(!t||t.broken){if(t&&t.broken){c.thought='broken';c.thoughtTime=2.5;c.happiness-=6;}this.retarget(c);break;}
+    const seats=TYPES[t.type].seats;if(t.users.length<seats&&t.queue[0]===c.id){t.queue.shift();t.users.push(c.id);c.state='play';c.timer=TYPES[t.type].dur*(1-.06*(t.level-1));break;}
+    const host=this.staff.some(s=>s.role==='host'&&Math.hypot(s.x-c.x,s.y-c.y)<3);c.patience+=dt*(host?.5:1)/(1+.3*this.up('carpet'));if(host)c.happiness+=dt*.15;
+    if(c.patience>14){c.thought='wait';c.thoughtTime=2.5;c.happiness-=8;this.retarget(c);}
+    break;}
+   case 'play':{if(!t){this.retarget(c);break;}t.anim+=dt;c.timer-=dt;if(c.timer<=0)this.finishPlay(c,t);break;}
+   case 'exit':if(this.walk(c,dt,speed*1.05)){c.gone=true;}break;
+  }
+ }
+ finishPlay(c,t){
+  const ty=TYPES[t.type];t.users=t.users.filter(u=>u!==c.id);c.state='think';c.timer=.4+this.random()*.6;c.target=null;
+  let price=ty.price;if(ty.cat==='games'){price=Math.round(ty.price*(1+.15*(t.level-1))*(1+.1*this.up('tokens'))*(this.campaign?.key==='tournament'?1.5:1)*100)/100;}
+  if(price>0){c.spent+=price;this.earn(price,t);}
+  c.visited[t.type]=(c.visited[t.type]||0)+1;
+  if(ty.cat==='games'){c.played++;this.plays++;this.today.plays++;this.typePlays[t.type]=(this.typePlays[t.type]||0)+1;t.plays++;c.happiness+=ty.fun*.6*(1+.1*(t.level-1))*(KINDS[c.kind].likes[ty.tag]||1);c.tickets+=Math.round((ty.tickets||0)*(1+.2*(t.level-1)));c.energy-=4;
+   const wear=(5+this.random()*5)/(1+.25*this.up('service'))/(1+.1*(t.level-1));t.condition=Math.max(0,t.condition-wear);if(t.condition<30&&this.random()<(30-t.condition)/45){t.broken=true;this.note(ty.name+' broke down.');this.pop({kind:'broken',x:t.x,y:t.y});}
+  }else if(ty.need==='tickets'){const gain=12+Math.min(30,c.tickets/8)*(1+.4*this.up('catalog'));c.happiness+=gain;c.tickets=0;const margin=Math.round(gain*.6);this.earn(margin,t);}
+  else if(ty.need){if(ty.need==='energy')c.energy=100;else c[ty.need]=0;c.happiness+=ty.fun;if(ty.need==='hunger'||ty.need==='thirst'){const binNear=this.items.some(i=>TYPES[i.type].bin&&Math.hypot(i.x-c.x,i.y-c.y)<3.5);if(this.random()<(binNear?.08:.45))c.dropLitter=4+this.random()*6;}}
+  else c.happiness+=ty.fun*.6;
+  c.happiness=clamp(c.happiness,0,100);
+ }
+ earn(amount,item){this.cash+=amount;this.totalEarned+=amount;this.today.income+=amount;if(item){item.earned+=amount;this.pop({kind:'coin',x:item.x+(TYPES[item.type].w>1&&!item.rot?1:.5),y:item.y+.3,text:'+$'+(Math.round(amount*100)/100)});}}
+ farewell(c){
+  this.release(c);this.served++;this.today.left++;this.today.happy+=c.happiness;
+  const weight=(c.critic?8:1)*(1+.4*this.up('loyalty')*(c.happiness>60?1:0));this.reputation=clamp(this.reputation+(c.happiness-this.reputation)*.012*weight,0,100);
+  if(c.critic){const good=c.happiness>=65;this.note('The critic left '+(good?'impressed':'unimpressed')+' ('+Math.round(c.happiness)+'/100).');this.pop({kind:'critic',good});}
+  if(c.happiness<35)this.lost++;
+ }
+ stepStaff(s,dt){
+  if(s.role==='mechanic'){
+   if(s.task){const it=this.items.find(i=>i.id===s.task);if(!it){s.task=null;s.path=[];return;}if(this.walk(s,dt,2.6)){s.timer+=dt;s.working=true;if(s.timer>=3.5){it.condition=100;it.broken=false;s.task=null;s.timer=0;s.working=false;this.pop({kind:'fixed',x:it.x,y:it.y});}}return;}
+   const jobs=this.items.filter(i=>TYPES[i.type].cat!=='decor'&&(i.broken||i.condition<55)&&!this.staff.some(o=>o!==s&&o.task===i.id)).sort((a,b)=>(b.broken-a.broken)||a.condition-b.condition);
+   if(jobs.length){const occ=this.occupied(),it=jobs[0],sp=this.spots(it,occ)[0];if(sp){s.task=it.id;s.timer=0;s.path=this.route(Math.floor(s.x),Math.floor(s.y),sp.x,sp.y,occ);return;}}
+  }else if(s.role==='janitor'){
+   if(s.task){const l=this.litter.find(i=>i.id===s.task);if(!l){s.task=null;s.path=[];return;}if(this.walk(s,dt,2.5)){s.timer+=dt;s.working=true;if(s.timer>=1.3){this.litter=this.litter.filter(i=>i!==l);s.task=null;s.timer=0;s.working=false;}}return;}
+   const l=this.litter.filter(i=>!this.staff.some(o=>o!==s&&o.task===i.id)).sort((a,b)=>Math.hypot(a.x-s.x,a.y-s.y)-Math.hypot(b.x-s.x,b.y-s.y))[0];if(l){s.task=l.id;s.timer=0;s.path=this.route(Math.floor(s.x),Math.floor(s.y),Math.floor(l.x),Math.floor(l.y));return;}
+  }else if(s.role==='host'&&!s.path.length){const q=this.items.filter(i=>i.queue.length).sort((a,b)=>b.queue.length-a.queue.length)[0];if(q&&this.random()<.6){const sp=this.spots(q)[0];if(sp){s.path=this.route(Math.floor(s.x),Math.floor(s.y),sp.x,sp.y);}}}
+  s.working=false;if(!s.path.length){s.timer-=dt;if(s.timer<=0){s.timer=1.5+this.random()*3;const tx=Math.floor(this.random()*this.w),ty=Math.floor(this.random()*this.h);if(this.walkable(tx,ty))s.path=this.route(Math.floor(s.x),Math.floor(s.y),tx,ty).slice(0,8);}}else this.walk(s,dt,1.6);
+ }
+ dailyCosts(){const wages=this.staff.reduce((a,s)=>a+STAFF[s.role].wage,0),util=Math.round(this.items.filter(i=>TYPES[i.type].cat!=='decor').length*1.5);return {rent:this.loc.rent,wages,util,total:this.loc.rent+wages+util};}
+ endDay(){
+  const costs=this.dailyCosts();this.cash-=costs.total;const avg=this.today.left?Math.round(this.today.happy/this.today.left):0;
+  const report={day:this.day,income:Math.round(this.today.income),costs:costs.total,visitors:this.today.visitors,happy:avg,plays:this.today.plays,event:this.event?.key||null};
+  this.history.push(report);if(this.history.length>21)this.history.shift();
+  if(this.cash<0&&this.staff.length){const gone=this.staff.pop();this.note(gone.name+' quit: payroll could not be met.');}
+  this.day++;this.today=this.blankDay();this.event=null;this.rollEvent();this.pop({kind:'day',report});this.checkMilestones();return report;
+ }
+ rollEvent(){
+  if(this.items.length<3||this.random()>.38)return;const keys=Object.keys(EVENTS).filter(k=>k!=='critic'||this.level>=1);const key=this.pick(keys);this.event={key};this.note('Today: '+EVENTS[key].name+'.');
+  if(key==='outage'){const m=this.items.filter(i=>TYPES[i.type].cat==='games'&&!i.broken);if(m.length){const it=this.pick(m);it.broken=true;it.condition=10;}}
+  if(key==='critic')this.event.pending=true;
+  if(key==='party')this.event.pending=true;
+ }
  step(dt){
-  this.events=[];if(!this.open&&!this.guests.length)return;
-  this.time+=dt;this.dayTime+=dt;this.campaign=Math.max(0,this.campaign-dt);
-  while(this.dayTime>=90){this.dayTime-=90;this.day++;const cost=this.dailyCost,paid=Math.min(this.cash,cost);this.cash-=paid;this.lastDay={income:this.dailyIncome,expenses:paid};this.dailyIncome=0;this.events.push({type:'rent',amount:paid});if(paid<cost){this.staff.mechanic=false;this.staff.host=false;this.events.push({type:'notice',text:'Daily costs used your remaining cash. Staff have left; you can reopen and rebuild.'});}}
-  this.stepMechanic(dt);this.spawnIn-=dt;
-  if(this.open&&this.spawnIn<=0&&this.guests.length<Math.min(40,6+this.games.length*3)&&!this.guests.some(g=>Math.hypot(g.x-this.door.x,g.y-this.door.y)<.55)){
-   const decor=Math.min(8,this.items.filter(i=>TYPES[i.type].kind==='decor'&&i.type!=='bench').length);
-   this.spawnIn=Math.max(1.3,5.8-this.games.length*.24-decor*.12-this.reputation*.009-(this.staff.host?0.7:0))*(this.campaign>0?0.45:1)+this.random()*1.2;
-   const favorites=Object.keys(TYPES).filter(k=>TYPES[k].kind==='game'&&this.isUnlocked(k)&&k!=='snack');
-   const g={id:this.nextId++,x:this.door.x,y:this.door.y,state:'waiting',path:[],visited:[],wait:0,playTime:0,target:null,destination:null,color:Math.floor(this.random()*6),favorite:favorites[Math.floor(this.random()*favorites.length)]||'cabinet',hunger:20+this.random()*40,happiness:70,bubble:'',bubbleTime:0,retry:0,queued:false};
-   this.guests.push(g);if(!this.choose(g)){this.react(g,'Any games free?');const used=new Set(this.guests.filter(a=>a!==g&&a.destination).map(a=>pos(a.destination.x,a.destination.y)));for(const [x,y] of [[1,2],[1,3],[1,1],[0,3],[0,1]]){const to={x,y},path=this.route(g,to);if(path&&!used.has(pos(x,y))){g.destination=to;g.path=path;break;}}}
-   this.events.push({type:'arrival'});
+  dt=Math.min(dt,.25);const busy=this.open||this.customers.length>0;
+  if(busy){this.time+=dt;this.dayTime+=dt;if(this.dayTime>=DAY_LENGTH){this.dayTime-=DAY_LENGTH;this.endDay();}}
+  if(this.campaign){this.campaign.left-=dt;if(this.campaign.left<=0){this.note(CAMPAIGNS[this.campaign.key].name+' finished.');this.campaign=null;}}
+  if(this.open){
+   this.spawnTimer-=dt;const cap=this.maxCustomers();
+   if(this.spawnTimer<=0){this.spawnTimer=this.spawnInterval()*(.6+this.random()*.8);if(this.customers.length<cap&&Number.isFinite(this.spawnTimer))this.spawn(this.chooseKind());if(!Number.isFinite(this.spawnTimer))this.spawnTimer=2;}
+   if(this.event?.pending&&this.customers.length<cap){if(this.event.key==='critic')this.spawn('adult',{critic:true,shirt:'#1f1f2a',maxPlays:4});else for(let i=0;i<5;i++)this.spawn('kid',{party:true,budget:22+i,x:this.door.x+.5+(i-2)*.15});this.event.pending=false;}
   }
-  const patience=18+(this.items.some(i=>i.type==='bench')?8:0)+(this.staff.host?8:0);
-  for(const g of this.guests){
-   g.hunger=Math.min(100,(g.hunger??30)+dt*.6);g.happiness??=70;g.bubbleTime=Math.max(0,(g.bubbleTime||0)-dt);
-   if(g.queued||g.state==='waiting'){g.wait+=dt;g.happiness=Math.max(0,g.happiness-dt*.25);if(g.wait>patience||!this.open&&g.state==='waiting'){if(this.open){g.happiness=Math.max(0,g.happiness-18);this.react(g,'Too long!');this.reputation=Math.max(20,this.reputation-.5);}this.leave(g);continue;}}
-   if(g.state==='waiting'){if(g.path.length)this.walk(g,dt);g.retry=(g.retry||0)-dt;if(this.open&&g.retry<=0){g.retry=1;if(this.choose(g))continue;}if(!this.open)this.leave(g);continue;}
-   if(g.state==='queued')continue;
-   if(g.state==='walking'||g.state==='leaving'){
-    this.walk(g,dt);if(g.path.length)continue;
-    if(g.state==='leaving'){g.gone=true;if(g.visited.length){this.served++;if(g.happiness>=70)this.reputation=Math.min(100,this.reputation+.15);}else{this.lost++;}continue;}
-    const item=this.items.find(i=>i.id===g.target);if(!item){g.state='waiting';g.target=null;continue;}
-    if(item.busy!==g.id){g.state='queued';continue;}
-    if(item.condition<=0){this.react(g,'It’s broken!');g.happiness-=10;this.leave(g);continue;}
-    g.state='playing';g.queued=false;g.wait=0;g.playTime=this.playDuration(item);
-   }
-   if(g.state==='playing'){
-    g.playTime-=dt;if(g.playTime>0)continue;const item=this.items.find(i=>i.id===g.target);
-    if(item){const amount=this.payFor(item),before=this.plays;this.cash+=amount;this.totalEarned+=amount;this.dailyIncome+=amount;this.plays++;item.plays++;item.earned+=amount;item.condition=Math.max(0,item.condition-2);item.busy=null;g.visited.push(item.id);g.happiness=Math.min(100,g.happiness+(g.favorite===item.type?12:5));if(item.type==='snack'){g.hunger=0;this.react(g,'Snack break!');}else if(g.favorite===item.type)this.react(g,'My favorite!');else if(item.condition<20){this.react(g,'Needs a tune-up');g.happiness=Math.max(0,g.happiness-5);}this.reputation=Math.min(100,this.reputation+.22);this.events.push({type:'earn',amount,guestId:g.id,x:item.x,y:item.y});for(const [type,info] of Object.entries(TYPES))if(info.unlock>before&&info.unlock<=this.plays)this.events.push({type:'unlock',text:info.name+' unlocked!',item:type});
-     g.target=null;g.destination=null;if(item.condition===0){for(const other of this.queue(item)){other.target=null;other.destination=null;other.path=[];other.state='waiting';other.queued=false;other.wait=0;other.happiness=Math.max(0,other.happiness-10);this.react(other,'It’s broken!');}}else this.arrangeQueue(item);
-    }
-    g.target=null;if(!this.open||g.visited.length>=3||!this.choose(g)){if(g.hunger>80){g.happiness=Math.max(0,g.happiness-8);this.react(g,'Need a snack');}else if(g.happiness>=80&&!(g.bubbleTime>0))this.react(g,'Great arcade!');this.leave(g);}
-   }
-  }
-  this.guests=this.guests.filter(g=>!g.gone);
+  for(const c of this.customers){this.stepCustomer(c,dt);if(c.dropLitter!=null){c.dropLitter-=dt;if(c.dropLitter<=0){c.dropLitter=null;if(this.litter.length<40&&c.y<this.h)this.litter.push({id:this.nextId++,x:c.x+(this.random()-.5)*.4,y:c.y+(this.random()-.5)*.4});}}}
+  for(const c of this.customers)if(c.gone)this.farewell(c);this.customers=this.customers.filter(c=>!c.gone);
+  for(const s of this.staff)this.stepStaff(s,dt);
+  for(const it of this.items)if(!it.users.length)it.anim=Math.max(0,it.anim-dt);
  }
- serialize(){return JSON.stringify({version:1,cash:this.cash,totalEarned:this.totalEarned,plays:this.plays,day:this.day,dayTime:this.dayTime,level:this.level,reputation:this.reputation,nextId:this.nextId,open:this.open,staff:this.staff,upgrades:this.upgrades,claimed:this.claimed,campaign:this.campaign,theme:this.theme,dailyIncome:this.dailyIncome,lastDay:this.lastDay,served:this.served,lost:this.lost,tutorial:this.tutorial,items:this.items.map(({busy,...item})=>item)});}
- static restore(text,random=Math.random){
-  const s=JSON.parse(text);if(s?.version!==1||!Array.isArray(s.items)||s.items.length>200||!Number.isInteger(s.level)||s.level<0||s.level>=EXPANSIONS.length)throw Error('Invalid arcade save.');
-  const game=new Tycoon(random);for(const key of ['cash','totalEarned','plays','day','dayTime','reputation','nextId']){if(!finite(s[key]))throw Error('Invalid arcade save.');game[key]=s[key];}if(!Number.isInteger(game.day)||game.day<1||game.dayTime>=90||game.reputation>100||!Number.isInteger(game.plays)||!Number.isInteger(game.nextId))throw Error('Invalid arcade counters.');
-  game.level=s.level;game.open=Boolean(s.open);for(const group of ['staff','upgrades'])if(s[group]!==undefined){if(!s[group]||typeof s[group]!=='object')throw Error('Invalid business save.');for(const id of Object.keys(game[group])){if(typeof s[group][id]!=='boolean')throw Error('Invalid business save.');game[group][id]=s[group][id];}}
-  if(s.claimed!==undefined){if(!Array.isArray(s.claimed)||new Set(s.claimed).size!==s.claimed.length||s.claimed.some(id=>!MILESTONES.some(m=>m.id===id)))throw Error('Invalid goals in save.');game.claimed=[...s.claimed];}
-  for(const key of ['campaign','dailyIncome','served','lost'])if(s[key]!==undefined){if(!finite(s[key],key==='campaign'?45:1e12))throw Error('Invalid business save.');game[key]=s[key];}
-  game.theme=['midnight','rose','ocean'].includes(s.theme)?s.theme:'midnight';if(s.lastDay&&['income','expenses'].every(k=>finite(s.lastDay[k])))game.lastDay={income:s.lastDay.income,expenses:s.lastDay.expenses};
-  if(s.tutorial!==undefined){if(!s.tutorial||!['new','active','done','skipped'].includes(s.tutorial.status)||!Number.isInteger(s.tutorial.step)||s.tutorial.step<0||s.tutorial.step>5||s.tutorial.status==='active'&&s.tutorial.step>4)throw Error('Invalid tutorial save.');game.tutorial={status:s.tutorial.status,step:s.tutorial.step};}
-  const ids=new Set();for(const i of s.items){if(!Number.isInteger(i.id)||i.id<1||ids.has(i.id)||!TYPES[i.type]||!Number.isInteger(i.level)||i.level<1||i.level>3||!finite(i.condition,100)||!finite(i.plays)||!finite(i.earned))throw Error('Invalid machine in save.');if(game.validate(i.type,i.x,i.y))throw Error('Invalid floor plan in save.');ids.add(i.id);game.items.push({id:i.id,type:i.type,x:i.x,y:i.y,level:i.level,condition:i.condition,plays:i.plays,earned:i.earned,busy:null});}
-  game.nextId=Math.max(game.nextId,1,...game.items.map(i=>i.id+1));return game;
+ advisor(){
+  const games=this.items.filter(i=>TYPES[i.type].cat==='games');
+  if(!games.length)return 'Choose an attraction on the left, then click an empty floor tile.';
+  if(!this.open&&!this.customers.length)return 'Open your doors to welcome visitors.';
+  const broken=this.items.filter(i=>i.broken);if(broken.length&&!this.staff.some(s=>s.role==='mechanic'))return broken.length+' machine'+(broken.length>1?'s are':' is')+' broken. Click to repair, or hire a mechanic.';
+  const needs={hunger:'snack',thirst:'soda',bladder:'restroom'};for(const [n,t] of Object.entries(needs)){if(this.unlocked(t)&&!this.items.some(i=>i.type===t)&&this.customers.filter(c=>c[n]>70).length>=2)return 'Visitors are '+({hunger:'hungry',thirst:'thirsty',bladder:'looking for a restroom'}[n])+'. Build a '+TYPES[t].name.toLowerCase()+'.';}
+  if(this.litter.length>5&&!this.staff.some(s=>s.role==='janitor'))return 'The floor is getting messy. Hire a janitor or add trash bins.';
+  const waits=this.items.filter(i=>i.queue.length>=2);if(waits.length)return 'Long lines at the '+TYPES[waits[0].type].name+'. Add more attractions.';
+  if(this.items.some(i=>i.type==='claw'||i.type==='skeeball')&&!this.items.some(i=>i.type==='prizes')&&this.unlocked('prizes'))return 'Ticket-hungry visitors want a prize counter.';
+  if(this.canRelocate())return 'You are ready to move to '+LOCATIONS[this.level+1].name+'. Open Business → Location.';
+  const g=this.goalStatus();if(g){const miss=g.parts.find(p=>p.have<p.need);if(miss)return 'Next location: '+miss.label.toLowerCase()+' '+(miss.money?'$'+Math.floor(miss.have).toLocaleString()+' / $'+miss.need.toLocaleString():miss.have+' / '+miss.need)+'.';}
+  return 'Your arcade is humming. Keep improving it.';
+ }
+ serialize(){
+  return JSON.stringify({version:2,cash:this.cash,totalEarned:this.totalEarned,plays:this.plays,day:this.day,dayTime:this.dayTime,level:this.level,reputation:this.reputation,nextId:this.nextId,open:this.open,
+   items:this.items.map(i=>({id:i.id,type:i.type,x:i.x,y:i.y,rot:i.rot,level:i.level,condition:i.condition,broken:i.broken,earned:i.earned,plays:i.plays})),
+   staff:this.staff.map(s=>({id:s.id,role:s.role,name:s.name})),upgrades:this.upgrades,claimed:this.claimed,campaign:this.campaign,event:this.event&&{key:this.event.key},served:this.served,lost:this.lost,history:this.history,typePlays:this.typePlays,litter:this.litter.slice(0,40)});
+ }
+ static restore(raw,random){return Tycoon.load(raw,random);}
+ static load(raw,random=Math.random){
+  const g=new Tycoon(random),s=typeof raw==='string'?JSON.parse(raw):raw;if(!s||typeof s!=='object')throw new Error('Unreadable save.');
+  const num=(v,d)=>Number.isFinite(v)?v:d;
+  if(s.version!==2){
+   // Arcade Tycoon 1.0 save: keep lifetime progress and location, refund the old floor as starting cash.
+   g.totalEarned=Math.max(0,num(s.totalEarned,0));g.level=clamp(Math.floor(num(s.level,0)),0,LOCATIONS.length-1);g.day=Math.max(1,Math.floor(num(s.day,1)));g.plays=Math.max(0,Math.floor(num(s.plays,0)));g.reputation=clamp(num(s.reputation,50),0,100);
+   const refund=(Array.isArray(s.items)?s.items.length:0)*200;g.cash=Math.max(800,num(s.cash,800)+refund)+g.level*1500;g.served=Math.max(0,Math.floor(num(s.served,0)));g.migrated=true;g.note('Welcome to Arcade Tycoon 2.0! Your lifetime progress came with you, and your old floor was refunded.');return g;
+  }
+  g.cash=num(s.cash,800);g.totalEarned=Math.max(0,num(s.totalEarned,0));g.plays=num(s.plays,0);g.day=Math.max(1,num(s.day,1));g.dayTime=clamp(num(s.dayTime,0),0,DAY_LENGTH);g.level=clamp(Math.floor(num(s.level,0)),0,LOCATIONS.length-1);g.reputation=clamp(num(s.reputation,50),0,100);g.nextId=Math.max(1,num(s.nextId,1));g.open=!!s.open;
+  for(const i of Array.isArray(s.items)?s.items:[]){if(!TYPES[i.type])continue;const it={id:i.id,type:i.type,x:i.x|0,y:i.y|0,rot:i.rot?1:0,level:clamp(i.level|0,1,5),condition:clamp(num(i.condition,100),0,100),broken:!!i.broken,earned:num(i.earned,0),plays:num(i.plays,0),users:[],queue:[],anim:0};if(g.cells(it).every(c=>g.inside(c.x,c.y))&&!g.cells(it).some(c=>g.occupied().has(c.x+','+c.y)))g.items.push(it);g.nextId=Math.max(g.nextId,it.id+1);}
+  const d=g.door;for(const st of Array.isArray(s.staff)?s.staff:[])if(STAFF[st.role]){g.staff.push({id:st.id,role:st.role,name:st.name||'Sam',x:d.x+.5,y:d.y+.5,path:[],task:null,timer:0});g.nextId=Math.max(g.nextId,st.id+1);}
+  g.upgrades={};for(const k in IMPROVEMENTS)if(s.upgrades?.[k])g.upgrades[k]=clamp(s.upgrades[k]|0,0,IMPROVEMENTS[k].costs.length);
+  g.claimed=Array.isArray(s.claimed)?s.claimed.filter(x=>typeof x==='string'):[];g.campaign=s.campaign&&CAMPAIGNS[s.campaign.key]?{key:s.campaign.key,left:num(s.campaign.left,0)}:null;g.event=s.event&&EVENTS[s.event.key]?{key:s.event.key}:null;
+  g.served=num(s.served,0);g.lost=num(s.lost,0);g.history=Array.isArray(s.history)?s.history.slice(-21):[];g.typePlays=s.typePlays&&typeof s.typePlays==='object'?s.typePlays:{};g.litter=Array.isArray(s.litter)?s.litter.filter(l=>g.inside(Math.floor(l.x),Math.floor(l.y))).map(l=>({id:g.nextId++,x:l.x,y:l.y})):[];
+  return g;
  }
 }

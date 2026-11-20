@@ -1,5 +1,65 @@
 [
   {
+    "id": "arcade-tycoon-remake",
+    "gameId": "arcade-tycoon",
+    "date": "2026-11-20T18:00:00.000Z",
+    "title": "Arcade Tycoon 2.0",
+    "summary": "A complete remake with six venues, 17 attractions and much smarter visitors.",
+    "changes": [
+      "Visitors now have tastes, budgets and needs: hunger, thirst, restrooms and rest.",
+      "New attractions, service buildings and decor, plus staff, improvements, campaigns, random events and daily reports.",
+      "Your lifetime earnings and venue carry over; your old floor is refunded as cash."
+    ]
+  },
+  {
+    "id": "pocket-heist-remake",
+    "gameId": "pocket-heist",
+    "date": "2026-11-20T18:00:00.000Z",
+    "title": "Pocket Heist: a new crew",
+    "summary": "Rebuilt from the ground up with ten chapters of new security and a safehouse shop.",
+    "changes": [
+      "100 procedurally built jobs, then endless heists. Your cleared-job count carries over.",
+      "Cameras, lasers, keycards, vaults, dark rooms, lockers, guard dogs, creaky floors and terminals.",
+      "Spend your take on smoke bombs, noisemakers, EMPs and stealth gear."
+    ]
+  },
+  {
+    "id": "ricochet-club-remake",
+    "gameId": "ricochet-club",
+    "date": "2026-11-20T18:00:00.000Z",
+    "title": "Ricochet Club: eight new clubs",
+    "summary": "80 new tables with bumpers, glass, portals, switches, sand, gravity wells and pockets.",
+    "changes": [
+      "Every table is generated from a real, replayable solution.",
+      "Par-based three-star ratings and a shot preview.",
+      "Endless tables continue after the final club."
+    ]
+  },
+  {
+    "id": "parcel-panic-remake",
+    "gameId": "parcel-panic",
+    "date": "2026-11-20T18:00:00.000Z",
+    "title": "Parcel Panic: routes and daily deliveries",
+    "summary": "Three modes, new crate types and tools.",
+    "changes": [
+      "60 delivery routes with goals: priority boxes, taped crates and dispatch quotas.",
+      "A Daily route everyone shares, plus endless Classic.",
+      "Box cutter, forklift and new-order tools earned through streaks and bonus stamps."
+    ]
+  },
+  {
+    "id": "odd-hours-remake",
+    "gameId": "odd-hours",
+    "date": "2026-11-20T18:00:00.000Z",
+    "title": "Odd Hours: the full collection",
+    "summary": "Eight cameras, seven nights and endless Overtime.",
+    "changes": [
+      "Seven anomaly categories to report, from moved objects to things that watch you.",
+      "Archive photos are now limited, and reports take time to file.",
+      "Subtler changes on later nights."
+    ]
+  },
+  {
     "id": "backrooms-for-science-release",
     "gameId": "backrooms-for-science",
     "date": "2026-11-20T16:45:21.593Z",

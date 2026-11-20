@@ -24,7 +24,7 @@ test('password uniqueness, confirmation, isolation, reload, validation and concu
  assert.equal((await call('check',{password:'FirstPassword'})).data.available,false);
  assert.equal((await call('check',{password:'firstPassword'})).data.available,true);
  assert.equal((await call('load',{password:'MissingPassword'})).status,404);
- const preview=await call('load',{password:'FirstPassword'});assert.equal(preview.cookie,undefined);assert.equal(preview.data.payload,payload);const portable=await decodeSaveCode(preview.data.payload);assert.equal(Tycoon.restore(portable.entries.find(([k])=>k===SAVE_KEY)[1]).cash,520);assert.equal(JSON.parse(portable.entries.find(([k])=>k===SETTINGS_KEY)[1]).volume,.2);
+ const preview=await call('load',{password:'FirstPassword'});assert.equal(preview.cookie,undefined);assert.equal(preview.data.payload,payload);const portable=await decodeSaveCode(preview.data.payload);assert.equal(Tycoon.restore(portable.entries.find(([k])=>k===SAVE_KEY)[1]).cash,670);assert.equal(JSON.parse(portable.entries.find(([k])=>k===SETTINGS_KEY)[1]).volume,.2);
  const connected=await call('connect',{password:'FirstPassword',revision:1,confirmed:true});
  assert.match(connected.cookie,/^arcade_save_session=[a-f0-9]{64}$/);
  assert.equal((await call('session',null,connected.cookie)).data.id,first.data.id);

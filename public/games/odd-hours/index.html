@@ -1,1 +1,23 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b171b"><title>Odd Hours</title><link rel="stylesheet" href="style.css"><script type="module" src="game.js"></script></head><body><header><div class="identity"><span class="mark" aria-hidden="true">OH</span><div><p class="eyebrow">Rhett’s Arcade</p><h1>Odd Hours</h1></div></div><div class="header-actions"><a href="../../" target="_top">Arcade ↗</a><select id="level-select" aria-label="Choose an unlocked challenge" hidden></select><button id="sound" aria-pressed="true">Sound on</button><button id="restart">Restart</button><button id="pause">Pause</button></div></header><main><div id="readout"></div><section id="stage" aria-label="Odd Hours play area"><canvas id="game" width="1000" height="560" tabindex="0" aria-label="Odd Hours game canvas"></canvas><div id="overlay"><div class="menu-card"><p class="eyebrow">Mystery</p><h2 id="menu-title">Odd Hours</h2><p id="menu-description">Four quiet cameras. Something keeps changing. Compare the live feed with its reference and report the things that should not be there.</p><button id="play" class="primary">Start playing</button><small id="controls">1–4 switch cameras · click an anomaly to report · Space reference</small></div></div></section><div class="below"><p id="objective"></p><div id="action-buttons"></div></div><footer><span>RHETT’S ARCADE</span><span id="best"></span></footer><div id="announcement" role="status" aria-live="polite"></div></main></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0c1213"><title>Odd Hours</title><link rel="stylesheet" href="style.css"><script type="module" src="game.js"></script></head>
+<body>
+<header><div class="brand"><span class="mark" aria-hidden="true">◉</span><div><h1>Odd Hours</h1><small id="night-name">Night 1</small></div></div>
+<nav><a href="../../" target="_top">Arcade ↗</a><button id="sound" aria-pressed="true">Sound</button><button id="music" aria-pressed="true">Ambience</button><button id="pause">Pause</button></nav></header>
+<main>
+ <div class="console">
+  <section id="stage"><canvas id="game" width="960" height="560" tabindex="0" aria-label="Security camera feed"></canvas><div id="overlay" class="overlay"></div></section>
+  <aside class="side">
+   <div class="clock"><small>Shift clock</small><strong id="clock">12:00 AM</strong><i class="meter"><b id="clock-bar"></b></i></div>
+   <div class="stat"><span>Reports filed</span><b id="found">0</b></div>
+   <div class="stat"><span>False reports</span><b id="wrong">0 / 5</b></div>
+   <div class="stat"><span>Archive photos</span><b id="peeks">4</b></div>
+   <div class="stat"><span>Score</span><b id="score">0</b></div>
+   <button id="peek" class="peek">📷 Archive photo <kbd>Space</kbd></button>
+   <h3>File a report for this camera</h3>
+   <div id="report" class="report"></div>
+   <p id="filing" class="filing"></p>
+  </aside>
+ </div>
+ <div id="cams" class="cams" role="tablist" aria-label="Cameras"></div>
+ <p class="keys"><kbd>1</kbd>–<kbd>8</kbd> or <kbd>←</kbd><kbd>→</kbd> switch cameras · <kbd>Space</kbd> archive photo · report keys shown on each button · <kbd>P</kbd> pause</p>
+</main>
+</body></html>

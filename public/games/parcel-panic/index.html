@@ -1,1 +1,17 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#211d1c"><title>Parcel Panic</title><link rel="stylesheet" href="style.css"><script type="module" src="game.js"></script></head><body><header><div class="identity"><span class="mark" aria-hidden="true">PP</span><div><p class="eyebrow">Rhett’s Arcade</p><h1>Parcel Panic</h1></div></div><div class="header-actions"><a href="../../" target="_top">Arcade ↗</a><select id="level-select" aria-label="Choose an unlocked challenge" hidden></select><button id="sound" aria-pressed="true">Sound on</button><button id="restart">Restart</button><button id="pause">Pause</button></div></header><main><div id="readout"></div><section id="stage" aria-label="Parcel Panic play area"><canvas id="game" width="1000" height="560" tabindex="0" aria-label="Parcel Panic game canvas"></canvas><div id="overlay"><div class="menu-card"><p class="eyebrow">Puzzle</p><h2 id="menu-title">Parcel Panic</h2><p id="menu-description">Pack awkward parcels into your delivery van. Complete rows and columns to ship them out, keep room for the next order, and build a streak.</p><button id="play" class="primary">Start playing</button><small id="controls">Select a parcel · R rotate · click the van grid to pack</small></div></div></section><div class="below"><p id="objective"></p><div id="action-buttons"></div></div><footer><span>RHETT’S ARCADE</span><span id="best"></span></footer><div id="announcement" role="status" aria-live="polite"></div></main></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#2a2118"><title>Parcel Panic</title><link rel="stylesheet" href="style.css"><script type="module" src="game.js"></script></head>
+<body>
+<header><div class="brand"><span class="mark" aria-hidden="true">📦</span><div><h1>Parcel Panic</h1><small id="mode-name">Depot</small></div></div>
+<nav><a href="../../" target="_top">Arcade ↗</a><button id="menu-btn">Modes</button><button id="sound" aria-pressed="true">Sound</button><button id="music" aria-pressed="true">Music</button></nav></header>
+<main>
+ <div class="hud" id="hud"></div>
+ <section id="stage"><canvas id="game" width="1000" height="640" tabindex="0" aria-label="Parcel Panic. Drag parcels into the van."></canvas><div id="overlay" class="overlay"></div></section>
+ <div class="tools" id="tools">
+  <button id="rotate">⟳ Rotate <kbd>R</kbd></button>
+  <button id="t-hammer">✂ Box cutter <b id="n-hammer">0</b> <kbd>H</kbd></button>
+  <button id="t-bomb">⛟ Forklift <b id="n-bomb">0</b> <kbd>B</kbd></button>
+  <button id="t-swap">↻ New order <b id="n-swap">0</b> <kbd>N</kbd></button>
+  <button id="undo">↶ Unpack <kbd>U</kbd></button>
+ </div>
+ <p class="keys">Drag a parcel into the van, or click it then click a spot · right-click / mouse wheel / <kbd>R</kbd> rotates · <kbd>1</kbd>–<kbd>3</kbd> pick · arrows + <kbd>Enter</kbd> place · <kbd>Esc</kbd> cancel</p>
+</main>
+</body></html>

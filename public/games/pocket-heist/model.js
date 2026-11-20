@@ -1,79 +1,209 @@
-const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-export const CELL=52,OX=142,OY=72,COLS=13,ROWS=8;
+// Pocket Heist 2.0 — procedural stealth jobs. Pure logic, no DOM.
+export const T=30,GW=32,GH=20,W=GW*T,H=GH*T;
+export const FLOOR=0,WALL=1,OUT=2,DOOR=3,RED=4,BLUE=5,EXIT=6;
 export const CHAPTERS=[
- {name:'The Blue Galleries',lesson:'Take every artifact and return to EXIT. Hold Shift to move quietly.',floor:['#263b4b','#2b4351'],wall:'#4c6978',trim:'#b9c7be',accent:'#e0bd8c',surface:'stone'},
- {name:'Keys to the City',lesson:'Pick up the blue keycard. Press E beside a locked door to open it.',floor:['#34404c','#3c4952'],wall:'#647481',trim:'#c8c4af',accent:'#9dc8e8',surface:'wood'},
- {name:'Eyes on the Prize',lesson:'Cameras sweep back and forth. Cabinets block their view.',floor:['#233f42','#28494c'],wall:'#4f7c7a',trim:'#b3d0bc',accent:'#a3d1b5',surface:'stone'},
- {name:'The Red Line',lesson:'Red laser beams cycle on and off. Cross while they are dark.',floor:['#303a50','#374258'],wall:'#566b86',trim:'#c3bde1',accent:'#d3b3e7',surface:'carpet'},
- {name:'Power Play',lesson:'Press E at a power panel to disable cameras and lasers for 10 seconds.',floor:['#3c393b','#45413f'],wall:'#7b7770',trim:'#d0c1a0',accent:'#e5c98c',surface:'stone'},
- {name:'Watch Your Step',lesson:'Running over metal floor grates alerts nearby cops. Sneak over them.',floor:['#2c4149','#334b52'],wall:'#587780',trim:'#bfd3cf',accent:'#a5d9db',surface:'wood'},
- {name:'Under Lock and Key',lesson:'Hold E beside a vault until its lock opens. Leave room to hide if a cop approaches.',floor:['#373445','#413e50'],wall:'#6e6686',trim:'#cfc0dc',accent:'#dfb5ce',surface:'carpet'},
- {name:'Smoke and Mirrors',lesson:'Press Q to throw smoke. It blocks sight for six seconds. Two charges per job.',floor:['#2d3e44','#35484d'],wall:'#58727b',trim:'#c5d0bc',accent:'#bdcfa6',surface:'stone'},
- {name:'Out of Sight',lesson:'Hold Shift in a hiding spot to disappear. Stay away from cops who get too close.',floor:['#293f35','#304a3d'],wall:'#587963',trim:'#cbd0a9',accent:'#b6d39e',surface:'wood'},
- {name:'The Grand Collection',lesson:'Combine everything you learned. Activate both security panels to unlock the exit.',floor:['#3c3542','#463e4c'],wall:'#7b6d85',trim:'#e0c8b0',accent:'#f0cca0',surface:'carpet'}
+ {name:'Night School',intro:'Guards patrol with flashlights. Stay out of their light, grab the marked target and get back to the van.'},
+ {name:'Eyes on the Walls',intro:'Security cameras sweep back and forth. Their cones trip the alarm just like a guard.'},
+ {name:'Keys to the Kingdom',intro:'Locked doors need a matching keycard. Find it first.'},
+ {name:'Red Light District',intro:'Laser tripwires pulse across doorways. Wait for the gap.'},
+ {name:'Safe Cracking',intro:'The big prize sits in a vault. Hold E to crack it — the drill is loud.'},
+ {name:'Lights Out',intro:'Dark rooms make you harder to spot. Lockers let you hide: press E beside one.'},
+ {name:'Who Let the Dogs In',intro:'Guard dogs are fast and can smell you through walls when you are close. Sneak.'},
+ {name:'Creaky Floors',intro:'Old floorboards creak when you walk on them. Sneaking keeps them quiet.'},
+ {name:'Inside Job',intro:'Security terminals loop the cameras and lasers for a while. Hold E to hack one.'},
+ {name:'The Masterpiece',intro:'Everything at once. The biggest jobs in the city.'}
 ];
-const STARTERS=[
- {name:'The blue gallery',start:[1,6],exit:[1,7],walls:[[3,2,1,4],[6,1,1,3],[8,5,3,1]],loot:[[2,1],[10,2],[11,6]],guards:[{route:[[5,4],[11,4],[11,6],[5,6]]}]},
- {name:'A quiet acquisition',start:[1,6],exit:[1,7],walls:[[3,1,1,5],[6,3,3,1],[10,2,1,4]],loot:[[1,1],[7,1],[11,6]],guards:[{route:[[5,1],[8,1],[8,2],[5,2]]},{route:[[5,5],[9,5],[9,6],[5,6]]}]},
- {name:'One last exhibit',start:[1,6],exit:[1,7],walls:[[3,2,3,1],[3,4,1,2],[7,2,1,4],[9,4,2,1]],loot:[[1,1],[10,1],[11,6],[5,4]],guards:[{route:[[1,1],[2,1],[2,5],[1,5]]},{route:[[9,1],[11,1],[11,3],[9,3]]}]}
-];
-export const center=p=>({x:OX+(p[0]+.5)*CELL,y:OY+(p[1]+.5)*CELL});
-const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),tileKey=p=>p.join(','),manhattan=(a,b)=>Math.abs(a[0]-b[0])+Math.abs(a[1]-b[1]);
-function random(seed){let n=seed>>>0;return()=>{n+=0x6D2B79F5;let t=Math.imul(n^n>>>15,n|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;};}
-export const freeTile=(walls,x,y)=>x>=0&&x<COLS&&y>=0&&y<ROWS&&!walls.some(([cx,cy,w,h])=>x>=cx&&x<cx+w&&y>=cy&&y<cy+h);
-export function floorNetwork(walls,start=[1,6]){const queue=[start],seen=new Set([tileKey(start)]);for(let n=0;n<queue.length;n++){const p=queue[n];for(const [dx,dy]of [[1,0],[-1,0],[0,1],[0,-1]]){const q=[p[0]+dx,p[1]+dy],k=tileKey(q);if(freeTile(walls,...q)&&!seen.has(k)){seen.add(k);queue.push(q);}}}return queue;}
-function generate(level,seed,tough=false){
- const endless=level>100,chapter=endless?9:Math.floor((level-1)/10),variation=endless?seed%10:(level-1)%10,theme=CHAPTERS[endless?(seed>>>8)%CHAPTERS.length:chapter],rng=random(endless?seed:level*7919+117),start=[1,6],exit=[1,7],walls=[],gap=endless?1+Math.floor(rng()*6):1+(level*3%6),panelDoor=endless?rng()<.35:chapter===4,occupied=new Set([tileKey(start),tileKey(exit)]),doors=[];
- if(chapter>=1){for(let y=0;y<ROWS;y++)if(y!==gap)walls.push([6,y,1,1]);doors.push({...center([6,gap]),w:1,h:1,open:false,kind:panelDoor?'switch':'key'});}
- const validConnected=w=>{let count=0;for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++)if(freeTile(w,x,y))count++;return floorNetwork(w).length===count;};
- for(let n=0,added=0;n<180&&added<(tough?14:7)+chapter%4;n++){const x=2+Math.floor(rng()*10),y=Math.floor(rng()*7),horizontal=rng()<.5,w=horizontal?(rng()<.6?2:1):1,h=horizontal?1:(rng()<.6?2:1);if(x+w>COLS||y+h>ROWS||chapter>=1&&x<=6&&x+w>6||manhattan([x,y],start)<3||walls.some(([a,b,c,d])=>x<a+c&&x+w>a&&y<b+d&&y+h>b))continue;const candidate=[...walls,[x,y,w,h]];if(validConnected(candidate)){walls.push([x,y,w,h]);added++;}}
- let floor=floorNetwork(walls);const pick=(predicate=()=>true)=>{const candidates=floor.filter(p=>!occupied.has(tileKey(p))&&predicate(p));if(!candidates.length)throw Error('No objective location on mission '+level);const p=candidates[Math.floor(rng()*candidates.length)];occupied.add(tileKey(p));return p;};
- const keys=chapter>=1&&!panelDoor?[pick(p=>p[0]<6&&manhattan(p,start)>2)]:[],loot=[];for(let i=0;i<3+Math.floor(chapter/4);i++)loot.push(pick(p=>(chapter<1||p[0]>6)&&manhattan(p,start)>3&&loot.every(q=>manhattan(p,q)>1)));
- const switches=[];if(chapter>=4){switches.push(pick(p=>p[0]<6&&manhattan(p,start)>2));if(chapter===9)switches.push(pick(p=>p[0]>6));}
- const cameras=[];if(chapter>=2)for(let i=0;i<(tough?2:1)+(chapter>=6?1:0);i++){const p=pick(p=>manhattan(p,start)>4);cameras.push({...center(p),baseAngle:p[0]>6?Math.PI:0,angle:0,range:(tough?173:155)+chapter*2,active:true,phase:rng()*6});}
- const lasers=[];if(chapter>=3){for(let i=0;i<(tough?2:1)+(chapter>=7?1:0);i++){const candidates=floor.filter(p=>manhattan(p,start)>4&&freeTile(walls,p[0]+1,p[1])&&!(chapter>=1&&p[0]>=5&&p[0]<=6));if(candidates.length){const p=candidates[Math.floor(rng()*candidates.length)],a=center(p),b=center([p[0]+1,p[1]]);lasers.push({x1:a.x,y1:a.y,x2:b.x,y2:b.y,phase:rng()*3.5,active:true});}}}
- const noisy=chapter>=5?Array.from({length:Math.min(8,3+chapter)},()=>pick(p=>manhattan(p,start)>1)):[],hiding=chapter>=8?Array.from({length:4},()=>pick()):[],guards=[];
- for(let i=0;i<(tough?Math.min(6,2+Math.floor(chapter/2)+(variation>6?1:0)):Math.min(4,1+Math.floor(chapter/3)+(variation>6?1:0)));i++){const beginning=pick(p=>p[0]!==6&&manhattan(p,start)>4&&(!tough||[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>p[0]+dx!==6&&freeTile(walls,p[0]+dx,p[1]+dy)))),path=[beginning];for(let n=0;n<5+variation%4;n++){const p=path.at(-1),options=[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>[p[0]+dx,p[1]+dy]).filter(q=>freeTile(walls,...q)&&!(chapter>=1&&q[0]===6)&&!path.some(p=>tileKey(p)===tileKey(q)));if(!options.length)break;path.push(options[Math.floor(rng()*options.length)]);}if(path.length<2){const options=[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>[beginning[0]+dx,beginning[1]+dy]).filter(q=>freeTile(walls,...q)&&q[0]!==6);if(options.length)path.push(options[0]);}if(path.length>=2)guards.push({route:[...path,...path.slice(1,-1).reverse()]});}
- return {name:endless?'Endless Heist #'+(level-100):theme.name+' '+String(variation+1).padStart(2,'0'),endless,chapter,chapterName:endless?'Endless · '+theme.name:theme.name,lesson:endless?'ENDLESS #'+(level-100)+' · A new layout and new patrols. Take all loot and activate both panels, then escape.':theme.lesson,palette:{floor:theme.floor,wall:theme.wall,trim:theme.trim,accent:theme.accent},surface:theme.surface,start,exit,walls,loot,guards,doors,keys,cameras,lasers,switches,noisy,hiding,vaultCount:chapter>=6?(chapter===9?2:1):0,extractionPanels:chapter===9?2:0,timeLimit:endless?195:125+chapter*7};
+export const GEAR={
+ smoke:{name:'Smoke bombs',key:'Q',costs:[150,400,900],desc:'Drop a cloud that blocks every line of sight. One charge per level, per job.'},
+ decoy:{name:'Noisemakers',key:'F',costs:[120,350,800],desc:'Toss a rattling decoy ahead. Guards go to investigate.'},
+ emp:{name:'EMP charges',key:'C',costs:[300,700,1500],desc:'Knock out nearby cameras and lasers for 8 seconds.'},
+ shoes:{name:'Soft shoes',costs:[250,700],desc:'Walking makes less noise and creaky floors are quieter.'},
+ hands:{name:'Quick hands',costs:[300,800],desc:'Crack vaults and hack terminals faster.'},
+ suit:{name:'Shadow suit',costs:[400,1100],desc:'Guards and cameras take longer to spot you.'}
+};
+export function rng(seed){let s=(seed>>>0)||1;return ()=>{s^=s<<13;s>>>=0;s^=s>>17;s^=s<<5;s>>>=0;return s/4294967296;};}
+export const chapterOf=level=>level>100?9:Math.min(9,Math.floor((level-1)/10));
+export function features(level){
+ const ch=chapterOf(level),endless=level>100,R=rng(level*31+7),pick=p=>endless?R()<p:false;
+ return {cameras:ch>=1||pick(.8),locks:ch>=2?(ch>=6&&R()<.6?2:1):0,lasers:ch>=3||pick(.7),vault:ch>=4||pick(.6),dark:ch>=5||pick(.5),dogs:ch>=6||pick(.5),creaks:ch>=7||pick(.5),terminal:ch>=8||pick(.5)};
 }
-const LEGACY_CASES=Array.from({length:100},(_,i)=>{if(i<3){const s=STARTERS[i],t=CHAPTERS[0];return {...s,chapter:0,chapterName:t.name,lesson:t.lesson,palette:{floor:t.floor,wall:t.wall,trim:t.trim,accent:t.accent},surface:t.surface,doors:[],keys:[],cameras:[],lasers:[],switches:[],noisy:[],hiding:[],vaultCount:0,extractionPanels:0,timeLimit:125};}return generate(i+1);});
-// Add cover and extra patrols to the three introductory layouts without blocking their objectives.
-function hardenStarter(base,level){
- const rng=random(level*8129),walls=base.walls.map(w=>[...w]),reserved=new Set([base.start,base.exit,...base.loot].map(tileKey));
- for(const guard of base.guards)for(let i=0;i<guard.route.length;i++){const a=guard.route[i],b=guard.route[(i+1)%guard.route.length],steps=manhattan(a,b);for(let n=0;n<=steps;n++)reserved.add(tileKey([Math.round(a[0]+(b[0]-a[0])*n/(steps||1)),Math.round(a[1]+(b[1]-a[1])*n/(steps||1))]));}
- for(let attempt=0,added=0;attempt<250&&added<7;attempt++){const x=2+Math.floor(rng()*10),y=Math.floor(rng()*7);if(!freeTile(walls,x,y)||reserved.has(tileKey([x,y]))||manhattan([x,y],base.start)<3)continue;const next=[...walls,[x,y,1,1]];let count=0;for(let ty=0;ty<ROWS;ty++)for(let tx=0;tx<COLS;tx++)if(freeTile(next,tx,ty))count++;if(floorNetwork(next).length===count){walls.push([x,y,1,1]);added++;}}
- const guards=base.guards.map(g=>({route:g.route.map(p=>[...p])})),floor=floorNetwork(walls),used=new Set(guards.map(g=>tileKey(g.route[0])));
- for(let i=0;i<2;i++){const choices=floor.filter(p=>manhattan(p,base.start)>4&&!used.has(tileKey(p))),first=choices[Math.floor(rng()*choices.length)];if(!first)continue;used.add(tileKey(first));const path=[first];for(let n=0;n<7;n++){const last=path.at(-1),options=[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>[last[0]+dx,last[1]+dy]).filter(p=>freeTile(walls,...p)&&!path.some(q=>tileKey(q)===tileKey(p)));if(!options.length)break;path.push(options[Math.floor(rng()*options.length)]);}if(path.length>1)guards.push({route:[...path,...path.slice(1,-1).reverse()]});}
- return {...base,walls,guards};
-}
-export const CASES=LEGACY_CASES.map((base,i)=>i<3?hardenStarter(base,i+1):generate(i+1,undefined,true));
 
-// Build one endless job at a time; its seed makes retries and save restoration identical.
-export function createCase(level,seed,layoutVersion=2){return level<=100?(layoutVersion===1?LEGACY_CASES:CASES)[level-1]:generate(level,seed>>>0,layoutVersion!==1);}
-function freshSeed(){const bytes=new Uint32Array(1);if(globalThis.crypto?.getRandomValues){globalThis.crypto.getRandomValues(bytes);return bytes[0];}return Math.floor(Math.random()*4294967296)>>>0;}
-export function blocked(board,x,y,r=10){return x<OX+r||x>OX+COLS*CELL-r||y<OY+r||y>OY+ROWS*CELL-r||board.walls.some(([cx,cy,w,h])=>x+r>OX+cx*CELL&&x-r<OX+(cx+w)*CELL&&y+r>OY+cy*CELL&&y-r<OY+(cy+h)*CELL)||(board.doors||[]).some(d=>!d.open&&x+r>d.x-CELL/2&&x-r<d.x+CELL/2&&y+r>d.y-CELL/2&&y-r<d.y+CELL/2);}
-export function lineClear(board,a,b){const n=Math.min(200,Math.ceil(distance(a,b)/8));for(let i=1;i<n;i++)if(blocked(board,a.x+(b.x-a.x)*i/n,a.y+(b.y-a.y)*i/n,0))return false;return true;}
-function segmentDistance(p,a,b){const dx=b.x-a.x,dy=b.y-a.y,n=dx*dx+dy*dy,t=n?clamp(((p.x-a.x)*dx+(p.y-a.y)*dy)/n,0,1):0;return Math.hypot(p.x-a.x-dx*t,p.y-a.y-dy*t);}
-export function sees(board,guard,player){const gap=distance(guard,player),angle=Math.atan2(player.y-guard.y,player.x-guard.x),delta=Math.atan2(Math.sin(angle-guard.angle),Math.cos(angle-guard.angle));if(gap>(guard.range||174)||Math.abs(delta)>.56||player.hidden&&gap>24||!lineClear(board,guard,player))return false;return !(board.smoke||[]).some(s=>s.life>0&&segmentDistance(s,guard,player)<80);}
-export class Heist{
- constructor(level=1,seed,layoutVersion=2){const n=Math.floor(level);this.level=Number.isSafeInteger(n)&&n>0?n:1;this.seed=this.level>100?(Number.isInteger(seed)?seed>>>0:freshSeed()):0;this.layoutVersion=layoutVersion===1?1:2;const base=createCase(this.level,this.seed,this.layoutVersion);this.doors=base.doors.map(d=>({...d}));this.smoke=[];this.board={...base,doors:this.doors,smoke:this.smoke};Object.assign(this,center(base.start));this.time=0;this.remaining=base.timeLimit;this.alarm=0;this.maxAlarm=0;this.score=0;this.sneaking=false;this.moving=false;this.heading=-Math.PI/2;this.status='playing';this.events=[];this.message=base.lesson;this.grace=2;this.hidden=false;this.smoked=false;this.footClock=0;this.tripCooldown=0;this.keycards=0;this.power=0;this.smokeCharges=base.chapter>=7?2:0;this.surface=base.surface;this.keys=base.keys.map(p=>({...center(p),taken:false}));this.switches=base.switches.map(p=>({...center(p),on:false,cooldown:0}));this.cameras=base.cameras.map(c=>({...c}));this.lasers=base.lasers.map(l=>({...l}));this.noisePulse=null;this.stars=0;this.loot=base.loot.map((p,i)=>({...center(p),taken:false,kind:['gem','painting','idol'][(i+this.level)%3],vault:i>=base.loot.length-base.vaultCount,progress:0}));this.guards=base.guards.map(g=>({...center(g.route[0]),route:g.route.map(center),next:1,angle:Math.atan2(g.route[1][1]-g.route[0][1],g.route[1][0]-g.route[0][0]),alert:0,mode:'patrol',range:150+Math.min(24,base.chapter*3),target:null}));}
- get collected(){return this.loot.filter(l=>l.taken).length;}
- get exit(){return center(this.board.exit);}
- get ready(){return this.collected===this.loot.length&&this.switches.filter(s=>s.on).length>=this.board.extractionPanels;}
- noise(radius=165){this.noisePulse={x:this.x,y:this.y,life:.8};for(const g of this.guards)if(distance(g,this)<radius&&lineClear(this.board,g,this)){g.alert=2;g.target={x:this.x,y:this.y};g.mode='investigate';}}
- smokeBomb(){if(this.status!=='playing'||this.smokeCharges<=0){this.message='No smoke charges available on this job.';return false;}this.smokeCharges--;this.smoke.push({x:this.x,y:this.y,life:6});this.events.push('smoke');this.message='Smoke deployed. Keep moving quietly.';return true;}
- act(){if(this.status!=='playing')return false;let found=false;for(const k of this.keys)if(!k.taken&&distance(k,this)<27){k.taken=true;this.keycards++;this.events.push('key');this.message='Keycard found. Press E at the locked door.';found=true;}for(const d of this.doors)if(!d.open&&distance(d,this)<48){if(d.kind==='key'&&this.keycards>0){d.open=true;this.keycards--;this.events.push('unlock');this.message='Door unlocked.';found=true;}else if(d.kind==='switch')this.message='Find the power panel to open this door.';else this.message='A blue keycard opens this door.';}for(const l of this.loot)if(!l.taken&&distance(this,l)<29&&!l.vault){l.taken=true;this.score+=250;this.events.push('pickup');found=true;this.message=this.collected+' / '+this.loot.length+' loot secured.';}return found;}
- interact(){this.act();const panel=this.switches.find(s=>distance(s,this)<40&&s.cooldown<=0);if(panel){panel.on=true;panel.cooldown=16;this.power=10;for(const d of this.doors)if(d.kind==='switch')d.open=true;this.events.push('switch');this.message='Security power is off for 10 seconds.';return true;}const vault=this.loot.find(l=>!l.taken&&l.vault&&distance(l,this)<36);if(vault)this.message='Hold E to pick this vault. '+Math.round(vault.progress*100)+'%';return !!vault;}
- step(dt,keys={}){
-  if(this.status!=='playing')return;dt=clamp(dt,0,.05);this.time+=dt;this.remaining=Math.max(0,this.remaining-dt);this.grace=Math.max(0,this.grace-dt);this.tripCooldown=Math.max(0,this.tripCooldown-dt);this.power=Math.max(0,this.power-dt);for(const p of this.switches)p.cooldown=Math.max(0,p.cooldown-dt);for(const s of this.smoke)s.life-=dt;this.smoke=this.smoke.filter(s=>s.life>0);this.board.smoke=this.smoke;if(this.noisePulse)this.noisePulse.life-=dt;
-  this.sneaking=!!keys.sneak;const dx=Number(!!keys.right)-Number(!!keys.left),dy=Number(!!keys.down)-Number(!!keys.up),n=Math.hypot(dx,dy)||1,speed=this.sneaking?76:142;this.moving=!!(dx||dy);if(this.moving)this.heading=Math.atan2(dy,dx);const nx=this.x+dx/n*speed*dt,ny=this.y+dy/n*speed*dt;if(!blocked(this.board,nx,this.y))this.x=nx;if(!blocked(this.board,this.x,ny))this.y=ny;const tile=[Math.floor((this.x-OX)/CELL),Math.floor((this.y-OY)/CELL)],onGrate=this.board.noisy.some(p=>tileKey(p)===tileKey(tile));this.surface=onGrate?'metal':this.board.surface;this.hidden=this.sneaking&&this.board.hiding.some(p=>distance(center(p),this)<23);this.smoked=this.smoke.some(s=>distance(s,this)<80);if(this.moving){this.footClock+=dt;if(this.footClock>(this.sneaking?.52:.30)){this.footClock=0;this.events.push('footstep');if(!this.sneaking)this.noise(onGrate?180:62);}}
-  let visible=false;for(const g of this.guards){g.alert=Math.max(0,g.alert-dt);const target=g.alert>0&&g.target?g.target:g.route[g.next],angle=Math.atan2(target.y-g.y,target.x-g.x),step=Math.min(this.layoutVersion===1?66:74,(this.layoutVersion===1?36:42)+this.board.chapter*(this.layoutVersion===1?2.5:3))*(g.alert>0?1.12:1)*dt,delta=Math.atan2(Math.sin(angle-g.angle),Math.cos(angle-g.angle));g.angle+=clamp(delta,-dt*3.8,dt*3.8);if(distance(g,target)>3){const x=g.x+Math.cos(angle)*step,y=g.y+Math.sin(angle)*step;if(!blocked(this.board,x,g.y,9))g.x=x;if(!blocked(this.board,g.x,y,9))g.y=y;}else if(g.alert<=0){g.next=(g.next+1)%g.route.length;g.mode='patrol';}if(g.alert<=0)g.mode='patrol';if(sees(this.board,g,this))visible=true;}
-  for(const camera of this.cameras){camera.angle=camera.baseAngle+Math.sin(this.time*(this.layoutVersion===1?.75:.95)+camera.phase)*.9;camera.active=this.power<=0;if(camera.active&&sees(this.board,camera,this))visible=true;}
-  for(const laser of this.lasers){laser.active=this.power<=0&&(this.time+laser.phase)%3.6<2.0;if(this.grace<=0&&laser.active&&this.tripCooldown<=0&&segmentDistance(this,{x:laser.x1,y:laser.y1},{x:laser.x2,y:laser.y2})<10){this.alarm=clamp(this.alarm+.58,0,1);this.tripCooldown=1.8;this.noise(220);this.events.push('laser');this.message='Laser tripped. Get out of sight!';}}
-  const wasAlarm=this.alarm;this.alarm=clamp(this.alarm+(visible&&this.grace<=0?dt*(this.layoutVersion===1?.72:.85):-dt*(this.hidden?.75:.35)),0,1);this.maxAlarm=Math.max(this.maxAlarm,this.alarm);if(wasAlarm<.15&&this.alarm>=.15)this.events.push('alert');if(visible&&this.grace<=0)this.message='IN SIGHT · find cover!';this.act();if(keys.interact){const vault=this.loot.find(l=>!l.taken&&l.vault&&distance(l,this)<36);if(vault){vault.progress=Math.min(1,vault.progress+dt/1.8);this.message='Picking vault · '+Math.round(vault.progress*100)+'%';if(vault.progress>=1){vault.taken=true;this.score+=500;this.events.push('vault');this.message='Vault opened. Bring the loot to the exit.';}}}
-  if(this.collected===this.loot.length&&distance(this,this.exit)<29){if(this.ready){this.status='won';this.stars=this.maxAlarm<.2&&this.remaining>this.board.timeLimit*.45?3:this.maxAlarm<.8?2:1;this.score+=Math.round(this.remaining*5)+this.stars*100;this.events.push('win');this.message=this.level===100?'The Grand Collection is yours. Endless heists are now unlocked.':this.level>100?'Endless heist #'+(this.level-100)+' complete. Another job is waiting.':'Clean getaway. '+this.stars+' stars earned.';return;}this.message='Activate both security panels to unlock extraction.';}
-  if(this.alarm>=1||this.remaining<=0){this.status='lost';this.message=this.alarm>=1?'Caught. Break line of sight before suspicion fills.':'Lockdown. Try a quicker route.';this.events.push('miss');}
+export function generate(level){
+ const R=rng(level*7919+101),ri=(a,b)=>a+Math.floor(R()*(b-a+1)),f=features(level),ch=chapterOf(level);
+ const inCh=level>100?9:(level-1)%10,prog=level>100?1:Math.min(1,(ch*10+inCh)/90);
+ const bw=Math.min(30,15+Math.round(prog*13)+ri(0,2)),bh=Math.min(18,10+Math.round(prog*7)+ri(0,1));
+ const x0=Math.floor((GW-bw)/2),y0=Math.max(0,Math.floor((GH-1-bh)/2));
+ const g=new Uint8Array(GW*GH).fill(OUT),at=(x,y)=>x<0||y<0||x>=GW||y>=GH?OUT:g[y*GW+x],set=(x,y,v)=>{g[y*GW+x]=v;};
+ for(let y=y0;y<y0+bh;y++)for(let x=x0;x<x0+bw;x++)set(x,y,(x===x0||y===y0||x===x0+bw-1||y===y0+bh-1)?WALL:FLOOR);
+ const rooms=[],doors=[];
+ const split=(r,depth)=>{
+  const canV=r.w>=9,canH=r.h>=7,big=r.w*r.h>(depth<2?30:44+R()*30);
+  if(!big||(!canV&&!canH)){rooms.push(r);return;}
+  const vertical=canV&&(!canH||r.w/r.h>1.15||(r.w/r.h>.8&&R()<.5));
+  for(let tries=0;tries<12;tries++){
+   if(vertical){const sx=r.x+ri(4,r.w-5);if(doors.some(d=>d.y>=r.y-1&&d.y<=r.y+r.h&&(d.x===sx)&&(d.y===r.y-1||d.y===r.y+r.h)))continue;
+    for(let y=r.y;y<r.y+r.h;y++)set(sx,y,WALL);const dy=ri(r.y,r.y+r.h-1);set(sx,dy,DOOR);const a={x:r.x,y:r.y,w:sx-r.x,h:r.h},b={x:sx+1,y:r.y,w:r.x+r.w-sx-1,h:r.h};const d={x:sx,y:dy,v:true};doors.push(d);split(a,depth+1);split(b,depth+1);return;}
+   else{const sy=r.y+ri(3,r.h-4);if(doors.some(d=>(d.y===sy)&&(d.x===r.x-1||d.x===r.x+r.w)))continue;
+    for(let x=r.x;x<r.x+r.w;x++)set(x,sy,WALL);const dx=ri(r.x,r.x+r.w-1);set(dx,sy,DOOR);const a={x:r.x,y:r.y,w:r.w,h:sy-r.y},b={x:r.x,y:sy+1,w:r.w,h:r.y+r.h-sy-1};doors.push({x:dx,y:sy,v:false});split(a,depth+1);split(b,depth+1);return;}
+  }
+  rooms.push(r);
+ };
+ split({x:x0+1,y:y0+1,w:bw-2,h:bh-2},0);
+ rooms.forEach((r,i)=>{r.id=i;r.cx=r.x+Math.floor(r.w/2);r.cy=r.y+Math.floor(r.h/2);});
+ const roomOf=(x,y)=>rooms.find(r=>x>=r.x&&y>=r.y&&x<r.x+r.w&&y<r.y+r.h);
+ for(const d of doors){d.a=roomOf(d.v?d.x-1:d.x,d.v?d.y:d.y-1);d.b=roomOf(d.v?d.x+1:d.x,d.v?d.y:d.y+1);}
+ // Exit on the bottom wall, under a room that touches it.
+ const bottom=rooms.filter(r=>r.y+r.h===y0+bh-1),startRoom=bottom[ri(0,bottom.length-1)],ex=ri(startRoom.x+1,startRoom.x+startRoom.w-2),ey=y0+bh-1;set(ex,ey,EXIT);
+ const exit={x:ex,y:ey},start={x:(ex+.5)*T,y:(ey-.5)*T};
+ // Room graph depth from start.
+ const adj=new Map(rooms.map(r=>[r,[]]));for(const d of doors)if(d.a&&d.b){adj.get(d.a).push([d.b,d]);adj.get(d.b).push([d.a,d]);}
+ const reach=(from,blocked=new Set())=>{const dist=new Map([[from,0]]),q=[from],via=new Map();while(q.length){const r=q.shift();for(const [n,d] of adj.get(r))if(!blocked.has(d)&&!dist.has(n)){dist.set(n,dist.get(r)+1);via.set(n,d);q.push(n);}}return {dist,via};};
+ const base=reach(startRoom);const depth=r=>base.dist.get(r)??0;
+ const sorted=rooms.slice().sort((a,b)=>depth(b)-depth(a));
+ const used=new Set([exit.x+','+exit.y]),doorSet=new Set(doors.map(d=>d.x+','+d.y));
+ const nearDoor=(x,y)=>[[0,0],[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>doorSet.has((x+a)+','+(y+b)))||(Math.abs(x-exit.x)<=1&&Math.abs(y-exit.y)<=2);
+ const spot=(r,edge=false)=>{for(let t=0;t<60;t++){const x=edge?(R()<.5?r.x:r.x+r.w-1):ri(r.x,r.x+r.w-1),y=edge&&R()<.5?(R()<.5?r.y:r.y+r.h-1):ri(r.y,r.y+r.h-1);const k=x+','+y;if(!used.has(k)&&!nearDoor(x,y)&&at(x,y)===FLOOR){used.add(k);return {x,y};}}return null;};
+ const targetCount=level<=3?1:Math.min(3,1+Math.floor(prog*2.5)+(R()<.3?1:0));
+ const loot=[];const vaultRoom=f.vault?sorted[0]:null;let vault=null;
+ if(vaultRoom){const p=spot(vaultRoom,true)||spot(vaultRoom);if(p)vault={x:p.x,y:p.y,progress:0,open:false,time:4};}
+ const targetRooms=sorted.filter(r=>r!==startRoom);for(let i=0;i<targetCount-(vault?1:0);i++){const r=targetRooms[Math.min(targetRooms.length-1,i+(vault?1:0))]||sorted[0];const p=spot(r,true)||spot(r);if(p)loot.push({...p,kind:['painting','statue','gem'][ri(0,2)],value:500+level*20,required:true,taken:false});}
+ const extra=3+Math.floor(prog*6);for(let i=0;i<extra;i++){const r=rooms[ri(0,rooms.length-1)];const p=spot(r);if(p)loot.push({...p,kind:['cash','watch','ring','cash'][ri(0,3)],value:ri(4,12)*10+level*2,required:false,taken:false});}
+ // Locks: lock doors on the path from the start to the deepest room, keys stay on the reachable side.
+ const keys=[];
+ if(f.locks){const deep=vaultRoom||sorted[0];let path=[],r=deep;while(r&&r!==startRoom){const d=base.via.get(r);if(!d)break;path.unshift(d);r=d.a===r?d.b:d.a;}
+  const colors=[RED,BLUE].slice(0,f.locks),locked=new Set();
+  colors.forEach((col,i)=>{const d=path[Math.min(path.length-1,Math.floor(path.length*(i?.85:.4)))];if(!d||locked.has(d))return;locked.add(d);set(d.x,d.y,col);d.lock=col;const side=reach(startRoom,new Set([...locked].filter(x=>x===d||col===RED)));const options=rooms.filter(rm=>side.dist.has(rm)&&rm!==startRoom);const kr=options.length?options[ri(0,options.length-1)]:startRoom;let p=spot(kr);for(const alt of options){if(p)break;p=spot(alt);}if(p)keys.push({...p,color:col,taken:false});else{set(d.x,d.y,DOOR);d.lock=0;locked.delete(d);}});}
+ // Cameras in deeper rooms.
+ const cameras=[];if(f.cameras){const n=Math.min(rooms.length-1,1+Math.floor(prog*5));for(const r of sorted.filter(r=>r!==startRoom).slice(0,n)){const cx=R()<.5?r.x:r.x+r.w-1,cy=R()<.5?r.y:r.y+r.h-1;const base=Math.atan2(r.cy-cy,r.cx-cx);cameras.push({x:(cx+.5)*T+(cx===r.x?-11:11),y:(cy+.5)*T+(cy===r.y?-11:11),base,sweep:.7,phase:R()*6,speed:.5+R()*.4,sus:0,off:0});}}
+ const lasers=[];if(f.lasers){for(const d of doors){if(d.lock||!d.a||!d.b||d.a===startRoom||d.b===startRoom)continue;if(R()<.45+prog*.3)lasers.push({x:d.x,y:d.y,v:d.v,period:2.6+R()*1.6,on:.55+R()*.15,phase:R()*5,off:0});}}
+ const hides=[];if(f.dark){for(const r of rooms)if(r!==startRoom&&R()<.5){const p=spot(r,true);if(p)hides.push(p);}}
+ const dark=new Set();if(f.dark)for(const r of rooms)if(r!==startRoom&&R()<.4)dark.add(r.id);
+ const creaks=new Set();if(f.creaks)for(const r of rooms)if(r!==startRoom&&R()<.6)for(let i=0;i<Math.floor(r.w*r.h*.25);i++){const x=ri(r.x,r.x+r.w-1),y=ri(r.y,r.y+r.h-1);creaks.add(x+','+y);}
+ let terminal=null;if(f.terminal){const r=rooms.filter(x=>x!==startRoom&&x!==vaultRoom)[0]||startRoom;const p=spot(r,true);if(p)terminal={...p,progress:0};}
+ // Guards and dogs.
+ const gc=Math.min(7,1+Math.floor(prog*5)+(level>100?Math.floor((level-100)/8):0)),guards=[];
+ const candidates=rooms.filter(r=>r!==startRoom);
+ for(let i=0;i<gc&&candidates.length;i++){
+  const n=Math.min(candidates.length,ri(2,4)),route=[];const pool=candidates.slice();for(let k=0;k<n;k++){const r=pool.splice(ri(0,pool.length-1),1)[0];route.push({x:ri(r.x,r.x+r.w-1),y:ri(r.y,r.y+r.h-1)});}
+  if(route.length===1){const r=candidates[ri(0,candidates.length-1)];route.push({x:r.cx,y:r.cy});}
+  const dog=f.dogs&&i>0&&R()<.4;guards.push({kind:dog?'dog':'guard',route});
  }
- checkpoint(){return {v:3,layoutVersion:this.layoutVersion,level:this.level,seed:this.seed,x:this.x,y:this.y,time:this.time,remaining:this.remaining,alarm:this.alarm,maxAlarm:this.maxAlarm,score:this.score,taken:this.loot.map(l=>l.taken),vaults:this.loot.map(l=>l.progress),guards:this.guards.map(g=>({x:g.x,y:g.y,next:g.next,angle:g.angle,alert:g.alert,mode:g.mode,target:g.target})),doors:this.doors.map(d=>d.open),keys:this.keys.map(k=>k.taken),keycards:this.keycards,switches:this.switches.map(s=>({on:s.on,cooldown:s.cooldown})),power:this.power,smoke:this.smoke.map(s=>({...s})),smokeCharges:this.smokeCharges};}
- static restore(raw){if(!raw||![1,2,3].includes(raw.v)||!Number.isSafeInteger(raw.level)||raw.level<1||(raw.level>100&&(!Number.isInteger(raw.seed)||raw.seed<0||raw.seed>4294967295))||![raw.x,raw.y,raw.time,raw.remaining,raw.alarm,raw.score].every(Number.isFinite)||raw.remaining<=0||raw.alarm>=1||!Array.isArray(raw.taken))return null;if(raw.v===3&&![1,2].includes(raw.layoutVersion))return null;const g=new Heist(raw.level,raw.seed,raw.v<3?1:raw.layoutVersion),legacy=raw.v===1;if(!legacy&&(!Array.isArray(raw.guards)||raw.guards.length!==g.guards.length||raw.taken.length!==g.loot.length))return null;g.time=clamp(raw.time,0,1e7);g.remaining=clamp(raw.remaining,.1,g.board.timeLimit);g.alarm=clamp(raw.alarm,0,.99);g.maxAlarm=clamp(Number(raw.maxAlarm)||g.alarm,0,1);g.score=clamp(raw.score,0,1e8);g.loot.forEach((l,i)=>{l.taken=!!raw.taken[i];l.progress=clamp(Number(raw.vaults?.[i])||0,0,1);});g.doors.forEach((d,i)=>d.open=!!raw.doors?.[i]);g.keys.forEach((k,i)=>k.taken=!!raw.keys?.[i]);g.keycards=clamp(Math.floor(raw.keycards)||0,0,3);g.switches.forEach((s,i)=>{s.on=!!raw.switches?.[i]?.on;s.cooldown=clamp(Number(raw.switches?.[i]?.cooldown)||0,0,16);});g.power=clamp(Number(raw.power)||0,0,10);g.smokeCharges=legacy?g.smokeCharges:clamp(Math.floor(raw.smokeCharges)||0,0,2);g.smoke=Array.isArray(raw.smoke)?raw.smoke.filter(s=>s&&[s.x,s.y,s.life].every(Number.isFinite)&&s.life>0&&s.life<=6&&s.x>=OX&&s.x<=OX+COLS*CELL&&s.y>=OY&&s.y<=OY+ROWS*CELL).slice(0,2).map(s=>({...s})):[];g.board.smoke=g.smoke;if(!blocked(g.board,raw.x,raw.y)){g.x=raw.x;g.y=raw.y;}if(!legacy){for(let i=0;i<raw.guards.length;i++){const p=raw.guards[i],guard=g.guards[i];if(!p||![p.x,p.y,p.next,p.angle,p.alert].every(Number.isFinite)||blocked(g.board,p.x,p.y,8)||!Number.isInteger(p.next)||p.next<0||p.next>=guard.route.length)return null;Object.assign(guard,{x:p.x,y:p.y,next:p.next,angle:p.angle,alert:clamp(p.alert,0,3),mode:p.mode==='investigate'?'investigate':'patrol',target:p.target&&Number.isFinite(p.target.x)&&Number.isFinite(p.target.y)?{x:clamp(p.target.x,OX,OX+COLS*CELL),y:clamp(p.target.y,OY,OY+ROWS*CELL)}:null});}}g.message='Job resumed. '+g.board.lesson;return g;}
+ const rooms2=rooms.map(r=>({id:r.id,x:r.x,y:r.y,w:r.w,h:r.h,dark:dark.has(r.id)}));
+ return {level,chapter:ch,grid:g,rooms:rooms2,exit,start,loot,keys,vault,cameras,lasers,hides,creaks,terminal,guards,features:f,par:30+rooms.length*9+gc*4};
+}
+
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),angDiff=(a,b)=>{let d=b-a;while(d>Math.PI)d-=Math.PI*2;while(d<-Math.PI)d+=Math.PI*2;return d;};
+export class Heist{
+ constructor(level=1,gear={}){
+  this.level=level;this.gear=gear;const m=generate(level);Object.assign(this,m);this.grid=new Uint8Array(m.grid);this.map=m;
+  this.p={x:m.start.x,y:m.start.y,face:-Math.PI/2,sneak:false,hidden:null,moving:false,step:0};
+  this.time=0;this.alarm=0;this.alarmed=false;this.police=0;this.status='play';this.spotted=false;this.message=CHAPTERS[this.chapter].intro;this.messageTime=6;
+  this.haveKeys=new Set();this.smokes=[];this.decoys=[];this.noises=[];this.events=[];this.loopTime=0;this.empTime=0;this.emps=[];
+  this.charges={smoke:gear.smoke||0,decoy:gear.decoy||0,emp:gear.emp||0};this.score=0;this.stolen=0;
+  const R=rng(level*13+5);
+  this.guards=m.guards.map((g,i)=>{const path=[];for(let k=0;k<g.route.length;k++){const a=g.route[k],b=g.route[(k+1)%g.route.length];path.push(...this.path(a.x,a.y,b.x,b.y,true));}let best=0,bd=-1;path.forEach((t,k)=>{const dd=Math.hypot(t.x*T-m.start.x,t.y*T-m.start.y);if(dd>bd){bd=dd;best=k;}});const s=path[best]||g.route[0];return {id:i,kind:g.kind,x:(s.x+.5)*T,y:(s.y+.5)*T,face:R()*6,route:path.length?path:[s],idx:path.length?(best+1)%path.length:0,state:'patrol',sus:0,wait:R()*2,look:0,target:null,lost:0,repath:0,trail:[],stepT:0};});
+ }
+ at(x,y){return x<0||y<0||x>=GW||y>=GH?OUT:this.grid[y*GW+x];}
+ solidFor(x,y,who){const v=this.at(x,y);if(v===WALL||v===OUT)return true;if(who==='player'&&(v===RED||v===BLUE))return !this.haveKeys.has(v);return false;}
+ blocksSight(x,y){const v=this.at(x,y);return v===WALL||v===RED||v===BLUE;}
+ path(sx,sy,tx,ty,guard=true){
+  if(sx===tx&&sy===ty)return [{x:tx,y:ty}];const prev=new Int32Array(GW*GH).fill(-1),q=[sy*GW+sx];prev[q[0]]=q[0];
+  for(let i=0;i<q.length;i++){const c=q[i],x=c%GW,y=(c/GW)|0;if(x===tx&&y===ty)break;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy,n=ny*GW+nx;if(nx<0||ny<0||nx>=GW||ny>=GH||prev[n]>=0)continue;const v=this.at(nx,ny);if(v===WALL||v===OUT||v===EXIT)continue;prev[n]=c;q.push(n);}}
+  const end=ty*GW+tx;if(prev[end]<0)return [];const out=[];for(let c=end;c!==sy*GW+sx;c=prev[c])out.unshift({x:c%GW,y:(c/GW)|0});return out;
+ }
+ roomAt(px,py){const x=Math.floor(px/T),y=Math.floor(py/T);return this.rooms.find(r=>x>=r.x&&y>=r.y&&x<r.x+r.w&&y<r.y+r.h);}
+ isDark(px,py){return !!this.roomAt(px,py)?.dark;}
+ los(ax,ay,bx,by){const d=Math.hypot(bx-ax,by-ay),n=Math.ceil(d/6);for(let i=1;i<n;i++){const x=ax+(bx-ax)*i/n,y=ay+(by-ay)*i/n;if(this.blocksSight(Math.floor(x/T),Math.floor(y/T)))return false;for(const s of this.smokes)if(Math.hypot(x-s.x,y-s.y)<s.r)return false;}return true;}
+ ray(ax,ay,ang,range){const dx=Math.cos(ang),dy=Math.sin(ang);for(let d=4;d<range;d+=5){const x=ax+dx*d,y=ay+dy*d;if(this.blocksSight(Math.floor(x/T),Math.floor(y/T)))return d;for(const s of this.smokes)if(Math.hypot(x-s.x,y-s.y)<s.r)return d;}return range;}
+ noise(x,y,r,kind){this.noises.push({x,y,r,t:0,kind});for(const g of this.guards){if(g.state==='chase')continue;const d=Math.hypot(g.x-x,g.y-y);if(d<r){g.state='investigate';g.target={x,y};g.repath=0;g.sus=Math.max(g.sus,.35);g.wait=0;}}}
+ say(m,t=3){this.message=m;this.messageTime=t;}
+ camOn(cam){return cam.off<=0&&this.loopTime<=0;}
+ laserOn(l){if(l.off>0||this.loopTime>0)return false;return ((this.time+l.phase)%l.period)/l.period<l.on;}
+ interactables(){const p=this.p,out=[];const near=(o,r=26)=>Math.hypot((o.x+.5)*T-p.x,(o.y+.5)*T-p.y)<r+T*.5;
+  if(this.vault&&!this.vault.open&&near(this.vault))out.push({kind:'vault'});if(this.terminal&&this.loopTime<=0&&near(this.terminal))out.push({kind:'terminal'});
+  for(const h of this.hides)if(near(h,16))out.push({kind:'hide',h});return out;}
+ step(dt,input={}){
+  if(this.status!=='play')return;dt=Math.min(dt,.05);this.time+=dt;if(this.messageTime>0)this.messageTime-=dt;
+  const p=this.p,sneak=!!input.sneak;p.sneak=sneak;
+  // gadgets
+  if(input.smoke&&this.charges.smoke>0){this.charges.smoke--;this.smokes.push({x:p.x,y:p.y,r:10,max:78,t:0,life:7});this.events.push('smoke');}
+  if(input.decoy&&this.charges.decoy>0){this.charges.decoy--;let d=this.ray(p.x,p.y,p.face,170)-10;const x=p.x+Math.cos(p.face)*d,y=p.y+Math.sin(p.face)*d;this.decoys.push({x,y,t:0,life:4});this.events.push('decoy');}
+  if(input.emp&&this.charges.emp>0){this.charges.emp--;this.emps.push({x:p.x,y:p.y,t:0});for(const c of this.cameras)if(Math.hypot(c.x-p.x,c.y-p.y)<200){c.off=8;c.sus=0;}for(const l of this.lasers)if(Math.hypot((l.x+.5)*T-p.x,(l.y+.5)*T-p.y)<200)l.off=8;this.events.push('emp');}
+  // interaction
+  const inter=this.interactables();
+  if(input.interactPressed){const h=inter.find(i=>i.kind==='hide');if(p.hidden){p.hidden=null;this.events.push('unhide');}else if(h){p.hidden=h.h;p.x=(h.h.x+.5)*T;p.y=(h.h.y+.5)*T;this.events.push('hide');}}
+  let working=false;
+  if(input.interact&&!p.hidden){const quick=1+.35*(this.gear.hands||0);
+   const v=inter.find(i=>i.kind==='vault');if(v){working=true;this.vault.progress+=dt*quick;if(Math.floor(this.vault.progress*1.5)!==Math.floor((this.vault.progress-dt*quick)*1.5)){this.noise((this.vault.x+.5)*T,(this.vault.y+.5)*T,150,'drill');this.events.push('drill');}if(this.vault.progress>=this.vault.time){this.vault.open=true;this.loot.push({x:this.vault.x,y:this.vault.y,kind:'diamond',value:1200+this.level*30,required:true,taken:false});this.events.push('vault');this.say('Vault open! Grab the diamond.');}}
+   const t=inter.find(i=>i.kind==='terminal');if(t){working=true;this.terminal.progress+=dt*quick;if(this.terminal.progress>=1.6){this.loopTime=25;this.terminal.progress=0;this.events.push('hack');this.say('Cameras and lasers looped for 25 seconds.');for(const c of this.cameras)c.sus=0;}}
+  }else if(this.terminal)this.terminal.progress=Math.max(0,this.terminal.progress-dt);
+  this.working=working;
+  // movement
+  let mx=input.x||0,my=input.y||0;const len=Math.hypot(mx,my);p.moving=false;
+  if(len>0&&!working){if(p.hidden){p.hidden=null;this.events.push('unhide');}mx/=len;my/=len;p.face=Math.atan2(my,mx);const sp=(sneak?62:125)*dt;this.move(p,mx*sp,my*sp);p.moving=true;
+   p.step+=sp;const stride=sneak?40:26;if(p.step>stride){p.step=0;const tile=Math.floor(p.x/T)+','+Math.floor(p.y/T),creak=this.creaks.has(tile);const shoes=1-.3*(this.gear.shoes||0);
+    if(creak){const r=(sneak?0:150)*shoes;if(r>0){this.noise(p.x,p.y,r,'creak');this.events.push('creak');}}else if(!sneak){this.noise(p.x,p.y,60*shoes,'step');}this.events.push(sneak?'softstep':'step');}}
+  // pickups
+  for(const l of this.loot)if(!l.taken&&Math.hypot((l.x+.5)*T-p.x,(l.y+.5)*T-p.y)<20){l.taken=true;this.stolen+=l.value;this.events.push(l.required?'target':'loot');if(l.required){const left=this.loot.filter(o=>o.required&&!o.taken).length+(this.vault&&!this.vault.open?1:0);this.say(left?left+' target'+(left>1?'s':'')+' left.':'All targets secured. Get to the van!');}}
+  for(const k of this.keys)if(!k.taken&&Math.hypot((k.x+.5)*T-p.x,(k.y+.5)*T-p.y)<20){k.taken=true;this.haveKeys.add(k.color);this.events.push('key');this.say((k.color===RED?'Red':'Blue')+' keycard. Matching doors now open for you.');}
+  // lasers
+  for(const l of this.lasers){if(l.off>0)l.off-=dt;if(this.laserOn(l)){const cx=(l.x+.5)*T,cy=(l.y+.5)*T;if(Math.abs(p.x-cx)<(l.v?6:T*.5)&&Math.abs(p.y-cy)<(l.v?T*.5:6)){this.trigger('laser');}}}
+  // exit
+  const tx=Math.floor(p.x/T),ty=Math.floor((p.y+8)/T);if(tx===this.exit.x&&ty===this.exit.y){if(this.targetsLeft()===0)return this.win();if(this.messageTime<=0)this.say('You still need the target'+(this.targetsLeft()>1?'s':'')+'.');}
+  // timers
+  if(this.loopTime>0)this.loopTime-=dt;
+  for(const s of this.smokes){s.t+=dt;s.r=Math.min(s.max,s.r+dt*120);if(s.t>s.life-1.5)s.r*=1-dt*1.2;}this.smokes=this.smokes.filter(s=>s.t<s.life);
+  for(const d of this.decoys){d.t+=dt;if(Math.floor(d.t*2)!==Math.floor((d.t-dt)*2))this.noise(d.x,d.y,220,'decoy');}this.decoys=this.decoys.filter(d=>d.t<d.life);
+  for(const n of this.noises)n.t+=dt;this.noises=this.noises.filter(n=>n.t<.8);for(const e of this.emps)e.t+=dt;this.emps=this.emps.filter(e=>e.t<.8);
+  this.stepCameras(dt);this.stepGuards(dt);
+  if(this.alarmed){this.police-=dt;if(this.police<=0)return this.lose('The police arrived. The job is blown.');}
+  else this.alarm=Math.max(0,this.alarm-dt*.04);
+ }
+ targetsLeft(){return this.loot.filter(o=>o.required&&!o.taken).length+(this.vault&&!this.vault.open?1:0);}
+ move(o,dx,dy){const r=9;const tryAxis=(nx,ny)=>{for(const [ox,oy] of [[-r,-r],[r,-r],[-r,r],[r,r]]){if(this.solidFor(Math.floor((nx+ox)/T),Math.floor((ny+oy)/T),'player'))return false;}return true;};
+  if(tryAxis(o.x+dx,o.y))o.x+=dx;if(tryAxis(o.x,o.y+dy))o.y+=dy;
+  for(const c of [RED,BLUE])if(this.haveKeys.has(c)){const x=Math.floor(o.x/T),y=Math.floor(o.y/T);for(const [a,b] of [[0,0],[1,0],[-1,0],[0,1],[0,-1]])if(this.at(x+a,y+b)===c&&Math.hypot((x+a+.5)*T-o.x,(y+b+.5)*T-o.y)<T){this.grid[(y+b)*GW+x+a]=DOOR;this.events.push('door');}}}
+ visibility(px,py,range,fov,face,ox,oy){
+  const p=this.p;if(p.hidden)return 0;const d=Math.hypot(p.x-ox,p.y-oy);let rng=range;if(this.isDark(p.x,p.y))rng*=.55;if(d>rng)return 0;
+  if(Math.abs(angDiff(face,Math.atan2(p.y-oy,p.x-ox)))>fov/2)return 0;if(!this.los(ox,oy,p.x,p.y))return 0;
+  const suit=1-.2*(this.gear.suit||0);return (1.3-d/rng)*(p.sneak?.65:1)*(p.moving?1:.7)*suit;
+ }
+ stepCameras(dt){for(const c of this.cameras){if(c.off>0)c.off-=dt;c.ang=c.base+Math.sin(this.time*c.speed+c.phase)*c.sweep;if(!this.camOn(c)){c.sus=Math.max(0,c.sus-dt);continue;}const v=this.visibility(0,0,190,.9,c.ang,c.x,c.y);if(v>0){c.sus+=v*dt*1.1;if(c.sus>=1){c.sus=1;this.trigger('camera');}}else c.sus=Math.max(0,c.sus-dt*.5);}}
+ trigger(src){if(!this.alarmed){this.alarmed=true;this.police=28;this.alarm=1;this.spotted=true;this.events.push('alarm');this.say(src==='laser'?'You tripped a laser! Police in 28 seconds — get out!':'Alarm! Police in 28 seconds — get out!');}for(const g of this.guards){if(g.state!=='chase'){g.state='investigate';g.target={x:this.p.x,y:this.p.y};g.repath=0;}}}
+ stepGuards(dt){
+  const p=this.p;
+  for(const g of this.guards){
+   const dog=g.kind==='dog',range=dog?125:170,fov=dog?2:1.25;
+   let v=this.visibility(0,0,range,fov,g.face,g.x,g.y);
+   if(dog&&!p.hidden&&!p.sneak&&Math.hypot(p.x-g.x,p.y-g.y)<70)v=Math.max(v,.8);
+   if(v>0){g.sus+=v*dt*(g.state==='patrol'?1.15:1.8);g.lastSeen={x:p.x,y:p.y};if(g.sus>.35&&g.state==='patrol'){g.state='investigate';g.target={x:p.x,y:p.y};g.repath=0;g.wait=.6;this.events.push('huh');}if(g.sus>=1&&g.state!=='chase'){g.state='chase';g.lost=0;this.spotted=true;this.events.push('spotted');this.trigger('guard');}}
+   else if(g.state!=='chase')g.sus=Math.max(0,g.sus-dt*.22);
+   const speed=(g.state==='chase'?(dog?165:132):g.state==='investigate'?(dog?115:88):(dog?85:62))*dt;
+   if(g.state==='chase'){
+    if(v>0||Math.hypot(p.x-g.x,p.y-g.y)<40){g.lost=0;g.target={x:p.x,y:p.y};}else g.lost+=dt;
+    if(g.lost>5){g.state='investigate';g.sus=.6;g.wait=2;}
+    g.repath-=dt;if(g.repath<=0||!g.trail.length){g.repath=.35;g.trail=this.path(Math.floor(g.x/T),Math.floor(g.y/T),Math.floor(g.target.x/T),Math.floor(g.target.y/T));}
+    this.follow(g,speed);
+    if(!p.hidden&&Math.hypot(p.x-g.x,p.y-g.y)<20)return this.lose(dog?'A guard dog pinned you down.':'A guard caught you.');
+    if(p.hidden&&Math.hypot(p.x-g.x,p.y-g.y)<20&&g.lost<1)return this.lose('A guard pulled you out of the locker.');
+   }else if(g.state==='investigate'){
+    if(g.wait>0){g.wait-=dt;g.face+=angDiff(g.face,Math.atan2(g.target.y-g.y,g.target.x-g.x))*Math.min(1,dt*4);continue;}
+    if(!g.trail.length||g.repath<=0){g.repath=99;g.trail=this.path(Math.floor(g.x/T),Math.floor(g.y/T),Math.floor(g.target.x/T),Math.floor(g.target.y/T));if(!g.trail.length)g.trail=[{x:Math.floor(g.x/T),y:Math.floor(g.y/T)}];}
+    if(this.follow(g,speed)){g.look+=dt;g.face+=dt*2.2*Math.sin(g.look*1.5);if(g.look>3){g.look=0;g.state='return';g.sus=Math.min(g.sus,.3);const r=g.route[g.idx];g.trail=this.path(Math.floor(g.x/T),Math.floor(g.y/T),r.x,r.y);}}
+   }else if(g.state==='return'){if(this.follow(g,speed)||!g.trail.length){g.state='patrol';}}
+   else{
+    if(g.wait>0){g.wait-=dt;g.face+=Math.sin(this.time*1.3+g.id)*dt*1.2;continue;}
+    const n=g.route[g.idx];const tx=(n.x+.5)*T,ty=(n.y+.5)*T,dx=tx-g.x,dy=ty-g.y,d=Math.hypot(dx,dy);
+    if(d<=speed){g.x=tx;g.y=ty;g.idx=(g.idx+1)%g.route.length;const nn=g.route[g.idx];if(Math.abs(nn.x-n.x)+Math.abs(nn.y-n.y)>1){g.trail=this.path(n.x,n.y,nn.x,nn.y);g.state='return';}if(Math.random()<.035)g.wait=.8+Math.random()*1.2;}
+    else{g.x+=dx/d*speed;g.y+=dy/d*speed;g.face+=angDiff(g.face,Math.atan2(dy,dx))*Math.min(1,dt*6);}
+   }
+  }
+ }
+ follow(g,speed){if(!g.trail.length)return true;const n=g.trail[0],tx=(n.x+.5)*T,ty=(n.y+.5)*T,dx=tx-g.x,dy=ty-g.y,d=Math.hypot(dx,dy);if(d<=speed){g.x=tx;g.y=ty;g.trail.shift();return !g.trail.length;}g.x+=dx/d*speed;g.y+=dy/d*speed;g.face+=angDiff(g.face,Math.atan2(dy,dx))*Math.min(1,speed*.12);return false;}
+ win(){
+  this.status='win';const all=this.loot.every(l=>l.taken);const ghost=!this.spotted;const time=Math.max(0,this.par-this.time);
+  this.stars=1+(ghost?1:0)+(all?1:0);this.ghost=ghost;this.allLoot=all;
+  this.score=Math.round(this.stolen+time*10+(ghost?500:0)+(all?250:0));this.events.push('win');
+ }
+ lose(why){this.status='lose';this.message=why;this.score=0;this.events.push('caught');}
 }
