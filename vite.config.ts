@@ -6,8 +6,11 @@ import { sites } from "./build/sites-vite-plugin";
 import { connectorPreview } from "./build/connector-preview-plugin.mjs";
 import { playtestAssets } from "./scripts/playtest-assets.mjs";
 
-const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
-  "00000000-0000-4000-8000-000000000000";
+// Self-hosted Cloudflare deployment (Workers Builds from GitHub).
+// The Worker name must match the Worker connected in the Cloudflare dashboard.
+const WORKER_NAME = "rhettsarcade";
+const D1_DATABASE_NAME = "rhetts-arcade-db";
+const D1_DATABASE_ID = "c55ef4b0-10c0-4119-a28c-b9c7bc7e1fd5";
 
 const { d1, r2 } = hostingConfig;
 
@@ -16,14 +19,16 @@ const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
 const managedLinux = readExecutionProfile() === "managed-linux";
 
 const localBindingConfig = {
+  name: WORKER_NAME,
   main: "./build/sites-worker.ts",
   compatibility_flags: ["nodejs_compat"],
   d1_databases: d1
     ? [
         {
           binding: d1,
-          database_name: "site-creator-d1",
-          database_id: SITE_CREATOR_PLACEHOLDER_DATABASE_ID,
+          database_name: D1_DATABASE_NAME,
+          database_id: D1_DATABASE_ID,
+          migrations_dir: "../../drizzle",
         },
       ]
     : [],
