@@ -244,5 +244,12 @@
     "releaseAfter": "square-off",
     "source": "C:/Users/rhett/Documents/Codex/2026-11-04/is-t/outputs/Rhetts-Arcade-Shared/public/games/square-off-2",
     "originalSource": "User-provided Square Off 2 folder, imported 2026-11-04"
+  },
+  {
+    "id": "backrooms-for-science",
+    "title": "Backrooms: For Science",
+    "mode": "bundled",
+    "source": "public/games/backrooms-for-science",
+    "originalSource": "Playtest build playtest/games/backrooms-for-science, released 2026-11-20"
   }
 ]

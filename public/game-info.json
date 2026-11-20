@@ -372,5 +372,15 @@
       "A/D or arrows: move. Space/W/up: thrust. S/down: drop. Mouse: aim; weapons fire automatically.",
       "Shift + direction: dash. E: utility. Esc/P: pause. Workshop: 1–4 select, Enter confirm, R reroll."
     ]
+  },
+  "backrooms-for-science": {
+    "session": "10–30 min",
+    "features": [
+      "Explore the Backrooms and study its entities across survival shifts.",
+      "Meet your research quota, then spend your pay on better gear."
+    ],
+    "controls": [
+      "WASD move · Mouse look · E interact"
+    ]
   }
 }

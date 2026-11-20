@@ -1,5 +1,6 @@
 // Only these game-owned keys are portable. Never export other origin storage.
 export const SAVE_GROUPS=[
+  {id:'backrooms-for-science',title:'Backrooms: For Science',keys:[],pattern:/^l0ns_[A-Za-z0-9_]{1,64}$/},
   {id:'square-off-2',title:'Square Off 2',keys:['square-off-2-save-v1']},
   {id:'meridian-space-program',title:'Meridian Space Program',keys:['meridian_space_program_v1','meridian_space_program_quick_v1','meridian_space_program_settings_v1']},
   {id:'slide-between',title:'Slide Between',keys:['sb.best','sb.course','sb.diff','sb.sound','sb.music']},

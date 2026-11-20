@@ -126,5 +126,9 @@
   "square-off-2": {
     "src": "covers/square-off-2.svg",
     "alt": "Square Off 2 cover art: a turquoise jetpack square blasts toward a coral mech boss in a comic-book burst."
+  },
+  "backrooms-for-science": {
+    "src": "covers/backrooms-for-science.svg",
+    "alt": "A dim yellow hallway with fluorescent lights and a distant silhouette"
   }
 }

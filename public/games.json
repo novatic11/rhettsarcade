@@ -34,6 +34,23 @@
     "number": "02"
   },
   {
+    "id": "backrooms-for-science",
+    "choiceQuote": "",
+    "title": "Backrooms: For Science",
+    "genre": "Horror",
+    "status": "released",
+    "description": "Explore the Backrooms and study its entities. Survive your shifts, meet your research quota, and spend your pay on better gear.",
+    "controls": "WASD · Mouse · E to interact",
+    "number": "03",
+    "color": "#e8d27a",
+    "accent": "#e8d27a",
+    "url": "games/backrooms-for-science/",
+    "cover": "covers/backrooms-for-science.svg",
+    "buildSha256": "82e3a5e00eed386a3e9f9e0d5d9b68689282a2d87439ce5733d2745036e69771",
+    "updatedAt": "2026-11-20T16:45:21.593Z",
+    "releasedAt": "2026-11-20T16:45:21.593Z"
+  },
+  {
     "id": "rustbound",
     "choiceQuote": "Rustbound is for people who found Stellar Forge too easy. Addicting, but requires brainpower.",
     "title": "Rustbound",
@@ -42,7 +59,7 @@
     "controls": "Keyboard & mouse recommended",
     "color": "#d59d72",
     "accent": "#b5d1e5",
-    "number": "03",
+    "number": "04",
     "url": "games/rustbound/",
     "cover": "covers/rustbound.svg",
     "updatedAt": "2026-10-13T23:21:07.940Z",

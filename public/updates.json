@@ -1,5 +1,15 @@
 [
   {
+    "id": "backrooms-for-science-release",
+    "gameId": "backrooms-for-science",
+    "date": "2026-11-20T16:45:21.593Z",
+    "title": "Backrooms: For Science is out",
+    "summary": "Backrooms: For Science moves from Playtest into the main library.",
+    "changes": [
+      "Now playable from the main arcade as the third game."
+    ]
+  },
+  {
     "id": "neon-slip-modular-boss",
     "gameId": "neon-slip",
     "date": "2026-11-08T18:48:35.733464Z",
