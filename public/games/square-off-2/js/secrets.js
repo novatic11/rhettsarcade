@@ -12,7 +12,7 @@
       look: { body: '#d5ff63', dark: '#a6bf67', off: '#596446', plate: '#d5ff63', jet: '#596446', acc: null, original: true },
       desc: 'The square that started it all, straight out of the first Square Off. He plays by the old rules — and so does his boss.',
       traits: ['Peashooter (Blaster), no utility, and no dash until he finds Air Dash', 'Classic Upgrades: he draws ONLY from his own pool of Square Off 1 upgrades, modernized', 'Classic Boss: the boss starts with a single cannon and only gets Square Off 1 upgrades too — no chassis evolutions'],
-      unlockText: 'Beat Round 5 in the original Square Off', weapons: ['blaster'], utility: null, ups: [], flags: { original: 1, noDash: 1 }, mods: B => { B.s.critChance = 0; } },
+      get unlockText() { const b = SO.so1Best(); return 'Beat Round 5 in the original Square Off (your best there: ' + (b ? 'Round ' + b : 'none yet') + ')'; }, weapons: ['blaster'], utility: null, ups: [], flags: { original: 1, noDash: 1 }, mods: B => { B.s.critChance = 0; } },
     vortrox: { name: 'Vortrox', title: 'the Wave', role: 'Secret', secret: true, stars: 4, icon: 'mobility',
       look: { body: '#3ad6ff', dark: '#1a7fb0', off: '#ff3fb4', plate: '#e8fbff', jet: '#152338', acc: 'wave' },
       desc: 'Doesn\'t fly — it zigzags. Hold thrust to slice upward on a sharp diagonal, let go to dive. No drift, no momentum.',

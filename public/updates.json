@@ -1,5 +1,26 @@
 [
   {
+    "id": "square-off-2-square-unlock-fix",
+    "gameId": "square-off-2",
+    "date": "2026-11-24T20:05:21.939Z",
+    "title": "Square Off 2: secret unlock fix",
+    "summary": "Progress from the original Square Off now unlocks its secret right away.",
+    "changes": [
+      "Square Off 2 now checks your original Square Off progress every time you open its menus, so you no longer have to start a run first.",
+      "The locked secret card now shows your best round in the original Square Off."
+    ]
+  },
+  {
+    "id": "square-off-so2-link",
+    "gameId": "square-off",
+    "date": "2026-11-24T20:05:20.939Z",
+    "title": "Square Off: a link to the sequel",
+    "summary": "The start and game-over screens now point to a secret waiting in Square Off 2.",
+    "changes": [
+      "Beat Round 5 to unlock a secret character in Square Off 2. The start screen shows when you have it."
+    ]
+  },
+  {
     "id": "square-off-2-menu-challenge-fixes",
     "gameId": "square-off-2",
     "date": "2026-11-24T19:56:11.917Z",

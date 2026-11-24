@@ -11,8 +11,8 @@
     "number": "01",
     "url": "games/square-off/",
     "cover": "covers/square-off.svg",
-    "updatedAt": "2026-10-13T22:08:07.029Z",
-    "buildSha256": "5c1468eba7e2b43e6f6cb360103b5cf9220b242b7c0e6eed2c119d8d3d120c20"
+    "updatedAt": "2026-11-24T20:05:20.939Z",
+    "buildSha256": "349a5c2a561d72304b07a39b07a741ece8f28c70220fbf9a238444dc1841750f"
   },
   {
     "id": "square-off-2",
@@ -29,8 +29,8 @@
     "color": "#79d6ce",
     "accent": "#f39386",
     "releasedAt": "2026-11-05T00:25:07.884Z",
-    "buildSha256": "4f11e63b7992ef644b8b8aafb1c0d82d7e9edcac46f059d6951332f8d045a2d5",
-    "updatedAt": "2026-11-24T19:56:11.917Z",
+    "buildSha256": "9f3a14c2b5875fb88adcf08d346e744a350b27db1abbbd41b4f4216d0b24a26a",
+    "updatedAt": "2026-11-24T20:05:21.939Z",
     "number": "02"
   },
   {

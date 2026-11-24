@@ -167,9 +167,10 @@
   };
 
   /* ================= title ================= */
+  ui.syncUnlocks = function () { const out = G().checkUnlocks(); out.forEach((t, i) => setTimeout(() => ui.toast('🔓 <b>Unlocked</b> ' + t, 'unlock', 7), 300 + i * 250)); return out; };
   ui.title = function () {
     const d = D(); const run = d.run; const g = G();
-    g.toMenu();
+    g.toMenu(); ui.syncUnlocks();
     const resume = run ? btn(h('span', null, 'Resume Run', h('small', null, `${run.trial && SO.TRIALS[run.trial] ? 'Challenge: ' + SO.TRIALS[run.trial].name : run.mode === 'endless' ? 'Endless' : 'Standard'} · Round ${run.round}${run.phase === 'workshop' ? ' (workshop)' : ''} · ${SO.KITS[run.kit] ? SO.KITS[run.kit].name : ''}`)), () => g.resumeRun(), 'warn span2') : null;
     const tile = (glyph, name, sub, fn, cls) => btn(h('span', null, h('span', { class: 'mglyph' }, glyph), name, h('small', null, sub)), fn, 'mtile ' + cls);
     const el = h('div', { class: 'screen' },
@@ -206,7 +207,7 @@
   };
   /* ================= run setup ================= */
   ui.runSetup = function (mode) {
-    const d = D(); const g = G();
+    const d = D(); const g = G(); ui.syncUnlocks();
     let kit = (d.lastKit && d.unlocks.kits.includes(d.lastKit)) ? d.lastKit : 'tinkerer'; const chal = new Set((d.lastChallenges || []).filter(c => d.unlocks.challenges.includes(c)));
     const owned = k => d.unlocks.kits.includes(k);
     const ROLES = ['All', 'Classic', 'Twist', 'Hard Mode', 'Overhaul', 'Secret'];
@@ -528,7 +529,7 @@
 
   /* ================= challenges ================= */
   ui.challenges = function () {
-    const d = D(), g = G(); g.toMenu();
+    const d = D(), g = G(); g.toMenu(); ui.syncUnlocks();
     const secretOn = !!d.unlocks.secretSeen;
     const order = (secretOn ? SO.SECRET_TRIAL_ORDER : []).concat(SO.TRIAL_ORDER);
     let sel = d.lastTrial && order.includes(d.lastTrial) ? d.lastTrial : order[0];

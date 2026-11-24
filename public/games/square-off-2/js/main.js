@@ -14,6 +14,7 @@
     window.addEventListener('blur', () => { if (G.state === 'play') G.pause(); });
     document.addEventListener('visibilitychange', () => { if (document.hidden && G.state === 'play') G.pause(); });
     SO.onKey = e => SO.ui.onKey(e);
+    window.addEventListener('storage', e => { if (e.key === 'square-off-best' && G.state === 'menu') SO.ui.syncUnlocks(); });
     G.makeAttract();
     SO.ui.title();
     requestAnimationFrame(G.loop);
