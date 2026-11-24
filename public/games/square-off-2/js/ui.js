@@ -170,17 +170,18 @@
   ui.title = function () {
     const d = D(); const run = d.run; const g = G();
     g.toMenu();
-    const resume = run ? btn(h('span', null, 'Resume Run', h('small', null, `${run.trial && SO.TRIALS[run.trial] ? 'Challenge: ' + SO.TRIALS[run.trial].name : run.mode === 'endless' ? 'Endless' : 'Standard'} · Round ${run.round}${run.phase === 'workshop' ? ' (workshop)' : ''} · ${SO.KITS[run.kit] ? SO.KITS[run.kit].name : ''}`)), () => g.resumeRun(), 'warn') : null;
+    const resume = run ? btn(h('span', null, 'Resume Run', h('small', null, `${run.trial && SO.TRIALS[run.trial] ? 'Challenge: ' + SO.TRIALS[run.trial].name : run.mode === 'endless' ? 'Endless' : 'Standard'} · Round ${run.round}${run.phase === 'workshop' ? ' (workshop)' : ''} · ${SO.KITS[run.kit] ? SO.KITS[run.kit].name : ''}`)), () => g.resumeRun(), 'warn span2') : null;
+    const tile = (glyph, name, sub, fn, cls) => btn(h('span', null, h('span', { class: 'mglyph' }, glyph), name, h('small', null, sub)), fn, 'mtile ' + cls);
     const el = h('div', { class: 'screen' },
       h('div', { class: 'title-wrap' },
-        h('div', { class: 'logo' }, 'SQUARE', h('br'), 'OFF ', h('span', { class: 'two' }, '2')),
+        h('div', { class: 'logo' }, 'SQUARE OFF ', h('span', { class: 'two' }, '2')),
         h('div', { class: 'tagline' }, 'Upgrade yourself. Upgrade the boss. Survive what you built.'),
-        h('div', { class: 'menu' },
+        h('div', { class: 'menu menu-grid' },
           resume,
-          btn(h('span', null, 'Standard Run', h('small', null, '10 rounds + a final confrontation' + (d.records.standardWins ? ` · ${d.records.standardWins} win(s)` : ''))), () => ui.runSetup('standard'), 'primary'),
-          btn(h('span', null, 'Endless', h('small', null, 'Escalating rounds · Best: ' + (d.records.endlessBest ? 'Round ' + d.records.endlessBest : '—'))), () => ui.runSetup('endless'), 'boss'),
-          btn(h('span', null, 'Challenges', h('small', null, 'Short twisted runs · ' + SO.TRIAL_ORDER.filter(SO.trialDone).length + '/' + SO.TRIAL_ORDER.length + ' cleared' + (d.unlocks.secretSeen ? ' · ' + SO.SECRET_TRIAL_ORDER.filter(SO.trialDone).length + '/' + SO.SECRET_TRIAL_ORDER.length + ' secret' : ''))), () => ui.challenges(), 'warn'),
-          btn(h('span', null, 'Practice Workshop', h('small', null, 'Test weapons & boss patterns, no risk')), () => ui.practice()),
+          tile('▶', 'Standard Run', '10 rounds + a final confrontation' + (d.records.standardWins ? ' · ' + d.records.standardWins + ' win(s)' : ''), () => ui.runSetup('standard'), 'primary'),
+          tile('∞', 'Endless', 'Escalating rounds · Best: ' + (d.records.endlessBest ? 'Round ' + d.records.endlessBest : '—'), () => ui.runSetup('endless'), 'boss'),
+          tile('★', 'Challenges', SO.TRIAL_ORDER.filter(SO.trialDone).length + '/' + SO.TRIAL_ORDER.length + ' cleared' + (d.unlocks.secretSeen ? ' · ' + SO.SECRET_TRIAL_ORDER.filter(SO.trialDone).length + '/' + SO.SECRET_TRIAL_ORDER.length + ' secret' : ' · short twisted runs'), () => ui.challenges(), 'warn'),
+          tile('⚙', 'Practice', 'Test weapons & boss patterns, no risk', () => ui.practice(), ''),
           h('div', { class: 'menu-row' },
             btn(d.unlocks.tutorialDone ? 'Tutorial' : 'Tutorial ★', () => g.startTutorial(), d.unlocks.tutorialDone ? '' : 'warn'),
             btn('Guide', () => ui.guide(ui.title)), btn('Unlocks', () => ui.unlocks()), btn('Settings', () => ui.settings(ui.title))))),
@@ -545,11 +546,13 @@
       const T = SO.TRIALS[sel]; const done = SO.trialDone(sel);
       const card = id => { const C = SO.TRIALS[id]; return h('div', { class: 'tcard' + (C.secret ? ' secret' : '') + (id === sel ? ' on' : '') + (SO.trialDone(id) ? ' done' : ''), onclick: () => { sel = id; SO.sfx.play('select'); render(); } },
         h('div', { class: 'tname' }, C.name), h('div', { class: 'tmeta' }, C.rounds + ' rounds' + (C.secret ? ' · SECRET' : '') + (C.reward ? ' · ★' : '')), SO.trialDone(id) ? h('div', { class: 'tcheck' }, '✓') : null); };
-      const kits = SO.KIT_ORDER.filter(k => d.unlocks.kits.includes(k));
-      const kitSel = T.rules.kit ? h('b', null, SO.KITS[T.rules.kit].name + ' (fixed)')
-        : h('select', { onchange: e => { kit = e.target.value; } }, kits.map(k => h('option', { value: k, selected: k === kit ? true : null }, SO.KITS[k].name + ', ' + SO.KITS[k].title)));
+      const kits = SO.KIT_ORDER.filter(k => d.unlocks.kits.includes(k)); const shown = T.rules.kit || kit; const SK = SO.KITS[shown];
+      const bigCv = h('canvas', { width: 104, height: 104 }); ui.portrait(bigCv, shown, false);
+      const kitSel = h('div', null,
+        h('div', { class: 'tkit-cur' }, bigCv, h('div', null, h('h3', null, SK.name), h('div', { class: 'ctitle' }, SK.title), h('span', { class: 'role', style: 'background:' + SO.ROLE_COLOR[SK.role] + (SK.role === 'Secret' ? ';color:#fff' : '') }, SK.role), T.rules.kit ? h('div', { class: 'muted', style: 'font-size:12px;font-weight:700' }, 'Fixed for this challenge') : null)),
+        T.rules.kit ? null : h('div', { class: 'tkits scroll' }, kits.map(k => { const cv = h('canvas', { width: 64, height: 64 }); ui.portrait(cv, k, false); return h('div', { class: 'tkit' + (k === kit ? ' on' : ''), title: SO.KITS[k].name + ', ' + SO.KITS[k].title, style: '--rc:' + SO.ROLE_COLOR[SO.KITS[k].role], onclick: () => { kit = k; d.lastTrialKit = k; SO.sfx.play('select'); const el0 = document.querySelector('.tkits'), st = el0 ? el0.scrollTop : 0; render(); const el1 = document.querySelector('.tkits'); if (el1) el1.scrollTop = st; } }, cv, h('div', null, SO.KITS[k].name)); })));
       ui.set(h('div', { class: 'screen solid' }, h('div', { class: 'page' },
-        h('div', { class: 'page-head' }, h('h1', null, 'CHALLENGES'), h('div', { class: 'muted', style: 'font-weight:700;max-width:520px' }, 'Short runs of 3–5 rounds, each with a twist. Clear one to tick it off — some hand out characters.'), h('div', { class: 'spacer' }), btn('Back', ui.title, 'small', 'Esc')),
+        h('div', { class: 'page-head' }, h('h1', null, 'CHALLENGES'), h('div', { class: 'muted', style: 'font-weight:700;max-width:520px' }, 'Short runs of 3–5 rounds, each with a twist. Some hand out characters. Challenge runs never change your Standard or Endless records.'), h('div', { class: 'spacer' }), btn('Back', ui.title, 'small', 'Esc')),
         h('div', { class: 'trials' },
           h('div', { class: 'panel scroll tlist' },
             secretOn ? h('h2', { class: 'tsec secret' }, 'SECRET CHALLENGES') : null, secretOn ? h('div', { class: 'tgrid' }, SO.SECRET_TRIAL_ORDER.map(card)) : null,
@@ -558,7 +561,6 @@
             h('h2', null, T.name), h('div', { class: 'tmeta big' }, T.rounds + ' rounds' + (T.rules.startRound ? ' · starts at Round ' + T.rules.startRound : '') + (done ? ' · ✓ CLEARED' : '')),
             h('p', { class: 'cdesc' }, T.desc), rewardLine(T),
             h('div', { class: 'sec2' }, 'CHARACTER'), kitSel,
-            h('p', { class: 'muted', style: 'font-size:12.5px' }, 'Challenge runs never change your Standard or Endless records. Quit any time from the pause menu.'),
             h('div', { style: 'margin-top:auto;display:flex;justify-content:flex-end;padding-top:8px' }, btn('Start Challenge', start, 'primary', 'Enter')))))),
         e => { if (typing()) return; if (e.code === 'Escape') ui.title(); else if (e.code === 'Enter') start(); });
     };

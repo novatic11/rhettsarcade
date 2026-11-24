@@ -23,6 +23,7 @@
       this.platforms = (this.arena.platforms || []).map(p => Object.assign({ h: 16 }, SO.clone(p), { x0: p.x, y0: p.y, dx: 0, dy: 0 }));
       this.waterY = null; this.floorPush = 0; this.inSpotlight = false;
       this.stats = { dmgBySource: {}, dmgTaken: {}, hitsTaken: 0, dashes: 0, utils: 0, modulesBroken: 0, time: 0, lastHitBy: null, crits: 0, peakHit: 0, erased: 0 };
+      this.tr = o.trial || {}; this.timeScale = this.tr.fast || 1; this.trialInfo = o.trialInfo || null; this.trialChip = null;
       this.player = new SO.Player(this, this.build, { hp: o.playerHp, x: o.px, y: o.py });
       this.boss = o.noBoss ? null : new SO.Boss(this, this.bb, { hp: o.bossHp, intro: o.intro, noPhases: o.noPhases || o.infinite, unfolded: o.unfolded });
       if (!this.boss) this.state = 'fight';
@@ -33,7 +34,6 @@
       this.twin = this.build.f.twin ? { x: 0, y: 0, ws: null } : null;
       this.controlLock = false; this.weaponsOff = false; this.bannerT = 0;
       this.bossHpMul = o.bossHpMul || 1; this.bossCdMul = o.bossCdMul || 1; this.contract = null;
-      this.tr = o.trial || {}; this.timeScale = this.tr.fast || 1; this.trialInfo = o.trialInfo || null; this.trialChip = null;
       if (this.boss && this.bossHpMul !== 1 && !o.bossHp) { this.boss.maxHp = Math.round(this.boss.maxHp * this.bossHpMul); this.boss.hp = this.boss.maxHp; for (const m of this.boss.modules) { m.maxHp *= this.bossHpMul; m.hp = m.maxHp; } }
     }
     get mouse() { return this.mouseOverride || SO.input.mouse; }

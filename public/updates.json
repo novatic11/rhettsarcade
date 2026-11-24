@@ -1,5 +1,17 @@
 [
   {
+    "id": "square-off-2-menu-challenge-fixes",
+    "gameId": "square-off-2",
+    "date": "2026-11-24T19:56:11.917Z",
+    "title": "Square Off 2: new menu and challenge fixes",
+    "summary": "A cleaner main menu, a visual character picker for Challenges, and Upside Down now really is.",
+    "changes": [
+      "The main menu is now a tidy grid: Standard Run, Endless, Challenges and Practice, with Tutorial, Guide, Unlocks and Settings in one row.",
+      "Challenges now show every character you own as a portrait. Click one to pick it.",
+      "Fixed Upside Down: gravity is now actually reversed. Every other challenge was rechecked."
+    ]
+  },
+  {
     "id": "slide-between-intelligent-robot",
     "gameId": "slide-between",
     "date": "2026-11-24T19:49:40.143Z",
