@@ -122,6 +122,12 @@ body.mon #hud .flags{top:auto;bottom:calc(70px + env(safe-area-inset-bottom,0px)
 #monitor .tools{position:absolute;left:28px;bottom:calc(38px + min(450px,(100vw - 56px) * 0.909,100vh - 300px) + env(safe-area-inset-bottom,0px));display:flex;gap:8px}
 #monitor .tools button{background:#1d1a0c;border:1px solid #8a7c3a;font-family:var(--osd);font-size:20px;padding:2px 10px;cursor:pointer;color:#efe6bf}
 #monitor .tools button:disabled{opacity:.4;cursor:default}
+#monitor .tools #ventBtn{border-color:#6fb3c8;color:#d6f2fa;background:#0f1c20}
+#monitor .tools #ventBtn:hover{background:#18303a}
+#monitor .tools #ventBtn.low{border-color:var(--danger);color:#ffd2c8;background:#3a120c;animation:hblink .8s steps(2) infinite}
+#ventWarn{position:absolute;left:50%;bottom:calc(46px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);font-family:var(--osd);font-size:17px;letter-spacing:2px;color:#ffd2c8;background:rgba(50,10,6,.78);border:1px solid var(--danger);padding:2px 12px;white-space:nowrap;pointer-events:none;z-index:6;animation:hblink 1s steps(2) infinite}
+body.mon #ventWarn{bottom:calc(8px + env(safe-area-inset-bottom,0px))}
+@media (max-width:760px){#ventWarn{font-size:13px;letter-spacing:1px;white-space:normal;text-align:center;width:calc(100vw - 48px)}}
 #monitor .maplabel{position:absolute;left:8px;top:4px;font-size:16px;color:#9b9273;letter-spacing:1px}
 #bugs{position:absolute;inset:0;width:100%;height:100%}
 #ad{position:absolute;left:50%;top:50%;width:min(560px,86vw);transform:translate(-50%,-50%);background:#f3e7c4;color:#1b1608;border:4px solid #1b1608;font-family:var(--doc);padding:18px 20px 16px;box-shadow:0 0 0 6px #d23b2b,0 20px 60px rgba(0,0,0,.6)}
@@ -611,6 +617,7 @@ body.boss #hud .flags{top:calc(16px + env(safe-area-inset-top,0px))}
       <div class="water"><span class="k" id="hWater">ALMOND WATER</span><span class="bt" id="hBottles"><i></i><i></i><i></i><i></i></span></div>
       <div class="invrow" id="hInvRow"><span class="k">ITEMS</span><span class="inv" id="hInv"></span></div>
     </div>
+    <div id="ventWarn" hidden>⚠ AIR GOING STALE · REFRESH THE VENTS ON YOUR MONITOR</div>
     <div class="hint" id="hHint"><b>W</b>MASK &nbsp; <b>S</b>CAMERAS &nbsp; <b>A</b><b>D</b>DOORS &nbsp; <b>Z</b>FLASHLIGHT &nbsp; <b>X</b>FAN &nbsp; <b>E</b>ALMOND WATER &nbsp; <b>SPACE</b>PHONE &nbsp; <b>ESC</b>PAUSE</div>
   </div>
   <div id="xhud" hidden>
@@ -634,7 +641,7 @@ body.boss #hud .flags{top:calc(16px + env(safe-area-inset-top,0px))}
     <div class="rec"><i></i>REC</div>
     <div class="stamp" id="mStamp">LVL-0 · 12:00 AM</div>
     <div class="warn" id="mWarn"></div>
-    <div class="tools"><button id="lureBtn" type="button">PLAY AUDIO</button></div>
+    <div class="tools"><button id="lureBtn" type="button">PLAY AUDIO</button><button id="ventBtn" type="button">REFRESH VENTS</button></div>
     <div class="map" id="mMap"><canvas id="mapCv" width="660" height="600"></canvas><div class="maplabel">LEVEL 0 · SECTOR C</div></div>
     <div id="ad" hidden></div>
   </div>
@@ -677,7 +684,7 @@ body.boss #hud .flags{top:calc(16px + env(safe-area-inset-top,0px))}
               <label for="flMode">Flashlight <select id="flMode"><option value="hold">Hold Z</option><option value="toggle">Z toggles</option></select></label>
               <label for="quality">Quality <select id="quality"><option value="high">High</option><option value="low">Low</option></select></label>
             </div>
-            <p class="legend"><kbd>W</kbd> hazmat mask · <kbd>S</kbd> camera monitor · <kbd>A</kbd>/<kbd>D</kbd> left/right door · <kbd>Z</kbd> flashlight (aims at your mouse) · <kbd>E</kbd> almond water · <kbd>SPACE</kbd> hang up phone · <kbd>1</kbd>–<kbd>0</kbd> cameras · click a card's arrows or scroll on it to set AI (shift = ±5). Survive 12 AM to 6 AM.</p>
+            <p class="legend"><kbd>W</kbd> hazmat mask · <kbd>S</kbd> camera monitor · <kbd>A</kbd>/<kbd>D</kbd> left/right door · <kbd>Z</kbd> flashlight (aims at your mouse) · <kbd>E</kbd> almond water · <kbd>SPACE</kbd> hang up phone · <kbd>1</kbd>–<kbd>0</kbd> cameras · REFRESH VENTS on the monitor before the air runs out · click a card's arrows or scroll on it to set AI (shift = ±5). Survive 12 AM to 6 AM.</p>
           </div>
         </aside>
       </div>
@@ -5255,6 +5262,8 @@ const SCRIPT = {
     L_("Badge reader likes you. Sit down. See the clock? 11 PM. The shift starts at midnight, so let's get you set up."),
     L_('Press S to raise the camera monitor.', { wait: () => G.mon.up && G.mon.amt > 0.95, hint: 'Press S' }),
     L_('Ten cameras. Click the map or press 1 to 0 to switch. PLAY AUDIO lures some of them toward the camera you are watching.'),
+    L_('See REFRESH VENTS, next to PLAY AUDIO? The air in that office goes stale. Click it.', { wait: () => G._ventClicked, hint: 'Click REFRESH VENTS' }),
+    L_("Do that every so often, all night long. You won't know exactly when the air runs out, but when it gets thin a warning shows up at the bottom of your screen. Let it run out and you pass out. The vents clog faster every night."),
     L_('Now press S again to lower it.', { wait: () => !G.mon.up && G.mon.amt < 0.05, hint: 'Press S' }),
     L_('A and D work the left and right doors. Close one.', { wait: () => G.door.L.closed || G.door.R.closed, hint: 'Press A or D' }),
     L_('Doors stop most things, but they eat power. So do the monitor and the flashlight. When it runs out, the lights go... and then so do you.'),
@@ -8737,9 +8746,8 @@ const ray = new THREE.Raycaster();
 /* ---------------------------------------------------------------- G API */
 G.toast = (msg, dur = 1.6) => { const el = $('#toast'); el.textContent = msg; el.style.opacity = 1; clearTimeout(G._tt); G._tt = setTimeout(() => (el.style.opacity = 0), dur * 1000); };
 G.winRoll = () => {
-  const t = $('#wTitle'); t.innerHTML = '<span class="roll"><i>5</i><i>6</i></span><span class="am">:00 AM</span>';
-  const w = $('#win'); w.classList.remove('rolling'); void w.offsetWidth; w.classList.add('rolling');
-  [0, 0.45, 0.9].forEach((d) => AU.tone({ freq: 1400, dur: 0.05, gain: 0.04, type: 'square', delay: d }));
+  const t = $('#wTitle'); t.innerHTML = '6<span class="am">:00 AM</span>'; // no 5→6 roll: the end screen appears immediately
+  const w = $('#win'); w.classList.remove('rolling');
 };
 G.has = (id) => !!(G.up && G.up.has(id));
 G.clock = (h, m) => (h === 0 ? 12 : h) + ':' + String(m).padStart(2, '0') + '<small>AM</small>';
@@ -9122,6 +9130,7 @@ function buildMonitorMap() {
     map.appendChild(b);
   });
   $('#lureBtn').addEventListener('click', (ev) => { ev.stopPropagation(); playLure(); });
+  $('#ventBtn').addEventListener('click', (ev) => { ev.stopPropagation(); refreshVents(); });
 }
 function switchCam(i) {
   if (G.state !== 'playing' || !G.mon.up) return;
@@ -9257,7 +9266,7 @@ function startNight(cfg, chalIdx, opts = {}) {
   AU.init(); AU.setVolume(G.opts.vol); AU.stopAll(); AU.setSilence(false);
   endEntities();
   Object.assign(G, { t: 0, hour: -1, power: 100, water: 4, cfg: { ...cfg }, chal: chalIdx, busy: {}, occ: {}, lure: null, lureCd: 0, drain: 0, pull: 0, shake: 0, blind: 0, paralyze: 0, gas: 0, wet: 0, acidVisor: 0, seer: 0, rash: 0, silent: false, powerOut: false, flickT: 0, fx: 0, glitch: 0, lastDrainer: null, fade: 1, poT: 0 });
-  G.temp = 18; G.chill = 0; G.fan = false; G._hot = {}; G.pant = 0; G.passT = null; $('#heat').style.opacity = 0;
+  G.temp = 18; G.chill = 0; G.fan = false; G._hot = {}; G.pant = 0; G.passT = null; G.passBy = null; $('#heat').style.opacity = 0;
   G.camBlank = {}; G.ad.open = false; $('#ad').hidden = true; G._warn = {}; G._fh = null; G._wat = -1;
   G.up = opts.up instanceof Set ? opts.up : new Set(opts.up || []); G.inv = Array.isArray(opts.inv) ? opts.inv : []; G.laser = 0; G.docMask = 0; G.pick = null; G._inv = null;
   G.powerMax = G.has('battery') ? 120 : 100; G.power = G.powerMax; G.water = 4 + (G.has('water') ? 2 : 0); G.waterMax = G.water;
@@ -9275,6 +9284,7 @@ function startNight(cfg, chalIdx, opts = {}) {
     const e = { def: d, id: d.id, ai, st: {}, model: m, index: i, node: null, slot: 0 }; G.ents.push(e);
   });
   G.story = !!opts.story; G.custom = !!opts.custom; G.freeze = !!opts.freeze; G._fz = 0;
+  G.vent = { max: ventMax(), t: 0, warned: false }; G.vent.t = G.vent.max; G._ventClicked = false; $('#ventWarn').hidden = true; $('#ventBtn').classList.remove('low');
   G.ents.forEach((e) => e.def.init(e)); G.camBlank = {};
   setTimeout(() => MD.persist(), 2000);
   G.hum = AU.loop('hum'); G.hum.set(0.05); G.fanSnd = AU.loop('fan'); G.breath = AU.loop('breath'); G.stat = AU.loop('static'); G.cough = 0;
@@ -9317,16 +9327,32 @@ function win() {
 function die() {
   G.state = 'dead'; endEntities(); $('#death').hidden = false;
   const e = G.killer; const d = e.def;
-  $('#dTitle').textContent = U.pick(['YOU DIED', 'NOCLIPPED', 'LOST IN LEVEL 0', 'SHIFT OVER']);
+  $('#dTitle').textContent = d.id === 'vents' ? 'PASSED OUT' : U.pick(['YOU DIED', 'NOCLIPPED', 'LOST IN LEVEL 0', 'SHIFT OVER']);
   $('#dBy').textContent = d.byline || 'Caught by ' + d.name;
   $('#dTip').innerHTML = `<b>${d.name}</b>${d.how}`;
   if (G.bossMode) { $('#dTitle').textContent = 'GAME OVER'; $('#dRetry').textContent = 'REMATCH'; $('#dMenu').textContent = 'QUIT TO TITLE'; $('#dNight').textContent = (BOSS.roundLabel || 'ROUND') + ' ' + BOSS.phase + ' / ' + (BOSS.rounds || 7) + ' · ' + (BOSS.hpLabel || 'HER HEALTH') + ' ' + Math.round(BOSS.hp) + '%'; return; }
   $('#dRetry').textContent = G.story ? 'RETRY NIGHT ' + ST.night : 'TRY AGAIN'; $('#dMenu').textContent = G.story ? 'QUIT TO TITLE' : 'CUSTOM NIGHT';
   $('#dNight').textContent = (G.story ? 'NIGHT ' + ST.night + ' · ' + ST.DIFF[ST.diff].name + ' · ' : '') + hourStr();
 }
+// seconds of air per vent refresh: 70 s on night 1, 8 s less every night after, never under 22 s.
+// Endless counts its rounds as nights (round 1 = night 3); custom nights sit at night 3, the Daily at night 4.
+function ventMax() {
+  let n = 3;
+  if (typeof ENDLESS !== 'undefined' && ENDLESS.on && ENDLESS.run) n = 2 + (ENDLESS.run.round || 1);
+  else if (G.story && typeof ST !== 'undefined') n = ST.night || 1;
+  else if (typeof DAILY !== 'undefined' && DAILY.on) n = 4;
+  return Math.max(22, 70 - 8 * (n - 1));
+}
+function refreshVents() {
+  if (G.state !== 'playing' || G.bossMode || !G.vent) return;
+  G.vent.t = G.vent.max; G.vent.warned = false; G._ventClicked = true; $('#ventWarn').hidden = true; $('#ventBtn').classList.remove('low');
+  AU.noise({ dur: 0.9, gain: 0.07, filter: { type: 'bandpass', freq: 900, Q: 0.7 }, attack: 0.05 }); AU.tone({ freq: 180, slide: 120, dur: 0.5, gain: 0.04, type: 'triangle' });
+  G.toast('VENTS REFRESHED', 1.2);
+}
 function hourStr() { const h = Math.max(0, G.hour); return 'SURVIVED UNTIL ' + (h === 0 ? 12 : h) + ':' + String(Math.max(0, G._min || 0)).padStart(2, '0') + ' AM'; }
 const PSEUDO = {
   dark: { id: 'dark', name: 'The dark', byline: 'The power ran out', how: 'Every closed door, the monitor, the flashlight and the fan drain power. Open doors as soon as the threat leaves.' },
+  vents: { id: 'vents', name: 'Stale air', byline: 'Passed out', how: 'The vents clog up as the night goes on, and faster every night. Raise the monitor (S) and click REFRESH VENTS every so often. A warning shows at the bottom of the screen when the air is about to run out.' },
   heat: { id: 'heat', name: 'Heat stroke', byline: 'You passed out from the heat', how: 'The office heats up all night, faster with the doors shut and the monitor up. Press X to run the fan before the thermometer hits the top. The fan uses power, so switch it off once you have cooled down.' },
 };
 
@@ -9336,7 +9362,7 @@ function step(dt, t) {
   if (G.passT != null) { // heat stroke: the view sags and goes dark, then the death screen
     G.passT += dt; G.view.pitch = U.damp(G.view.pitch, -0.55, 1.4, dt); G.view.yaw += Math.sin(G.passT * 1.7) * 0.004;
     W.camera.rotation.set(G.view.pitch, G.view.yaw, Math.sin(G.passT * 1.3) * 0.08 * G.passT, 'YXZ'); W.camera.updateMatrixWorld(); W.update(dt, t, false);
-    if (G.passT > 2.7) { G.passT = null; G.fan = false; G.killer = { def: PSEUDO.heat }; G.mon.up = false; G.mon.amt = 0; die(); FADE.to(0, 0.8); }
+    if (G.passT > 2.7) { G.passT = null; G.fan = false; G.killer = { def: G.passBy || PSEUDO.heat }; G.passBy = null; G.mon.up = false; G.mon.amt = 0; die(); FADE.to(0, 0.8); }
     return;
   }
   G.dt = dt;
@@ -9434,6 +9460,15 @@ function step(dt, t) {
     if (G.temp > 72) { G.pant -= dt; if (G.pant <= 0) { G.pant = U.lerp(2.2, 0.9, (G.temp - 72) / 28); AU.noise({ dur: 0.45, gain: 0.05 + (G.temp - 72) * 0.003, brown: true, filter: { type: 'bandpass', freq: 700 } }); if (G.temp > 86) { AU.tone({ freq: 52, dur: 0.1, gain: 0.08, type: 'sine' }); AU.tone({ freq: 48, dur: 0.1, gain: 0.06, type: 'sine', delay: 0.16 }); } } }
     if (G.temp >= 100 && G.passT == null) { G.passT = 0; G.toast('YOU ARE PASSING OUT', 2.5); AU.stopAll(); AU.noise({ dur: 2.4, gain: 0.12, brown: true, filter: { freq: 300 } }); FADE.to(1, 2.4); return; }
   }
+  // vents: an invisible timer. REFRESH VENTS on the monitor resets it; it runs out faster every night. Boss fights skip it.
+  if (G.vent && !G.bossMode && !G.freeze && !G.powerOut && G.passT == null) {
+    G.vent.t -= dt;
+    const low = G.vent.t <= 7;
+    if (low && !G.vent.warned) { G.vent.warned = true; AU.tone({ freq: 440, dur: 0.14, gain: 0.06, type: 'square', filter: { freq: 1400 } }); AU.tone({ freq: 330, dur: 0.18, gain: 0.06, type: 'square', delay: 0.18, filter: { freq: 1400 } }); }
+    if ($('#ventWarn').hidden === low) $('#ventWarn').hidden = !low;
+    $('#ventBtn').classList.toggle('low', low);
+    if (G.vent.t <= 0) { $('#ventWarn').hidden = true; G.passT = 0; G.passBy = PSEUDO.vents; G.toast('YOU ARE PASSING OUT', 2.5); AU.stopAll(); AU.noise({ dur: 2.4, gain: 0.12, brown: true, filter: { freq: 300 } }); FADE.to(1, 2.4); return; }
+  } else if (G.bossMode && !$('#ventWarn').hidden) $('#ventWarn').hidden = true;
   if (G.fanSnd) G.fanSnd.set(fanOn ? 0.035 : 0);
   // ammonia gas
   const masked = (G.mask.on && G.mask.amt > 0.8) || G.docMask > 0;
@@ -9496,6 +9531,7 @@ function hud(t) {
     $('#mStamp').textContent = 'LVL-0 · ' + (G.freeze || G.hour < 0 ? '11:00 PM' : hr + ':' + String(mn).padStart(2, '0') + ' AM') + ' · ' + new Date(1995, 10, 4 + (G.story && typeof ST !== 'undefined' ? ST.night || 1 : 1)).toLocaleDateString('en-US');
     document.querySelectorAll('#mMap .cb').forEach((b) => { b.classList.toggle('on', +b.dataset.cam === G.mon.cam); if (G.has('motion')) { const nn = camNode(+b.dataset.cam); b.classList.toggle('occ', !!(G.occ[nn] && G.occ[nn].some(Boolean)) || G.ents.some((e) => e.node === nn)); } else b.classList.remove('occ'); b.classList.toggle('lure', !!(G.lure && camNode(+b.dataset.cam) === G.lure.node)); });
     $('#lureBtn').disabled = G.lureCd > 0; $('#lureBtn').textContent = G.lureCd > 0 ? 'PLAY AUDIO · ' + Math.ceil(G.lureCd) : 'PLAY AUDIO';
+    $('#ventBtn').hidden = !!G.bossMode;
     $('#ad').hidden = !(G.ad.open && G.mon.amt > 0.98);
     drawBugs(t);
   }
@@ -11266,6 +11302,7 @@ const RELEASE = (() => {
 const ENDLESS = (() => {
   const E = { on: false, phase: null };
   const RATE = { easy: 1, normal: 1.5, hard: 2 };
+  const START = { easy: 3, normal: 4, hard: 5 }; // specimens picked before round 1
   const DNAME = { easy: 'EASY', normal: 'NORMAL', hard: 'HARD' };
   // endless-only upgrades (lv = permanent levels; tok = consumable tokens)
   const G_ = (inner) => `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="eg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6a3ad0"/><stop offset="1" stop-color="#1c0f3a"/></linearGradient></defs><rect x="2" y="2" width="44" height="44" rx="10" fill="url(#eg)" stroke="#ffd84a" stroke-width="1.5"/>${inner}</svg>`;
@@ -11314,9 +11351,9 @@ const ENDLESS = (() => {
   /* ---------------------------------------------------------------- the lineup: choose N of 5+ */
   E.pick = async () => {
     const R = E.run; E.phase = 'pick'; G.state = 'endless'; hideAll(); q$('#hud').hidden = true; q$('#win').hidden = true;
-    if (R.need == null) { R.acc = (R.acc || 0) + RATE[R.diff]; R.need = Math.floor(R.acc + 1e-6); R.acc -= R.need; }
+    if (R.need == null) { if (R.round === 1 && !R.roster.length) R.need = START[R.diff] || 4; else { R.acc = (R.acc || 0) + RATE[R.diff]; R.need = Math.floor(R.acc + 1e-6); R.acc -= R.need; } }
     const pool = ENT.map((d) => d.id).filter((id) => !R.roster.includes(id));
-    const size = 5 + (R.lv.wide || 0);
+    const size = Math.max(5 + (R.lv.wide || 0), R.need + 3); // the opening lineup always leaves a real choice
     if (!R.offer || !R.offer.length) R.offer = U.shuffle(pool.slice()).slice(0, size);
     R.need = Math.min(R.need, R.offer.length); save();
     await ensureModels(R.offer.concat(R.roster), 'SCOUTING THE LINEUP'); if (!E.on || E.phase !== 'pick') return;
@@ -11607,24 +11644,105 @@ ACH.LIST.push({ id: 'endless10', n: 'Overtime Forever', d: 'Survive 10 rounds in
 /* ------------------------------------------------------------------ the mannequin */
 const MANQ = (() => {
   const SPH = new THREE.SphereGeometry(1, 22, 16), CYL = (r1, r2, h) => new THREE.CylinderGeometry(r1, r2, h, 16);
-  function build(color = 0xd8c8b0) {
+  // ---------------------------------------------------------------- looks (Boss Builder): proportions, face, hat, clothes
+  const LOOK0 = { height: 0, build: 0, head: 0, arms: 0, legs: 0, face: 'blank', hat: 'none', top: 'none', bottom: 'none', topCol: 0x3a4a6a, botCol: 0x2a2f3a };
+  const OPT = {
+    face: ['blank', 'smile', 'grin', 'angry', 'sad', 'hollow', 'button', 'stitched', 'cyclops', 'clown'],
+    hat: ['none', 'top', 'cap', 'beanie', 'party', 'crown', 'cone'],
+    top: ['none', 'tee', 'hoodie', 'suit', 'labcoat', 'dress', 'hazmat'],
+    bottom: ['none', 'pants', 'shorts', 'skirt'],
+    cols: [0x3a4a6a, 0x2a2f3a, 0x15151a, 0xe9e6dc, 0x9a2a22, 0xd8a030, 0x3f7a3a, 0x7a4aa0, 0xd86a9a, 0xe0d24a],
+  };
+  const NAMES = {
+    face: { blank: 'BLANK', smile: 'SMILE', grin: 'BIG GRIN', angry: 'ANGRY', sad: 'CRYING', hollow: 'HOLLOW', button: 'BUTTON EYES', stitched: 'STITCHED', cyclops: 'CYCLOPS', clown: 'CLOWN' },
+    hat: { none: 'NONE', top: 'TOP HAT', cap: 'CAP', beanie: 'BEANIE', party: 'PARTY HAT', crown: 'CROWN', cone: 'TRAFFIC CONE' },
+    top: { none: 'NONE', tee: 'T-SHIRT', hoodie: 'HOODIE', suit: 'SUIT', labcoat: 'LAB COAT', dress: 'DRESS', hazmat: 'HAZMAT SUIT' },
+    bottom: { none: 'NONE', pants: 'PANTS', shorts: 'SHORTS', skirt: 'SKIRT' },
+    height: ['TINY', 'SHORT', 'AVERAGE', 'TALL', 'GIANT'], build: ['SKINNY', 'SLIM', 'AVERAGE', 'STOCKY', 'HULKING'], head: ['TINY', 'SMALL', 'NORMAL', 'BIG', 'HUGE'],
+    arms: ['STUBBY', 'SHORT', 'NORMAL', 'LONG', 'LANKY'], legs: ['STUBBY', 'SHORT', 'NORMAL', 'LONG', 'STILTS'],
+  };
+  function normLook(l) {
+    l = Object.assign({}, LOOK0, l && typeof l === 'object' ? l : {});
+    ['height', 'build', 'head', 'arms', 'legs'].forEach((k) => (l[k] = U.clamp(Math.round(+l[k]) || 0, -2, 2)));
+    ['face', 'hat', 'top', 'bottom'].forEach((k) => { if (!OPT[k].includes(l[k])) l[k] = LOOK0[k]; });
+    ['topCol', 'botCol'].forEach((k) => { if (!OPT.cols.includes(+l[k])) l[k] = LOOK0[k]; else l[k] = +l[k]; });
+    return { height: l.height, build: l.build, head: l.head, arms: l.arms, legs: l.legs, face: l.face, hat: l.hat, top: l.top, bottom: l.bottom, topCol: l.topCol, botCol: l.botCol };
+  }
+  function randLook() {
+    const r = () => U.randi(-2, 2), p = (a) => U.pick(a);
+    return normLook({ height: r(), build: r(), head: Math.random() < 0.6 ? 0 : r(), arms: Math.random() < 0.6 ? 0 : r(), legs: Math.random() < 0.6 ? 0 : r(), face: p(OPT.face), hat: Math.random() < 0.4 ? 'none' : p(OPT.hat), top: p(OPT.top), bottom: p(OPT.bottom), topCol: p(OPT.cols), botCol: p(OPT.cols) });
+  }
+  // face decals: drawn on a 256² canvas that wraps the front of the head (eyes ≈ (80,118) / (176,118), mouth ≈ y 185)
+  const faceTex = {};
+  function face(kind) {
+    if (faceTex[kind]) return faceTex[kind];
+    const cv = TX.canvas(256, 256), g = cv.getContext('2d'); g.lineCap = 'round'; g.lineJoin = 'round';
+    const ink = '#14100c', ell = (x, y, rx, ry, col) => { g.fillStyle = col; g.beginPath(); g.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); g.fill(); };
+    const line = (pts, w, col) => { g.strokeStyle = col || ink; g.lineWidth = w; g.beginPath(); pts.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); g.stroke(); };
+    const eyes = (r = 11) => { ell(80, 118, r, r * 1.1, ink); ell(176, 118, r, r * 1.1, ink); };
+    if (kind === 'smile') { eyes(10); g.strokeStyle = ink; g.lineWidth = 8; g.beginPath(); g.arc(128, 160, 42, 0.2 * Math.PI, 0.8 * Math.PI); g.stroke(); }
+    else if (kind === 'grin') { eyes(12); ell(128, 182, 64, 26, ink); g.fillStyle = '#f2ecd8'; for (let i = 0; i < 9; i++) g.fillRect(72 + i * 12.5, 164, 9, 15); for (let i = 0; i < 8; i++) g.fillRect(78 + i * 12.5, 185, 9, 13); }
+    else if (kind === 'angry') { eyes(10); line([[56, 92], [102, 110]], 9); line([[200, 92], [154, 110]], 9); line([[92, 196], [128, 180], [164, 196]], 8); }
+    else if (kind === 'sad') { eyes(10); line([[62, 104], [98, 96]], 6); line([[194, 104], [158, 96]], 6); g.strokeStyle = ink; g.lineWidth = 7; g.beginPath(); g.arc(128, 214, 34, 1.2 * Math.PI, 1.8 * Math.PI); g.stroke(); ell(80, 150, 6, 14, '#5aa8e0'); ell(176, 158, 6, 14, '#5aa8e0'); ell(80, 178, 5, 10, '#5aa8e0'); }
+    else if (kind === 'hollow') { ell(80, 120, 24, 30, '#050403'); ell(176, 120, 24, 30, '#050403'); ell(128, 190, 20, 30, '#050403'); }
+    else if (kind === 'button') { [80, 176].forEach((x) => { ell(x, 118, 20, 20, '#2a1a12'); ell(x, 118, 16, 16, '#6a3a22'); [[-6, -6], [6, -6], [-6, 6], [6, 6]].forEach(([a, b]) => ell(x + a, 118 + b, 3, 3, '#1a0f0a')); }); line([[84, 186], [172, 186]], 4); for (let x = 92; x <= 164; x += 12) line([[x, 176], [x, 196]], 3); }
+    else if (kind === 'stitched') { line([[64, 118], [96, 118]], 5); line([[160, 118], [192, 118]], 5); [70, 80, 90, 166, 176, 186].forEach((x) => line([[x, 110], [x, 126]], 3)); line([[70, 186], [186, 186]], 5); for (let x = 78; x <= 180; x += 12) line([[x, 176], [x, 196]], 3); line([[150, 60], [190, 100], [176, 140]], 3, '#5a2018'); }
+    else if (kind === 'cyclops') { ell(128, 118, 34, 30, '#f2ecd8'); ell(128, 118, 16, 16, '#2a6a3a'); ell(128, 118, 8, 8, ink); g.strokeStyle = ink; g.lineWidth = 4; g.beginPath(); g.ellipse(128, 118, 34, 30, 0, 0, Math.PI * 2); g.stroke(); line([[100, 190], [156, 190]], 6); }
+    else if (kind === 'clown') { ell(80, 118, 22, 26, '#e8eef8'); ell(176, 118, 22, 26, '#e8eef8'); line([[80, 86], [80, 150]], 4, '#2a4ab0'); line([[176, 86], [176, 150]], 4, '#2a4ab0'); eyes(7); ell(128, 148, 18, 18, '#d82a2a'); g.strokeStyle = '#d82a2a'; g.lineWidth = 14; g.beginPath(); g.arc(128, 160, 52, 0.15 * Math.PI, 0.85 * Math.PI); g.stroke(); }
+    const t = new THREE.CanvasTexture(cv); t.encoding = THREE.sRGBEncoding; t.anisotropy = 4; faceTex[kind] = t; return t;
+  }
+  const FACEGEO = new THREE.SphereGeometry(1, 32, 24, Math.PI / 2 - 0.95, 1.9, Math.PI / 2 - 0.95, 1.9);
+  function build(color = 0xd8c8b0, look) {
+    const L = normLook(look);
+    const s = 1 + 0.09 * L.height, w = 1 + 0.16 * L.build, hk = 1 + 0.18 * L.head, A = 1 + 0.15 * L.arms, Lg = 1 + 0.12 * L.legs, lw = 1 + 0.12 * L.build;
     const c = new THREE.Color(color), mat = new THREE.MeshStandardMaterial({ color: c, roughness: 0.38, metalness: 0.04 }), jm = new THREE.MeshStandardMaterial({ color: c.clone().multiplyScalar(0.7), roughness: 0.5 });
     const eyeM = new THREE.MeshStandardMaterial({ color: 0x110000, emissive: 0xff2010, emissiveIntensity: 0 });
     const root = new THREE.Group(); root.name = 'mannequin';
+    // everything hangs off "body", so height can scale it without touching the root (attacks reset root.scale to 1)
+    const body = new THREE.Group(); body.scale.setScalar(s); body.position.y = s * 0.89 * (Lg - 1); root.add(body);
     const mk = (geo, m, par, x, y, z, sx = 1, sy = 1, sz = 1) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); o.scale.set(sx, sy, sz); o.castShadow = true; o.receiveShadow = true; par.add(o); return o; };
     const piv = (par, x, y, z) => { const g = new THREE.Group(); g.position.set(x, y, z); g.userData.p0 = g.position.clone(); par.add(g); return g; };
-    const hips = piv(root, 0, 0.98, 0); mk(SPH, mat, hips, 0, 0, 0, 0.17, 0.11, 0.115);
+    const hips = piv(body, 0, 0.98, 0); mk(SPH, mat, hips, 0, 0, 0, 0.17 * w, 0.11, 0.115 * w);
     const torso = piv(hips, 0, 0.06, 0);
-    mk(CYL(0.12, 0.155, 0.24), mat, torso, 0, 0.12, 0); mk(SPH, mat, torso, 0, 0.36, 0, 0.2, 0.2, 0.125); mk(SPH, jm, torso, 0, 0.47, 0, 0.235, 0.065, 0.11); mk(CYL(0.04, 0.046, 0.12), mat, torso, 0, 0.58, 0);
-    const head = piv(torso, 0, 0.62, 0);
-    mk(SPH, mat, head, 0, 0.13, 0.005, 0.1, 0.135, 0.115); mk(SPH, jm, head, 0, 0.155, 0.098, 0.065, 0.018, 0.022); mk(SPH, mat, head, 0, 0.115, 0.112, 0.016, 0.03, 0.02); // brow, nose
+    mk(CYL(0.12, 0.155, 0.24), mat, torso, 0, 0.12, 0, w, 1, w); mk(SPH, mat, torso, 0, 0.36, 0, 0.2 * w, 0.2, 0.125 * w); mk(SPH, jm, torso, 0, 0.47, 0, 0.235 * w, 0.065, 0.11 * w); mk(CYL(0.04, 0.046, 0.12), mat, torso, 0, 0.58, 0);
+    const head = piv(torso, 0, 0.62, 0); head.scale.setScalar(hk);
+    mk(SPH, mat, head, 0, 0.13, 0.005, 0.1, 0.135, 0.115); const brow = mk(SPH, jm, head, 0, 0.155, 0.098, 0.065, 0.018, 0.022); mk(SPH, mat, head, 0, 0.115, 0.112, 0.016, 0.03, 0.02); // brow, nose
     const eyes = [-0.035, 0.035].map((x) => mk(SPH, eyeM, head, x, 0.14, 0.105, 0.013, 0.008, 0.006));
-    const arm = (s) => { const sh = piv(torso, s * 0.225, 0.46, 0); mk(SPH, jm, sh, 0, 0, 0, 0.046, 0.046, 0.046); mk(CYL(0.035, 0.042, 0.28), mat, sh, 0, -0.15, 0); const el = piv(sh, 0, -0.3, 0); mk(SPH, jm, el, 0, 0, 0, 0.037, 0.037, 0.037); mk(CYL(0.029, 0.035, 0.26), mat, el, 0, -0.14, 0); const hd = piv(el, 0, -0.29, 0); mk(SPH, mat, hd, 0, -0.045, 0.005, 0.034, 0.062, 0.02); return { sh, el, hd }; };
+    const arm = (sd) => { const sh = piv(torso, sd * 0.225 * w, 0.46, 0); mk(SPH, jm, sh, 0, 0, 0, 0.046 * lw, 0.046 * lw, 0.046 * lw); mk(CYL(0.035, 0.042, 0.28), mat, sh, 0, -0.15 * A, 0, lw, A, lw); const el = piv(sh, 0, -0.3 * A, 0); mk(SPH, jm, el, 0, 0, 0, 0.037 * lw, 0.037 * lw, 0.037 * lw); mk(CYL(0.029, 0.035, 0.26), mat, el, 0, -0.14 * A, 0, lw, A, lw); const hd = piv(el, 0, -0.29 * A, 0); mk(SPH, mat, hd, 0, -0.045, 0.005, 0.034 * lw, 0.062, 0.02 * lw); return { sh, el, hd }; };
     const aL = arm(-1), aR = arm(1);
-    const leg = (s) => { const hp = piv(hips, s * 0.09, -0.04, 0); mk(SPH, jm, hp, 0, 0, 0, 0.062, 0.062, 0.062); mk(CYL(0.055, 0.067, 0.42), mat, hp, 0, -0.22, 0); const kn = piv(hp, 0, -0.45, 0); mk(SPH, jm, kn, 0, 0, 0, 0.049, 0.049, 0.049); mk(CYL(0.04, 0.05, 0.4), mat, kn, 0, -0.21, 0); const ft = piv(kn, 0, -0.44, 0); mk(new THREE.BoxGeometry(0.085, 0.05, 0.21), mat, ft, 0, -0.01, 0.05); return { hp, kn, ft }; };
+    const leg = (sd) => { const hp = piv(hips, sd * 0.09 * w, -0.04, 0); mk(SPH, jm, hp, 0, 0, 0, 0.062 * lw, 0.062 * lw, 0.062 * lw); mk(CYL(0.055, 0.067, 0.42), mat, hp, 0, -0.22 * Lg, 0, lw, Lg, lw); const kn = piv(hp, 0, -0.45 * Lg, 0); mk(SPH, jm, kn, 0, 0, 0, 0.049 * lw, 0.049 * lw, 0.049 * lw); mk(CYL(0.04, 0.05, 0.4), mat, kn, 0, -0.21 * Lg, 0, lw, Lg, lw); const ft = piv(kn, 0, -0.44 * Lg, 0); mk(new THREE.BoxGeometry(0.085, 0.05, 0.21), mat, ft, 0, -0.01, 0.05, lw, 1, 1); return { hp, kn, ft }; };
     const lL = leg(-1), lR = leg(1);
+    // ---- clothes
+    const cm = (col, o = {}) => new THREE.MeshStandardMaterial(Object.assign({ color: col, roughness: 0.85, metalness: 0 }, o));
+    const TOP = cm(L.topCol), TOP2 = cm(new THREE.Color(L.topCol).multiplyScalar(0.6)), BOT = cm(L.botCol), WH = cm(0xf0ece2), DS = (col) => cm(col, { side: THREE.DoubleSide });
+    const sleeves = (long, m = TOP) => [aL, aR].forEach((a) => { mk(CYL(0.047, 0.053, long ? 0.3 : 0.13), m, a.sh, 0, (long ? -0.15 : -0.055) * A, 0, lw, A, lw); if (long) mk(CYL(0.038, 0.045, 0.26), m, a.el, 0, -0.13 * A, 0, lw, A, lw); });
+    const shirt = (m = TOP) => { mk(CYL(0.133, 0.168, 0.25), m, torso, 0, 0.12, 0, w, 1, w); mk(SPH, m, torso, 0, 0.36, 0, 0.214 * w, 0.212, 0.138 * w); mk(SPH, m, torso, 0, 0.47, 0, 0.247 * w, 0.077, 0.122 * w); };
+    const trousers = (m, full) => { mk(SPH, m, hips, 0, 0, 0, 0.182 * w, 0.122, 0.127 * w); [lL, lR].forEach((l) => { mk(CYL(0.066, 0.078, full ? 0.44 : 0.2), m, l.hp, 0, (full ? -0.22 : -0.1) * Lg, 0, lw, Lg, lw); if (full) mk(CYL(0.05, 0.061, 0.42), m, l.kn, 0, -0.2 * Lg, 0, lw, Lg, lw); }); };
+    const skirt = (m, len) => { const k = mk(new THREE.CylinderGeometry(0.17, 0.26, len, 20, 1, true), m, hips, 0, 0.04 - len / 2, 0, w, 1, w); k.castShadow = true; };
+    if (L.bottom === 'pants') trousers(BOT, true); else if (L.bottom === 'shorts') trousers(BOT, false); else if (L.bottom === 'skirt') skirt(DS(L.botCol), 0.34);
+    if (L.top === 'tee') { shirt(); sleeves(false); }
+    else if (L.top === 'hoodie') { shirt(); sleeves(true); mk(SPH, TOP, head, 0, 0.145, -0.03, 0.12, 0.155, 0.122); mk(new THREE.BoxGeometry(0.17, 0.07, 0.012), TOP2, torso, 0, 0.15, 0.163 * w, w, 1, 1); [-0.03, 0.03].forEach((x) => mk(CYL(0.004, 0.004, 0.1), WH, torso, x, 0.46, 0.13 * w)); }
+    else if (L.top === 'suit') { shirt(); sleeves(true); mk(new THREE.BoxGeometry(0.075, 0.14, 0.012), WH, torso, 0, 0.42, 0.134 * w); mk(new THREE.BoxGeometry(0.026, 0.17, 0.012), cm(0x9a1a1a), torso, 0, 0.36, 0.142 * w); mk(new THREE.BoxGeometry(0.03, 0.03, 0.03), cm(0x9a1a1a), torso, 0, 0.455, 0.135 * w); }
+    else if (L.top === 'labcoat') { shirt(); sleeves(true); skirt(DS(L.topCol), 0.46); mk(new THREE.BoxGeometry(0.06, 0.05, 0.012), TOP2, torso, 0.07 * w, 0.36, 0.14 * w); mk(CYL(0.004, 0.004, 0.06), cm(0x2a50c0), torso, 0.06 * w, 0.39, 0.146 * w); }
+    else if (L.top === 'dress') { shirt(); skirt(DS(L.topCol), 0.52); }
+    else if (L.top === 'hazmat') { shirt(); sleeves(true); trousers(TOP, true); mk(SPH, TOP, head, 0, 0.135, 0, 0.125, 0.162, 0.135); mk(SPH, cm(0x101418, { roughness: 0.15, metalness: 0.4 }), head, 0, 0.145, 0.07, 0.088, 0.065, 0.075); [aL, aR].forEach((a) => mk(SPH, cm(0x1a1a1a), a.hd, 0, -0.045, 0.005, 0.04 * lw, 0.068, 0.026 * lw)); [lL, lR].forEach((l) => mk(new THREE.BoxGeometry(0.1, 0.07, 0.23), cm(0x1a1a1a), l.ft, 0, 0, 0.05, lw, 1, 1)); }
+    // ---- face (hazmat hides it behind the visor; the glowing eyes show through)
+    if (L.top === 'hazmat') { brow.visible = false; eyes.forEach((e) => (e.position.z = 0.142)); }
+    else if (L.face !== 'blank') {
+      const fm = new THREE.MeshStandardMaterial({ map: face(L.face), transparent: true, alphaTest: 0.35, roughness: 0.5, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 });
+      const f = mk(FACEGEO, fm, head, 0, 0.13, 0.005, 0.1 * 1.02, 0.135 * 1.02, 0.115 * 1.02); f.castShadow = false; f.renderOrder = 2;
+      brow.visible = false; eyes.forEach((e) => (e.position.z = 0.114)); if (L.face === 'cyclops') { eyes[0].position.x = -0.012; eyes[1].position.x = 0.012; }
+    }
+    // ---- hats
+    const HY = 0.262;
+    if (L.hat === 'top') { const k = cm(0x15151a, { roughness: 0.6 }); mk(CYL(0.16, 0.16, 0.014), k, head, 0, HY - 0.005, 0); mk(CYL(0.088, 0.094, 0.17), k, head, 0, HY + 0.08, 0); mk(CYL(0.096, 0.096, 0.03), cm(0x9a1a1a), head, 0, HY + 0.02, 0); }
+    else if (L.hat === 'cap') { mk(SPH, TOP, head, 0, 0.205, 0, 0.106, 0.075, 0.12); mk(new THREE.BoxGeometry(0.15, 0.012, 0.1), TOP2, head, 0, 0.215, 0.13); }
+    else if (L.hat === 'beanie') { mk(SPH, TOP, head, 0, 0.19, -0.004, 0.108, 0.1, 0.121); mk(CYL(0.11, 0.11, 0.04), TOP2, head, 0, 0.19, -0.004, 1, 1, 1.1); mk(SPH, WH, head, 0, 0.3, -0.004, 0.03, 0.03, 0.03); }
+    else if (L.hat === 'party') { const p = mk(new THREE.ConeGeometry(0.06, 0.18, 18), cm(0xe84aa0), head, 0, HY + 0.075, 0); p.rotation.z = 0.12; mk(SPH, cm(0xf0e040), head, -0.011, HY + 0.17, 0, 0.022, 0.022, 0.022); }
+    else if (L.hat === 'crown') { const gold = cm(0xd8b048, { roughness: 0.3, metalness: 0.8, side: THREE.DoubleSide }); mk(new THREE.CylinderGeometry(0.085, 0.08, 0.05, 20, 1, true), gold, head, 0, HY, 0); for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2; mk(new THREE.ConeGeometry(0.018, 0.05, 8), gold, head, Math.sin(a) * 0.083, HY + 0.048, Math.cos(a) * 0.083); } mk(SPH, cm(0xc02030, { roughness: 0.2 }), head, 0, HY + 0.005, 0.087, 0.012, 0.012, 0.008); }
+    else if (L.hat === 'cone') { const o = cm(0xf06a18, { roughness: 0.6 }); mk(new THREE.ConeGeometry(0.095, 0.27, 20), o, head, 0, HY + 0.12, 0); mk(CYL(0.062, 0.072, 0.04), WH, head, 0, HY + 0.13, 0); mk(new THREE.BoxGeometry(0.2, 0.016, 0.2), o, head, 0, HY - 0.006, 0); }
     const P = { hips, torso, head, armL: aL.sh, armR: aR.sh, foreL: aL.el, foreR: aR.el, handL: aL.hd, handR: aR.hd, legL: lL.hp, legR: lR.hp, kneeL: lL.kn, kneeR: lR.kn };
-    root.userData.parts = P; root.userData.B = { foreL: aL.el, foreR: aR.el }; root.userData.mats = { mat, jm, eyeM }; root.userData.eyes = eyes;
+    root.userData.parts = P; root.userData.B = { foreL: aL.el, foreR: aR.el }; root.userData.mats = { mat, jm, eyeM }; root.userData.eyes = eyes; root.userData.look = L;
     root.userData.reset = () => { Object.values(P).forEach((g) => { g.rotation.set(0, 0, 0); if (g.userData.p0) g.position.copy(g.userData.p0); }); P.armL.rotation.z = -0.08; P.armR.rotation.z = 0.08; };
     root.userData.reset();
     return root;
@@ -11644,7 +11762,7 @@ const MANQ = (() => {
     else if (kind === 'slump') { P.torso.rotation.x = 0.9 * k; P.head.rotation.x = 0.7 * k; P.armL.rotation.x = 0.3 * k; P.armR.rotation.x = 0.2 * k; P.armL.rotation.z = -0.4 * k; P.armR.rotation.z = 0.5 * k; P.kneeL.rotation.x = 1.2 * k; P.kneeR.rotation.x = 1.0 * k; P.legL.rotation.x = -0.9 * k; P.legR.rotation.x = -0.8 * k; P.hips.position.y = 0.98 - 0.45 * k; }
     else if (kind === 'stand') { /* the reset pose */ }
   }
-  return { build, recolor, pose };
+  return { build, recolor, pose, normLook, randLook, OPT, NAMES, LOOK0 };
 })();
 
 /* ------------------------------------------------------------------ the 30 attacks */
@@ -11729,11 +11847,12 @@ const BB = (() => {
     c.name = String(c.name || 'THE MANNEQUIN').toUpperCase().replace(/[^A-Z0-9 '!?.-]/g, '').slice(0, 22) || 'THE MANNEQUIN';
     c.hp = U.clamp(Math.round(+c.hp / 5) * 5 || 40, 10, 150); c.lives = U.clamp(+c.lives | 0 || 3, 1, 5); c.phases = U.clamp(+c.phases | 0 || 3, 1, 5); if (!SPEED[c.speed]) c.speed = 'normal'; c.combos = !!c.combos; if (!COLORS.includes(+c.color)) c.color = COLORS[0];
     c.atk = Array.from({ length: c.phases }, (_, i) => ((c.atk && c.atk[i]) || []).filter((id) => ATKBY[id]));
+    c.look = MANQ.normLook(c.look);
     return c;
   };
   // ---------------------------------------------------------------- per-fight setup
   function setup() {
-    if (!B.ms) { B.ms = [0, 1, 2, 3, 4].map(() => MANQ.build(B.cfg.color)); }
+    const lk = JSON.stringify(B.cfg.look || null); if (!B.ms || B.msLook !== lk) { if (B.ms) B.ms.forEach((m) => m.parent && m.parent.remove(m)); B.ms = [0, 1, 2, 3, 4].map(() => MANQ.build(B.cfg.color, B.cfg.look)); B.msLook = lk; }
     B.ms.forEach((m) => { MANQ.recolor(m, B.cfg.color); if (m.parent !== W.scene) W.scene.add(m); m.visible = false; m.userData.used = false; m.scale.setScalar(1); m.rotation.set(0, 0, 0); });
     B.main = B.ms[0]; B.clones = B.ms.slice(1);
   }
@@ -11870,16 +11989,29 @@ const BBPRESETS = [
 
 /* ------------------------------------------------------------------ the builder screen */
 {
-  const S = { tab: 0, cat: 'all', focus: null };
+  const S = { tab: 0, cat: 'all', focus: null, side: 'stats' };
   const load = () => BB.norm(U.store.get('bbBuild', null) || BBPRESETS[1]);
   const store = (c) => U.store.set('bbBuild', c);
-  const code = (c) => 'BB1:' + btoa(unescape(encodeURIComponent(JSON.stringify({ n: c.name, c: c.color, h: c.hp, l: c.lives, p: c.phases, s: c.speed, x: c.combos ? 1 : 0, a: c.atk }))));
-  const decode = (s) => { try { const j = JSON.parse(decodeURIComponent(escape(atob(String(s).trim().replace(/^BB1:/, ''))))); return BB.norm({ name: j.n, color: j.c, hp: j.h, lives: j.l, phases: j.p, speed: j.s, combos: !!j.x, atk: j.a }); } catch (e) { return null; } };
+  const code = (c) => 'BB1:' + btoa(unescape(encodeURIComponent(JSON.stringify({ n: c.name, c: c.color, h: c.hp, l: c.lives, p: c.phases, s: c.speed, x: c.combos ? 1 : 0, a: c.atk, k: c.look }))));
+  const decode = (s) => { try { const j = JSON.parse(decodeURIComponent(escape(atob(String(s).trim().replace(/^BB1:/, ''))))); return BB.norm({ name: j.n, color: j.c, hp: j.h, lives: j.l, phases: j.p, speed: j.s, combos: !!j.x, atk: j.a, look: j.k }); } catch (e) { return null; } };
   const hex = (n) => '#' + n.toString(16).padStart(6, '0');
   let preview = null, prevKey = '';
+  const PW = 240, PH = 300; let prt = null, pbuf = null, pcv = null, pcam = null;
+  function shootFull(m) { // the whole mannequin, head to toe, in the portrait studio
+    PORT.setup(); const PS = PORT.PS;
+    if (!prt) { prt = new THREE.WebGLRenderTarget(PW, PH); prt.texture.encoding = THREE.sRGBEncoding; pbuf = new Uint8Array(PW * PH * 4); pcv = TX.canvas(PW, PH); pcam = new THREE.PerspectiveCamera(30, PW / PH, 0.05, 50); }
+    PS.add(m); m.visible = true; m.rotation.y = -0.45; m.updateMatrixWorld(true);
+    const bb = new THREE.Box3().setFromObject(m), ctr = bb.getCenter(new THREE.Vector3()), size = bb.getSize(new THREE.Vector3());
+    const dist = (size.y * 0.5 + 0.12) / Math.tan((30 * Math.PI) / 360) + 0.2; pcam.position.set(ctr.x + dist * 0.18, ctr.y + dist * 0.12, ctr.z + dist); pcam.lookAt(ctr);
+    R.setRenderTarget(prt); R.render(PS, pcam); R.readRenderTargetPixels(prt, 0, 0, PW, PH, pbuf); R.setRenderTarget(null); PS.remove(m);
+    const g = pcv.getContext('2d'), img = g.createImageData(PW, PH);
+    for (let y = 0; y < PH; y++) for (let x = 0; x < PW; x++) { const si = ((PH - 1 - y) * PW + x) * 4, di = (y * PW + x) * 4; img.data[di] = pbuf[si]; img.data[di + 1] = pbuf[si + 1]; img.data[di + 2] = pbuf[si + 2]; img.data[di + 3] = 255; }
+    g.putImageData(img, 0, 0); g.fillStyle = 'rgba(0,0,0,0.12)'; for (let y = 0; y < PH; y += 3) g.fillRect(0, y, PW, 1);
+    return pcv.toDataURL('image/jpeg', 0.88);
+  }
   function prev(c) {
-    if (prevKey === String(c.color) && preview) return preview; prevKey = String(c.color);
-    try { const m = MANQ.build(c.color); MANQ.pose(m, 'point', 1); PORT.setup(); preview = PORT.shoot('mannequin', m); } catch (e) { console.warn(e); preview = ''; }
+    const key = JSON.stringify([c.color, c.look]); if (prevKey === key && preview) return preview; prevKey = key;
+    try { const m = MANQ.build(c.color, c.look); MANQ.pose(m, 'point', 1); preview = shootFull(m); } catch (e) { console.warn(e); preview = ''; }
     return preview;
   }
   BB.open = () => {
@@ -11888,6 +12020,19 @@ const BBPRESETS = [
   };
   addEventListener('keydown', (e) => { const el = q$('#bbScr'); if (!el || el.hidden || e.key !== 'Escape') return; e.stopPropagation(); const m = el.querySelector('.bbmodal'); if (m && !m.hidden) m.hidden = true; else BB.close(); }, true);
   BB.close = () => { const el = q$('#bbScr'); if (el) el.hidden = true; q$('#title').hidden = false; TITLE.modes(1); };
+  function lookPanel(c) {
+    const L = c.look, N = MANQ.NAMES, O = MANQ.OPT;
+    const prop = (k, label) => `<div class="bst"><span class="lb">${label}</span><button type="button" data-lk="${k}:-1" ${L[k] <= -2 ? 'disabled' : ''}>−</button><b class="sm">${N[k][L[k] + 2]}</b><button type="button" data-lk="${k}:1" ${L[k] >= 2 ? 'disabled' : ''}>+</button></div>`;
+    const cyc = (k, label) => `<div class="bst"><span class="lb">${label}</span><button type="button" data-lc="${k}:-1">◄</button><b class="sm">${N[k][L[k]]}</b><button type="button" data-lc="${k}:1">►</button></div>`;
+    const sw = (k, label) => `<div class="lsw"><span class="lb">${label}</span><div class="bsw">${O.cols.map((col) => `<button type="button" class="${col === L[k] ? 'on' : ''}" data-lcol="${k}:${col}" style="background:${hex(col)}" aria-label="${label}"></button>`).join('')}</div></div>`;
+    return `<div class="lk">
+      <div class="lh">BODY</div>${prop('height', 'HEIGHT')}${prop('build', 'BUILD')}${prop('head', 'HEAD')}${prop('arms', 'ARMS')}${prop('legs', 'LEGS')}
+      <div class="lh">STYLE</div>${cyc('face', 'FACE')}${cyc('hat', 'HAT')}${cyc('top', 'TOP')}${cyc('bottom', 'BOTTOM')}
+      ${sw('topCol', 'TOP / HAT')}${sw('botCol', 'BOTTOM')}
+      <div class="lsw"><span class="lb">SKIN</span><div class="bsw">${BB.COLORS.map((col) => `<button type="button" class="${col === c.color ? 'on' : ''}" data-col="${col}" style="background:${hex(col)}" aria-label="Skin colour"></button>`).join('')}</div></div>
+      <div class="lrow"><button type="button" class="btn" data-a="lrand">⚄ RANDOM LOOK</button><button type="button" class="btn" data-a="lreset">RESET LOOK</button></div>
+    </div>`;
+  }
   function render() {
     const c = load(), el = q$('#bbScr'); if (S.tab >= c.phases) S.tab = c.phases - 1;
     const keep = { page: el.scrollTop, grid: el.querySelector('.grid') ? el.querySelector('.grid').scrollTop : 0 };
@@ -11902,13 +12047,15 @@ const BBPRESETS = [
     el.innerHTML = `<div class="bbh"><div><div class="k">GAMEMODES · BOSS BUILDER</div><h2>BUILD YOUR BOSS</h2></div><div class="pre"><span>PRESETS</span>${BBPRESETS.map((p, i) => `<button type="button" class="btn" data-pre="${i}">${p.name.replace('THE ', '')}</button>`).join('')}<button type="button" class="btn" data-a="random">⚄ RANDOM</button></div></div>
       <div class="bbb"><div class="bbl">
         <div class="bpv"><img src="${prev(c)}" alt=""><input id="bbName" maxlength="22" value="${esc(c.name)}" aria-label="Boss name" spellcheck="false"></div>
+        <div class="bside"><button type="button" class="${S.side === 'stats' ? 'on' : ''}" data-side="stats">STATS</button><button type="button" class="${S.side === 'look' ? 'on' : ''}" data-side="look">LOOK</button></div>
+        ${S.side === 'look' ? lookPanel(c) : `
         <div class="bsw">${BB.COLORS.map((col) => `<button type="button" class="${col === c.color ? 'on' : ''}" data-col="${col}" style="background:${hex(col)}" aria-label="Colour"></button>`).join('')}</div>
         ${stepper('hp', 'HEALTH', c.hp, '≈ ' + Math.ceil(c.hp / avg) + ' counters to win')}
         ${stepper('lives', 'YOUR LIVES', c.lives)}
         ${stepper('phases', 'PHASES', c.phases, 'faster each phase')}
         <div class="bst"><span class="lb">SPEED</span><div class="seg">${Object.keys(BB.SPEED).map((s) => `<button type="button" class="${s === c.speed ? 'on' : ''}" data-spd="${s}">${s.toUpperCase()}</button>`).join('')}</div></div>
         ${rating}
-        <div class="bst"><span class="lb">COMBOS</span><div class="seg"><button type="button" class="${c.combos ? '' : 'on'}" data-cmb="0">OFF</button><button type="button" class="${c.combos ? 'on' : ''}" data-cmb="1">ON</button></div><em>two attacks at once in later phases</em></div>
+        <div class="bst"><span class="lb">COMBOS</span><div class="seg"><button type="button" class="${c.combos ? '' : 'on'}" data-cmb="0">OFF</button><button type="button" class="${c.combos ? 'on' : ''}" data-cmb="1">ON</button></div><em>two attacks at once in later phases</em></div>`}
       </div><div class="bbr">
         <div class="tabs">${c.atk.map((p, i) => `<button type="button" class="${i === S.tab ? 'on' : ''}${p.length ? '' : ' empty'}" data-tab="${i}">PHASE ${i + 1}<small>${p.length} ATTACK${p.length === 1 ? '' : 'S'}</small>${strip(p)}</button>`).join('')}</div>
         <div class="tools"><div class="cats">${['all'].concat(Object.keys(BBCATS)).map((k) => `<button type="button" class="${S.cat === k ? 'on' : ''}" data-cat="${k}">${k === 'all' ? 'ALL 30' : BBCATS[k]}</button>`).join('')}</div><div><button type="button" class="btn" data-a="copy">COPY TO ALL PHASES</button><button type="button" class="btn" data-a="clear">CLEAR</button></div></div>
@@ -11925,13 +12072,19 @@ const BBPRESETS = [
     el.querySelectorAll('[data-col]').forEach((b) => (b.onclick = () => upd((x) => (x.color = +b.dataset.col))));
     el.querySelectorAll('[data-st]').forEach((b) => (b.onclick = () => { const [k, d] = b.dataset.st.split(':'); upd((x) => { if (k === 'hp') x.hp += 5 * d; else if (k === 'lives') x.lives += +d; else { x.phases += +d; x.phases = U.clamp(x.phases, 1, 5); while (x.atk.length < x.phases) x.atk.push(x.atk[x.atk.length - 1] ? x.atk[x.atk.length - 1].slice() : []); x.atk.length = x.phases; } }); }));
     el.querySelectorAll('[data-spd]').forEach((b) => (b.onclick = () => upd((x) => (x.speed = b.dataset.spd))));
+    el.querySelectorAll('[data-side]').forEach((b) => (b.onclick = () => { S.side = b.dataset.side; AU.tone({ freq: 760, dur: 0.04, gain: 0.04, type: 'square' }); render(); }));
+    el.querySelectorAll('[data-lk]').forEach((b) => (b.onclick = () => { const [k, d] = b.dataset.lk.split(':'); upd((x) => (x.look[k] = U.clamp(x.look[k] + +d, -2, 2))); }));
+    el.querySelectorAll('[data-lc]').forEach((b) => (b.onclick = () => { const [k, d] = b.dataset.lc.split(':'); upd((x) => { const o = MANQ.OPT[k], i = o.indexOf(x.look[k]); x.look[k] = o[(i + +d + o.length) % o.length]; }); }));
+    el.querySelectorAll('[data-lcol]').forEach((b) => (b.onclick = () => { const [k, v] = b.dataset.lcol.split(':'); upd((x) => (x.look[k] = +v)); }));
     el.querySelectorAll('[data-cmb]').forEach((b) => (b.onclick = () => upd((x) => (x.combos = b.dataset.cmb === '1'))));
     el.querySelectorAll('[data-tab]').forEach((b) => (b.onclick = () => { S.tab = +b.dataset.tab; render(); }));
     el.querySelectorAll('[data-cat]').forEach((b) => (b.onclick = () => { S.cat = b.dataset.cat; render(); }));
     el.querySelectorAll('[data-atk]').forEach((b) => { b.onclick = () => { S.focus = b.dataset.atk; upd((x) => { const p = x.atk[S.tab]; const i = p.indexOf(b.dataset.atk); if (i >= 0) p.splice(i, 1); else p.push(b.dataset.atk); }); }; b.onmouseenter = () => { const a = ATKBY[b.dataset.atk], inf = el.querySelector('.binf'); inf.innerHTML = `<b>${esc(a.n)}</b> <span class="cat ${a.cat}">${BBCATS[a.cat]}</span> <span class="dm">${'◆'.repeat(a.dmg)}</span><p>${esc(a.d)}</p>`; }; });
     el.querySelectorAll('[data-pre]').forEach((b) => (b.onclick = () => { store(BB.norm(JSON.parse(JSON.stringify(BBPRESETS[+b.dataset.pre])))); S.tab = 0; S.msg = 'Loaded ' + BBPRESETS[+b.dataset.pre].name + '.'; render(); }));
     const A = (k, fn) => { const b = el.querySelector(`[data-a="${k}"]`); if (b) b.onclick = fn; };
-    A('random', () => { const ph = U.randi(1, 4); const pool = ATK.map((a) => a.id); store(BB.norm({ name: U.pick(['THE DUMMY', 'MR. POSE', 'THE DISPLAY', 'STAND-IN', 'THE FITTING', 'MANNY', 'THE MODEL', 'WINDOW SHOPPER']), color: U.pick(BB.COLORS), hp: U.randi(4, 14) * 5, lives: U.randi(2, 4), phases: ph, speed: U.pick(['slow', 'normal', 'normal', 'fast']), combos: Math.random() < 0.4, atk: Array.from({ length: ph }, () => U.shuffle(pool.slice()).slice(0, U.randi(3, 6))) })); S.tab = 0; render(); });
+    A('random', () => { const ph = U.randi(1, 4); const pool = ATK.map((a) => a.id); store(BB.norm({ name: U.pick(['THE DUMMY', 'MR. POSE', 'THE DISPLAY', 'STAND-IN', 'THE FITTING', 'MANNY', 'THE MODEL', 'WINDOW SHOPPER']), color: U.pick(BB.COLORS), hp: U.randi(4, 14) * 5, lives: U.randi(2, 4), phases: ph, speed: U.pick(['slow', 'normal', 'normal', 'fast']), combos: Math.random() < 0.4, look: MANQ.randLook(), atk: Array.from({ length: ph }, () => U.shuffle(pool.slice()).slice(0, U.randi(3, 6))) })); S.tab = 0; render(); });
+    A('lrand', () => upd((x) => (x.look = MANQ.randLook())));
+    A('lreset', () => upd((x) => (x.look = MANQ.normLook(null))));
     A('copy', () => upd((x) => { x.atk = x.atk.map(() => x.atk[S.tab].slice()); }));
     A('clear', () => upd((x) => { x.atk[S.tab] = []; }));
     A('back', () => BB.close());
@@ -11950,7 +12103,10 @@ const BBPRESETS = [
 #bbScr .bbh{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:8px} #bbScr .pre{display:flex;gap:6px;align-items:center;flex-wrap:wrap} #bbScr .pre span{letter-spacing:3px;color:var(--muted);font-size:14px}
 #bbScr .bbb{display:grid;grid-template-columns:300px minmax(0,1fr);gap:14px;flex:1;min-height:0}
 #bbScr .bbl{display:flex;flex-direction:column;gap:9px;background:#100e08;border:1px solid var(--line);padding:12px;overflow:auto;min-height:0} #bbScr .bbb > *{min-height:0}
-#bbScr .bpv{position:relative} #bbScr .bpv img{width:100%;height:min(30vh,250px);object-fit:cover;object-position:50% 20%;display:block;background:#0f0d07;border:1px solid var(--line)} #bbScr #bbName{position:absolute;left:8px;right:8px;bottom:8px;box-sizing:border-box;background:rgba(0,0,0,.75);border:1px solid var(--wall-dim);color:var(--wall);font-family:var(--osd);font-size:26px;letter-spacing:2px;padding:2px 8px;text-transform:uppercase}
+#bbScr .bpv{position:relative} #bbScr .bpv img{width:100%;height:min(34vh,290px);object-fit:contain;object-position:50% 50%;display:block;background:#0f0d07;border:1px solid var(--line)} #bbScr #bbName{position:absolute;left:8px;right:8px;bottom:8px;box-sizing:border-box;background:rgba(0,0,0,.75);border:1px solid var(--wall-dim);color:var(--wall);font-family:var(--osd);font-size:26px;letter-spacing:2px;padding:2px 8px;text-transform:uppercase}
+#bbScr .bside{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--wall-dim)} #bbScr .bside button{background:#1d1a0c;border:none;color:var(--muted);font-family:var(--osd);font-size:20px;letter-spacing:3px;padding:3px 0;cursor:pointer} #bbScr .bside button.on{background:var(--wall);color:#120f05}
+#bbScr .lk{display:flex;flex-direction:column;gap:7px} #bbScr .lk .lh{font-size:14px;letter-spacing:4px;color:var(--wall);border-bottom:1px solid var(--line);padding-bottom:2px;margin-top:2px} #bbScr .lk .bst b.sm{font-weight:400;font-size:19px;text-align:center;color:#f3ead0;letter-spacing:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} #bbScr .lk .bst > button:disabled{opacity:.35;cursor:default}
+#bbScr .lsw{display:flex;flex-direction:column;gap:4px} #bbScr .lsw .lb{font-size:14px;letter-spacing:2px;color:var(--muted)} #bbScr .lsw .bsw{flex-wrap:wrap} #bbScr .lsw .bsw button{flex:0 0 calc(20% - 5px);height:22px} #bbScr .lrow{display:flex;gap:6px} #bbScr .lrow .btn{flex:1;font-size:17px;padding:3px 4px}
 #bbScr .bsw{display:flex;gap:6px} #bbScr .bsw button{flex:1;height:26px;border:2px solid #000;cursor:pointer;border-radius:4px} #bbScr .bsw button.on{outline:2px solid var(--wall);outline-offset:2px}
 #bbScr .bst{display:grid;grid-template-columns:96px 30px 1fr 30px;align-items:center;gap:6px} #bbScr .bst .lb{font-size:16px;letter-spacing:2px;color:var(--muted)} #bbScr .bst > button{height:30px;background:#1d1a0c;border:1px solid var(--wall-dim);color:var(--wall);font-size:22px;cursor:pointer;line-height:1} #bbScr .bst > button:hover{background:#2b2612}
 #bbScr .bst b{font-weight:400;font-size:28px;text-align:center;color:#f3ead0} #bbScr .bst em{grid-column:2/-1;font-style:normal;font-family:var(--doc);font-size:11.5px;color:var(--muted);margin-top:-4px}
@@ -12318,7 +12474,7 @@ const P2 = (() => {
   const v0 = H.vol; H.vol = function (p, base) { const v = v0.apply(this, arguments); if (!camMode() || !p) return v; const c = W.cams[G.mon.cam]; if (!c) return v; return p.distanceTo(c.look || c.pos) < 7 ? Math.min(1, v * 1.7) : v * 0.75; };
   // resets for every new night; 5. the 6 AM moment wraps the win
   const sn = startNight; startNight = function () { S.sixGen++; G._sixDone = false; S.six = null; S.seen.clear(); S.rings.forEach((l) => (l._v = 0)); stopDrone(); const ov = q$('#sixAM'); if (ov) ov.className = ''; ['L', 'R'].forEach((s) => (S.door[s] = 0)); const r = sn.apply(this, arguments); if (lamp0 != null) { W.lights.lamp.color.setHex(lamp0); } return r; }; // eslint-disable-line no-global-assign
-  const w0 = win; win = function () { const args = arguments, self = this; if (typeof NCARD !== 'undefined') NCARD.hide(); if (G.state === 'playing' && !G.bossMode && !G._sixDone) { G._sixDone = true; sixAM(() => { w0.apply(self, args); G._sixDone = false; }); return; } G._sixDone = false; return w0.apply(this, arguments); }; // eslint-disable-line no-global-assign
+  const w0 = win; win = function () { if (typeof NCARD !== 'undefined') NCARD.hide(); G._sixDone = false; return w0.apply(this, arguments); }; // the 6 AM outro was removed at the user's request: the end screen shows right away // eslint-disable-line no-global-assign
   // the expedition flashlight resets each level; the office flashlight keeps its colour
   const xe = XP.enter.bind(XP); XP.enter = function () { S.batt = 1; S.wet = 0; return xe.apply(XP, arguments); };
   const xl = XP.leave.bind(XP); XP.leave = function () { if (flash0 != null) W.lights.flash.color.setHex(flash0); return xl.apply(XP, arguments); };

@@ -1,5 +1,18 @@
 [
   {
+    "id": "backrooms-vents-looks",
+    "gameId": "backrooms-for-science",
+    "date": "2026-11-24T18:58:10.059Z",
+    "title": "Backrooms: fresh air and boss fashion",
+    "summary": "Keep the vents running, pick a bigger Endless crew, and dress up your Boss Builder mannequin.",
+    "changes": [
+      "New REFRESH VENTS button on the monitor. Let the air run out and you pass out, and the vents clog faster every night. Boss fights skip it. The night-1 tutorial now covers it.",
+      "Endless runs start with 3 specimens on Easy, 4 on Normal and 5 on Hard.",
+      "6 AM now goes straight to the end screen.",
+      "Boss Builder has a new LOOK tab: height, build, head, arm and leg size, ten faces, hats, tops, bottoms and colours. Share codes include the look."
+    ]
+  },
+  {
     "id": "arcade-tycoon-remake",
     "gameId": "arcade-tycoon",
     "date": "2026-11-20T18:00:00.000Z",
