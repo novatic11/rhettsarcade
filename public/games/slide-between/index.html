@@ -199,7 +199,7 @@ kbd{display:inline-block;min-width:1.5em;padding:.08em .42em;border:1px solid rg
     <div class="row"><button class="btn primary" id="btnStart">Start race <kbd>Enter</kbd></button></div>
     <div class="field"><span class="label">Robot</span>
       <div class="seg" id="diffSeg" role="radiogroup" aria-label="Robot difficulty">
-        <button role="radio" data-d="easy" aria-checked="false">Easy</button><button role="radio" data-d="normal" aria-checked="true">Normal</button><button role="radio" data-d="hard" aria-checked="false">Hard</button>
+        <button role="radio" data-d="easy" aria-checked="false">Easy</button><button role="radio" data-d="normal" aria-checked="true">Normal</button><button role="radio" data-d="hard" aria-checked="false">Hard</button><button role="radio" data-d="intelligent" aria-checked="false">Intelligent</button>
       </div>
       <span class="seg-note" id="diffNote">Take 2 shortcuts to win</span>
     </div>
@@ -312,6 +312,7 @@ const DIFFS = {
   easy:   { f: 1.0,   note: 'One shortcut should do it' },
   normal: { f: 0.915, note: 'Take 2 shortcuts to win' },
   hard:   { f: 0.85,  note: 'You will need 3 or more' },
+  intelligent: { f: 1.0, smart: true, note: 'It jumps, steers and takes shortcuts like you do' },
 };
 
 // =====================================================================
@@ -526,11 +527,169 @@ function simulateRun(thrust, tuck) {
 }
 let REF_TIME = 0, thrustCache = {};
 function robotThrustFor(diff) {
+  if (DIFFS[diff].smart) return 0;
   if (thrustCache[diff] !== undefined) return thrustCache[diff];
   const target = REF_TIME * DIFFS[diff].f;
   let lo = -4, hi = 12;
   for (let i = 0; i < 22; i++) { const mid = (lo + hi) / 2; if (simulateRun(mid, true) > target) lo = mid; else hi = mid; }
   return thrustCache[diff] = (lo + hi) / 2;
+}
+
+// =====================================================================
+// Intelligent robot. It gets no thrust: it rides by the rider's rules,
+// tucks, holds the inside line, and finds shortcuts by simulating jumps
+// and air control with the same physics the rider uses.
+// =====================================================================
+const AI = { DT: 1 / 60, H: 4.5, MAX_T: 4.5, MIN_GAIN: 30, WAIT: 1.5, EDGE: 3.9, GROUND_EVERY: 0.1, AIR_EVERY: 0.1, WAITS: [0.12, 0.25, 0.4, 0.6] };
+const AIR_POLICIES = [];
+for (const st of [0, -0.5, 0.5, -1, 1]) for (const fw of [1, -1, 0]) AIR_POLICIES.push({ st, tuck: fw > 0, brake: fw < 0 });
+const FRA = { P: new V3(), T: new V3(), R: new V3(), N: new V3(), kr: 0, bank: 0 };
+// What a touchdown does to speed; shared by the rider and the robot.
+function landingOutcome(vel, s) {
+  const f = frameAt(s, FRA);
+  const vt = vel.dot(f.T), vn = -vel.dot(f.N), vl = vel.dot(f.R);
+  const planar = Math.hypot(vt, vl);
+  const cosA = planar > 0.1 ? vt / planar : 0;
+  const clean = cosA > 0.97 && vn < 30, hard = vn > 34;
+  let v = Math.max(6, vt * 0.95);
+  if (clean) v += 3;
+  if (hard) v *= 0.9;
+  return { v: Math.min(v, PHYS.VMAX), vn, vl, cosA, clean, hard };
+}
+const _cf1 = new V3(), _cf2 = new V3();
+function crossesFinish(prev, cur) {
+  const f = frameAt(course.finishS, FRA);
+  const a0 = _cf1.subVectors(prev, f.P).dot(f.T), a1 = _cf2.subVectors(cur, f.P).dot(f.T);
+  if (!(a0 < 0 && a1 >= 0)) return false;
+  const lat = _cf2.dot(f.R), h = _cf2.dot(f.N);
+  return Math.abs(lat) < W + 1.6 && h > -2 && h < 11;
+}
+function aiGroundSteer(b) {
+  const f = frameAt(b.s + clamp(b.v, 8, 60) * 0.3, FRA);
+  const target = clamp(f.kr * 120, -1, 1) * 3.6;              // inside of the bend is shorter
+  return clamp((target - b.u) * 0.7 - b.vu * 0.3, -1, 1);
+}
+function launchVelocity(b, out) {
+  const f = groundPose(b, b.pos, b.nrm);
+  const pad = padAt(b.s);
+  const jv = pad ? pad.jump : PHYS.JUMP;
+  out.copy(f.T).multiplyScalar(b.v + (pad && pad.jump > 12 ? PHYS.PAD_BOOST : 0))
+    .addScaledVector(f.R, b.vu + (pad ? pad.side * SIDE_KICK : 0)).addScaledVector(b.nrm, jv);
+  return pad;
+}
+// Fly one air-control policy; returns where it ends up, or null if it misses the slide.
+const _fb = { pos: new V3(), prev: new V3(), vel: new V3() };
+function aiFly(pos, vel, pol, maxIdx, finishOpen) {
+  _fb.pos.copy(pos); _fb.vel.copy(vel);
+  const floor = course.minY - 8;
+  for (let t = AI.DT; t <= AI.MAX_T; t += AI.DT) {
+    airStep(_fb, AI.DT, pol.st, pol.tuck, pol.brake);
+    if (finishOpen && crossesFinish(_fb.prev, _fb.pos)) return { s: course.finishS, u: 0, t, v: _fb.vel.length(), fin: true };
+    const hit = findLanding(_fb.prev, _fb.pos, _fb.vel, maxIdx);
+    if (hit) { hit.t = t; hit.v = landingOutcome(_fb.vel, hit.s).v; return hit; }
+    if (_fb.pos.y < floor) return null;
+  }
+  return null;
+}
+// Best policy from a mid-air state. Value = projected distance at horizon tOff + H.
+function aiBestAir(pos, vel, maxIdx, finishOpen, tOff) {
+  let best = null;
+  for (const pol of AIR_POLICIES) {
+    const r = aiFly(pos, vel, pol, maxIdx, finishOpen);
+    if (!r) continue;
+    const tt = tOff + r.t;
+    let val = r.s + r.v * (AI.H - tt);
+    if (!r.fin && Math.abs(r.u) > AI.EDGE) val -= 12 + 20 * (Math.abs(r.u) - AI.EDGE);   // too close to the edge
+    if (!best || val > best.val) best = { val, pol, s: r.s, t: tt, fin: !!r.fin };
+  }
+  return best;
+}
+const _gb = { s: 0, u: 0, v: 0, vu: 0, vmin: 4, scrape: 0, impact: 0, canSpill: false, pos: new V3(), prev: new V3(), vel: new V3(), nrm: new V3() };
+const _lv = new V3();
+const _gs = new Float64Array(400), _gv = new Float64Array(400);
+function aiJumpValue(s, u, v, vu, maxIdx, finishOpen, tOff) {
+  Object.assign(_gb, { s, u, v, vu });
+  launchVelocity(_gb, _lv);
+  return aiBestAir(_gb.pos, _lv, maxIdx, finishOpen, tOff);
+}
+// Decide whether to jump now. Compares the best jump now with riding on,
+// and waits if jumping a moment later is clearly better.
+function aiPlanJump(b, maxIdx, finishOpen) {
+  const now = aiJumpValue(b.s, b.u, b.v, b.vu, maxIdx, finishOpen, 0);
+  if (!now) return null;
+  // ride on for the horizon to get the baseline and the later take-off points
+  Object.assign(_gb, { s: b.s, u: b.u, v: b.v, vu: b.vu, vmin: 4, scrape: 0, impact: 0 });
+  const n = Math.min(_gs.length - 1, Math.ceil(AI.H / AI.DT));
+  const snaps = [];
+  let w = 0;
+  _gs[0] = b.s; _gv[0] = b.v;
+  for (let i = 1; i <= n; i++) {
+    groundStep(_gb, AI.DT, aiGroundSteer(_gb), true, false, 0);
+    _gs[i] = _gb.s; _gv[i] = _gb.v;
+    if (w < AI.WAITS.length && i * AI.DT >= AI.WAITS[w]) { snaps.push({ t: i * AI.DT, s: _gb.s, u: _gb.u, v: _gb.v, vu: _gb.vu }); w++; }
+  }
+  const ground = t => { const i = Math.min(n, Math.round(t / AI.DT)); return _gs[i] + _gv[i] * (AI.H - t); };
+  if (now.val - ground(now.t) < AI.MIN_GAIN) return null;
+  for (const p of snaps) {
+    const later = aiJumpValue(p.s, p.u, p.v, p.vu, maxIdx, finishOpen, p.t);
+    if (later && later.val > now.val + AI.WAIT) return null;     // a better take-off is coming
+  }
+  return now;
+}
+function aiNew() { return { planT: 0, pol: AIR_POLICIES[0], plan: null, cuts: 0 }; }
+// One robot step. Returns 'jump', 'land', 'reset' or null.
+function aiStep(b, ai, dt, maxIdx, done, quick) {
+  if (b.mode === 'ground') {
+    b.jumpCd -= dt; ai.planT -= dt;
+    if (!done && b.jumpCd <= 0 && ai.planT <= 0) {
+      ai.planT = AI.GROUND_EVERY * (quick || 1);
+      const pick = aiPlanJump(b, maxIdx, !done);
+      if (pick) {
+        launchVelocity(b, b.vel);
+        b.mode = 'air'; b.takeoffS = b.s; b.prev.copy(b.pos);
+        ai.pol = pick.pol; ai.plan = pick; ai.planT = AI.AIR_EVERY * (quick || 1);
+        return 'jump';
+      }
+    }
+    b.vmin = done ? 0 : 4;
+    groundStep(b, dt, aiGroundSteer(b), true, done && b.s > course.finishS + 6, 0);
+    groundPose(b, b.pos, b.nrm);
+    return null;
+  }
+  ai.planT -= dt;
+  if (ai.planT <= 0) {
+    ai.planT = AI.AIR_EVERY * (quick || 1);
+    const r = aiBestAir(b.pos, b.vel, maxIdx, !done, 0);
+    if (r) { ai.pol = r.pol; ai.plan = r; }
+  }
+  airStep(b, dt, ai.pol.st, ai.pol.tuck, ai.pol.brake);
+  const hit = findLanding(b.prev, b.pos, b.vel, maxIdx);
+  if (hit) {
+    const o = landingOutcome(b.vel, hit.s);
+    if (hit.s - b.takeoffS > 70) ai.cuts++;
+    Object.assign(b, { mode: 'ground', s: hit.s, u: clamp(hit.u, -LIM, LIM), vu: clamp(o.vl * 0.4, -8, 8), v: o.v, jumpCd: 0.18 });
+    groundPose(b, b.pos, b.nrm); ai.plan = null; ai.planT = 0;
+    return 'land';
+  }
+  if (b.pos.y < course.minY - 30) {           // missed: put it back where it left, slowly
+    Object.assign(b, { mode: 'ground', s: b.takeoffS, u: 0, vu: 0, v: 8, jumpCd: 0.5 });
+    groundPose(b, b.pos, b.nrm); ai.plan = null;
+    return 'reset';
+  }
+  return null;
+}
+// Plays the robot forward on a copy until it finishes. Used for its finish time.
+function aiFinishTime(src, ai0, maxT) {
+  const b = { ...src, pos: src.pos.clone(), prev: src.prev.clone(), vel: src.vel.clone(), nrm: src.nrm.clone() };
+  const ai = { ...ai0 };
+  const dt = 1 / 60; let t = 0;
+  while (t < maxT) {
+    const ps = b.s;
+    aiStep(b, ai, dt, FIN_IDX, false, 2.5);
+    t += dt;
+    if (b.mode === 'ground' ? (ps < course.finishS && b.s >= course.finishS) : crossesFinish(b.prev, b.pos)) return t;
+  }
+  return Infinity;
 }
 // Fixed layouts retain their existing numeric IDs for saved best times.
 function loadCourse(script) {
@@ -1455,6 +1614,7 @@ let cuts = 0, finished = false, robotFinished = false, robotTime = Infinity, pla
 let jumpQueued = 0, accum = 0, menuS = 30, doomT = 0, doomedFlag = false, shake = 0, flashA = 0, fallCam = new V3();
 let landMax = FIN_IDX;
 const player = newBody(), robot = newBody();
+let robotAI = aiNew();
 player.jumpCd = 0; player.takeoffS = 0; player.airDist = 0; player.nrm = new V3(0, 1, 0);
 robot.nrm = new V3(0, 1, 0);
 const camPos = new V3(), camLook = new V3(), camFwd = new V3(0, 0, 1), camUp = new V3(0, 1, 0);
@@ -1472,7 +1632,8 @@ addEventListener('resize',clearControls);
 function resetRace() {
   clearControls();
   Object.assign(player, { s: START_S, u: -2.2, v: 0, vu: 0, vmin: 4, scrape: 0, impact: 0, canSpill: true, spill: 0, spillMax: 0, spillSide: 0, mode: 'ground', jumpCd: 0, takeoffS: 0, airDist: 0, pad: null });
-  Object.assign(robot, { s: START_S, u: 2.2, v: 0, vu: 0, vmin: 4, scrape: 0, impact: 0, mode: 'ground' });
+  Object.assign(robot, { s: START_S, u: 2.2, v: 0, vu: 0, vmin: 4, scrape: 0, impact: 0, mode: 'ground', jumpCd: 0, takeoffS: START_S });
+  robotAI = aiNew();
   groundPose(player, player.pos, player.nrm); player.prev.copy(player.pos);
   groundPose(robot, robot.pos, robot.nrm);
   robotThrust = robotThrustFor(diff);
@@ -1600,16 +1761,9 @@ function spillOff() {
   sfx.jump(false);
 }
 function land(hit) {
-  const f = frameAt(hit.s, FR);
-  const vt = player.vel.dot(f.T), vn = -player.vel.dot(f.N), vl = player.vel.dot(f.R);
-  const planar = Math.hypot(vt, vl);
-  const cosA = planar > 0.1 ? vt / planar : 0;
-  let v = Math.max(6, vt * 0.95);
-  const clean = cosA > 0.97 && vn < 30, hard = vn > 34;
-  if (clean) v += 3;
-  if (hard) v *= 0.9;
+  const { v, vn, vl, cosA, clean, hard } = landingOutcome(player.vel, hit.s);
   const gained = hit.s - player.takeoffS;
-  Object.assign(player, { mode: 'ground', s: hit.s, u: clamp(hit.u, -W, W), vu: clamp(vl * 0.4, -8, 8), v: Math.min(v, PHYS.VMAX), jumpCd: 0.18 });
+  Object.assign(player, { mode: 'ground', s: hit.s, u: clamp(hit.u, -W, W), vu: clamp(vl * 0.4, -8, 8), v, jumpCd: 0.18 });
   groundPose(player, player.pos, player.nrm);
   shake = Math.max(shake, clamp(vn / 40, 0.12, 0.9));
   sfx.land(clamp(vn / 40, 0, 1));
@@ -1636,8 +1790,9 @@ function playerFinish() {
   finished = true; playerTime = raceTime; landMax = NS - 1;
   if (outcome) return;
   // finish time for the robot: run its deterministic physics forward
-  const b = { ...robot }; let t = 0;
-  while (b.s < course.finishS && t < 200) { groundStep(b, 1 / 60, 0, true, false, robotThrust); t += 1 / 60; }
+  let t = 0;
+  if (DIFFS[diff].smart) t = robotFinished ? 0 : aiFinishTime(robot, robotAI, 200);
+  else { const b = { ...robot }; while (b.s < course.finishS && t < 200) { groundStep(b, 1 / 60, 0, true, false, robotThrust); t += 1 / 60; } }
   robotTime = robotFinished ? robotTime : raceTime + t;
   endRace('win');
 }
@@ -1683,15 +1838,25 @@ function simStep(dt) {
     else if (player.pos.y < CLOUD_Y - 80) { player.vel.multiplyScalar(0.98); }
   }
   // ---------- robot
-  robot.vmin = robotFinished ? 0 : 4;
-  groundStep(robot, dt, 0, true, robotFinished && robot.s > course.finishS + 6, robotFinished ? 0 : robotThrust);
-  groundPose(robot, robot.pos, robot.nrm);
-  if (!robotFinished && robot.s >= course.finishS) {
+  let botCrossed = false;
+  if (DIFFS[diff].smart) {
+    const ps = robot.s;
+    const ev = aiStep(robot, robotAI, dt, robotFinished ? NS - 1 : FIN_IDX, robotFinished);
+    if (ev === 'jump') puffs.emit(robot.pos, 10, 0xff8fa0, 4, 3, 0.6, 2);
+    else if (ev === 'land') puffs.emit(robot.pos, 14, 0xf3ecff, 5, 3, 0.6, 3);
+    botCrossed = robot.mode === 'ground' ? ps < course.finishS && robot.s >= course.finishS : crossesFinish(robot.prev, robot.pos);
+  } else {
+    robot.vmin = robotFinished ? 0 : 4;
+    groundStep(robot, dt, 0, true, robotFinished && robot.s > course.finishS + 6, robotFinished ? 0 : robotThrust);
+    groundPose(robot, robot.pos, robot.nrm);
+    botCrossed = robot.s >= course.finishS;
+  }
+  if (!robotFinished && botCrossed) {
     robotFinished = true; robotTime = raceTime;
     if (!finished && !outcome) endRace('robot');
   }
   // ---------- bumping
-  if (player.mode === 'ground' && Math.abs(player.s - robot.s) < 1.7 && Math.abs(player.u - robot.u) < 1.3) {
+  if (player.mode === 'ground' && robot.mode === 'ground' && Math.abs(player.s - robot.s) < 1.7 && Math.abs(player.u - robot.u) < 1.3) {
     const sgn = player.u < robot.u ? -1 : 1;
     player.vu = sgn * 5; robot.vu = -sgn * 5;
     player.u = clamp(player.u + sgn * 0.08, -W, W);
@@ -1735,9 +1900,15 @@ function updateRiders(dt, t) {
   }
   // robot
   const bg = robotModel.g; bg.position.copy(robot.pos);
-  const f = frameAt(robot.s, FR);
-  _t1.copy(f.T).addScaledVector(f.R, robot.vu * 0.03);
-  orient(bg, _t1, robot.nrm, 14, dt);
+  if (robot.mode === 'air') {
+    _t1.set(robot.vel.x, robot.vel.y * 0.35, robot.vel.z);
+    _t2.copy(UP).addScaledVector(_rh.set(-_t1.z, 0, _t1.x).normalize(), robotAI.pol.st * 0.45);
+    orient(bg, _t1, _t2.normalize(), 6, dt);
+  } else {
+    const f = frameAt(robot.s, FR);
+    _t1.copy(f.T).addScaledVector(f.R, robot.vu * 0.03);
+    orient(bg, _t1, robot.nrm, 14, dt);
+  }
   robotModel.body.position.y = Math.abs(Math.sin(t * 7)) * 0.025;
   robotModel.body.rotation.z = Math.sin(t * 1.3) * 0.03;
   const fl = 0.3 + clamp(robotThrust / 4, 0, 1) * 0.2 + Math.random() * 0.12;
@@ -1909,10 +2080,11 @@ function updateHud(dt) {
   $('timer').textContent = fmtTime(raceTime);
   const effS = player.mode === 'ground' ? player.s : (predHit ? Math.max(player.takeoffS, predHit.s) : player.takeoffS);
   const pct = s => clamp((s - START_S) / (course.finishS - START_S), 0, 1) * 100;
-  $('mkYou').style.left = pct(effS) + '%'; $('mkBot').style.left = pct(robot.s) + '%'; $('fill').style.width = pct(effS) + '%';
+  const botS = robot.mode === 'ground' ? robot.s : Math.max(robot.takeoffS, robotAI.plan ? robotAI.plan.s : robot.takeoffS);
+  $('mkYou').style.left = pct(effS) + '%'; $('mkBot').style.left = pct(botS) + '%'; $('fill').style.width = pct(effS) + '%';
   $('distLeft').textContent = finished ? 'Finished' : Math.max(0, Math.round(course.finishS - effS)) + ' m to the door';
-  const gap = robot.s - effS;
-  const ahead = finished || (!robotFinished && effS >= robot.s);
+  const gap = botS - effS;
+  const ahead = finished || (!robotFinished && effS >= botS);
   $('posTxt').textContent = ahead ? '1st' : '2nd';
   const g = $('gapTxt');
   if (Math.abs(gap) < 3) { g.textContent = 'Side by side'; g.className = ''; }
@@ -1951,7 +2123,8 @@ function showResult() {
     t.textContent = 'The robot got there first'; t.className = 'lose';
     $('resEyebrow').textContent = 'Race lost · ' + diff;
     $('resReason').textContent = 'You were ' + Math.max(1, Math.round(course.finishS - player.s)) + ' m from the finish door.';
-    $('resTip').innerHTML = touchLayout()?'The robot is faster on the slide. Tap <b>Jump</b> anywhere and drag to land farther down the slide.':'The robot is faster on the slide. Hold <b>W</b> to tuck and press <b>Space</b> anywhere to cut whole sections.';
+    if (DIFFS[diff].smart) $('resTip').textContent = 'This robot follows your rules: no extra speed. It just never misses a shortcut. Find longer jumps and land facing down the slide.';
+    else $('resTip').innerHTML = touchLayout()?'The robot is faster on the slide. Tap <b>Jump</b> anywhere and drag to land farther down the slide.':'The robot is faster on the slide. Hold <b>W</b> to tuck and press <b>Space</b> anywhere to cut whole sections.';
   } else {
     t.textContent = 'Lost in the void'; t.className = 'lose';
     $('resEyebrow').textContent = 'Race lost · ' + diff;
@@ -1959,7 +2132,7 @@ function showResult() {
     $('resTip').innerHTML = touchLayout()?'Drag left or right in the air until the <b>green ring</b> appears. Red dots mean nothing to land on.':'In the air, steer until the <b>green ring</b> appears. Red dots mean nothing to land on. <b>S</b> brakes in the air if you are overshooting.';
   }
   $('resTime').textContent = outcome === 'win' ? fmtTime(playerTime) : '—';
-  $('resBot').textContent = isFinite(robotTime) ? fmtTime(robotTime) : 'still racing';
+  $('resBot').textContent = (isFinite(robotTime) ? fmtTime(robotTime) : 'still racing') + (DIFFS[diff].smart ? ' · ' + robotAI.cuts + ' shortcut' + (robotAI.cuts === 1 ? '' : 's') : '');
   $('resCuts').textContent = String(cuts);
   const rb = $('resBest'); rb.textContent = best[key] ? fmtTime(best[key]) + (newBest ? ' new' : '') : '—'; rb.className = newBest ? 'new' : '';
   show('result'); setTimeout(() => $('btnAgain').focus(), 30);
@@ -2021,7 +2194,7 @@ toMenu();
 requestAnimationFrame(t => { clock.last = t; requestAnimationFrame(tick); });
 
 // debug handle for testing in the console
-window.__sb = { get course() { return course; }, PHYS, frameAt, findLanding, canReach, predict, groundStep, airStep, simulateRun, robotThrustFor, loadCourse, useCourse, buildWorld, player, robot, get state() { return state; }, get REF_TIME() { return REF_TIME; }, startRace, newBody, LITE };
+window.__sb = { get course() { return course; }, PHYS, frameAt, findLanding, canReach, predict, groundStep, airStep, simulateRun, robotThrustFor, loadCourse, useCourse, buildWorld, player, robot, get state() { return state; }, get REF_TIME() { return REF_TIME; }, startRace, newBody, LITE, aiStep, aiNew, aiFinishTime, crossesFinish, DIFFS, AI, get FIN_IDX() { return FIN_IDX; }, get NS() { return NS; } };
 }
 
 // =====================================================================

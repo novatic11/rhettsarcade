@@ -1,5 +1,18 @@
 [
   {
+    "id": "slide-between-intelligent-robot",
+    "gameId": "slide-between",
+    "date": "2026-11-24T19:49:40.143Z",
+    "title": "Slide Between: Intelligent robot",
+    "summary": "A new robot difficulty that races by your rules and takes the shortcuts too.",
+    "changes": [
+      "New Intelligent difficulty next to Hard.",
+      "This robot gets no extra speed. It tucks, takes the inside line, jumps, steers in the air and uses launch pads, just like you.",
+      "It plans every jump before it leaves the slide, so it hardly ever misses a shortcut. Expect it to finish well ahead of Hard.",
+      "The results screen shows how many shortcuts the robot took."
+    ]
+  },
+  {
     "id": "square-off-2-challenges-secrets",
     "gameId": "square-off-2",
     "date": "2026-11-24T19:38:39.782Z",
