@@ -1,4 +1,6 @@
 import {renderStatsDashboard} from './stats-dashboard.js';
+import {renderQuests,questsLeft} from './quests.js';
+import {checkQuests,rebaselineQuests} from './quests-model.js';
 import {STATS_KEY,SETTINGS_KEY,validStats,validSettings,addSession,timeLabel,readJSON,gameRecord,achievementList,publicUpdateFeed} from './arcade-model.js';
 const q=s=>document.querySelector(s),node=(tag,cls,text)=>{const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;};
 let info={},previews={},updates=[],view=null,active=null,ready=false,visible=!document.hidden,tickAt=performance.now(),settings=validSettings(readJSON(localStorage,SETTINGS_KEY)),stats=validStats(readJSON(localStorage,STATS_KEY));
@@ -8,7 +10,15 @@ function syncAchievements(){
  const latest=validStats(readJSON(localStorage,STATS_KEY));let changed=false;for(const a of achievementList(localStorage,latest,catalog(),favoriteIds()))if(a.unlocked&&!latest.unlocked[a.id]){latest.unlocked[a.id]=Date.now();changed=true;}
  if(changed)storeStats(latest);else stats=latest;
 }
-function flush(){const now=performance.now(),dt=Math.min(15,Math.max(0,(now-tickAt)/1000));tickAt=now;if(active&&ready&&visible&&dt>0)storeStats(addSession(readJSON(localStorage,STATS_KEY),active.id,dt));}
+function flush(){const now=performance.now(),dt=Math.min(15,Math.max(0,(now-tickAt)/1000));tickAt=now;if(active&&ready&&visible&&dt>0)storeStats(addSession(readJSON(localStorage,STATS_KEY),active.id,dt));syncQuests();}
+// Daily quests: mark finished ones, announce them, and keep the sidebar badge current.
+let questToastTimer;
+function syncQuests(){
+ if(!catalog().length)return;let fresh=[];try{fresh=checkQuests(localStorage,catalog());}catch{return;}
+ const left=questsLeft(localStorage,catalog()),badge=q('#quest-count');if(badge){badge.textContent=String(left);badge.hidden=!left;}
+ if(fresh.length){const t=q('#toast');t.textContent=(fresh.length>1?fresh.length+' quests complete!':'Quest complete: '+fresh[0].text)+(left?'':' · All of today’s quests are done!');t.classList.add('show');clearTimeout(questToastTimer);questToastTimer=setTimeout(()=>t.classList.remove('show'),4500);if(view==='quests')renderQuestsView();}
+}
+function renderQuestsView(){renderQuests({root:q('#arcade-hub'),catalog:catalog(),storage:localStorage,onDetails:details});}
 function start(game,loaded=false){flush();active=game;ready=loaded;tickAt=performance.now();storeStats(addSession(readJSON(localStorage,STATS_KEY),game.id,0,true));}
 function stop(){flush();active=null;ready=false;syncAchievements();if(view==='stats')renderStats();}
 q('#game-frame').addEventListener('load',()=>{if(active){ready=true;tickAt=performance.now();}});
@@ -82,16 +92,16 @@ function renderStats(){
 }
 function renderSettings(){const root=q('#arcade-hub');root.replaceChildren(pageHeader('FEEL RIGHT AT HOME','Your arcade. Your settings.','One set of controls for the whole arcade, saved on this browser.'),settingsForm());applySettings();}
 function show(next){
- view=['updates','stats','settings','requests','teasers','playtest'].includes(next)?next:null;q('#library').classList.toggle('hub-mode',!!view);q('#arcade-hub').hidden=!view;q('#arcade-hub').classList.toggle('stats-dashboard',view==='stats');document.querySelectorAll('[data-hub-nav]').forEach(a=>{a.classList.toggle('nav-active',a.dataset.hubNav===view);if(a.dataset.hubNav===view)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
- if(!view){if(!q('#library').classList.contains('junkyard-mode')&&!q('#library').classList.contains('secret-mode'))q('.breadcrumb b').textContent='LIBRARY';return;}q('#library-nav').classList.remove('nav-active');q('#favorites-nav').classList.remove('nav-active');q('.breadcrumb b').textContent={updates:'WHAT’S NEW',stats:'YOUR STATS',settings:'SETTINGS',requests:'REQUESTS',teasers:'NEWS',playtest:'PLAYTEST'}[view];if(view==='playtest'){q('#arcade-hub').replaceChildren();if(window.arcadePlaytest){q('#arcade-hub').append(window.arcadePlaytest.page);window.arcadePlaytest.open();}}else if(view==='teasers'){q('#arcade-hub').replaceChildren();if(window.arcadeTeasers){q('#arcade-hub').append(window.arcadeTeasers.page);window.arcadeTeasers.open();}}else if(view==='requests'){q('#arcade-hub').replaceChildren();if(window.arcadeRequests){q('#arcade-hub').append(window.arcadeRequests.page);window.arcadeRequests.open();}}else ({updates:renderUpdates,stats:renderStats,settings:renderSettings})[view]();
+ view=['updates','quests','stats','settings','requests','teasers','playtest'].includes(next)?next:null;q('#library').classList.toggle('hub-mode',!!view);q('#arcade-hub').hidden=!view;q('#arcade-hub').classList.toggle('stats-dashboard',view==='stats');document.querySelectorAll('[data-hub-nav]').forEach(a=>{a.classList.toggle('nav-active',a.dataset.hubNav===view);if(a.dataset.hubNav===view)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
+ if(!view){if(!q('#library').classList.contains('junkyard-mode')&&!q('#library').classList.contains('secret-mode'))q('.breadcrumb b').textContent='LIBRARY';return;}q('#library-nav').classList.remove('nav-active');q('#favorites-nav').classList.remove('nav-active');q('.breadcrumb b').textContent={updates:'WHAT’S NEW',quests:'QUESTS',stats:'YOUR STATS',settings:'SETTINGS',requests:'REQUESTS',teasers:'NEWS',playtest:'PLAYTEST'}[view];if(view==='playtest'){q('#arcade-hub').replaceChildren();if(window.arcadePlaytest){q('#arcade-hub').append(window.arcadePlaytest.page);window.arcadePlaytest.open();}}else if(view==='teasers'){q('#arcade-hub').replaceChildren();if(window.arcadeTeasers){q('#arcade-hub').append(window.arcadeTeasers.page);window.arcadeTeasers.open();}}else if(view==='requests'){q('#arcade-hub').replaceChildren();if(window.arcadeRequests){q('#arcade-hub').append(window.arcadeRequests.page);window.arcadeRequests.open();}}else ({updates:renderUpdates,quests:renderQuestsView,stats:renderStats,settings:renderSettings})[view]();
 }
 document.addEventListener('click',e=>{const a=e.target.closest('[data-hub-nav]');if(!a||e.ctrlKey||e.metaKey||e.shiftKey||e.button!==0)return;e.preventDefault();history.pushState({},'',a.href);stopGame();window.arcadeShowSecret?.(false);window.arcadeShowJunkyard?.(false);show(a.dataset.hubNav);scrollTo(0,0);});
-function libraryReady(){syncAchievements();const params=new URL(location.href).searchParams;if(view)show(view);else if(params.has('view')&&!params.has('play'))show(params.get('view'));const id=params.get('play');if(id&&!active&&q('#game-frame').hasAttribute('src')){const game=catalog().find(g=>g.id===id);if(game)start(game,q('#game-frame').contentDocument?.readyState==='complete');}}
+function libraryReady(){syncAchievements();syncQuests();const params=new URL(location.href).searchParams;if(view)show(view);else if(params.has('view')&&!params.has('play'))show(params.get('view'));const id=params.get('play');if(id&&!active&&q('#game-frame').hasAttribute('src')){const game=catalog().find(g=>g.id===id);if(game)start(game,q('#game-frame').contentDocument?.readyState==='complete');}}
 window.arcadeHub={show,details,start,stop,flush};
 addEventListener('arcade-library-ready',libraryReady);
 addEventListener('arcade-favorites-changed',()=>{for(const button of document.querySelectorAll('[data-favorite-id]')){const selected=favoriteIds().includes(button.dataset.favoriteId);button.textContent=selected?'♥':'♡';button.setAttribute('aria-pressed',String(selected));}syncAchievements();if(view==='stats')renderStats();});
-addEventListener('arcade-saves-restored',()=>{stats=validStats(readJSON(localStorage,STATS_KEY));syncAchievements();window.arcadeRenderJunkyard?.();if(view)show(view);});
-addEventListener('storage',e=>{if(e.key===SETTINGS_KEY){settings=validSettings(readJSON(localStorage,SETTINGS_KEY));applySettings();}if(e.key===STATS_KEY&&view==='stats')renderStats();});
+addEventListener('arcade-saves-restored',()=>{stats=validStats(readJSON(localStorage,STATS_KEY));try{if(catalog().length)rebaselineQuests(localStorage,catalog());}catch{}syncQuests();syncAchievements();window.arcadeRenderJunkyard?.();if(view)show(view);});
+addEventListener('storage',e=>{if(e.key===SETTINGS_KEY){settings=validSettings(readJSON(localStorage,SETTINGS_KEY));applySettings();}if(e.key===STATS_KEY&&view==='stats')renderStats();if(e.key!==SETTINGS_KEY)syncQuests();});
 matchMedia('(prefers-reduced-motion: reduce)').addEventListener?.('change',applySettings);applySettings();libraryReady();
 Promise.all(['game-info.json','game-previews.json','updates.json'].map(file=>fetch(file).then(r=>{if(!r.ok)throw Error(file);return r.json();}))).then(([a,b,c])=>{info=a;previews=b;updates=Array.isArray(c)?c:[];if(view)show(view);}).catch(()=>{if(view==='updates')renderUpdates();});
 
