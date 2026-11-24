@@ -58,12 +58,13 @@
     if (Pl.inWater) cx += chip(ctx, cx, cy, 'WATER: SLOW', P.tealLight);
     if (W.build.f.bulwark) cx += chip(ctx, cx, cy, Pl.guardBroken > 0 ? 'GUARD BROKEN ' + Math.ceil(Pl.guardBroken) + 's' : 'GUARD ' + Math.floor(Pl.guard) + '/10', Pl.guardBroken > 0 ? P.coral : P.blueLight);
     if (W.build.f.grounded) cx += chip(ctx, cx, cy, Pl.grounded ? 'JUMPS 2' : 'JUMPS ' + Pl.jumps + (Pl.slamming ? ' · SLAM!' : ''), P.paper);
+    if (W.trialChip) cx += chip(ctx, cx, cy, W.trialChip(W), P.warn);
     if (W.contract) { const C = SO.CONTRACTS[W.contract.id]; const ok = C.check(W, W.round); cx += chip(ctx, cx, cy, 'CONTRACT: ' + C.text(W.round) + ' · ' + C.prog(W, W.round), ok ? P.green : P.warn); }
     ctx.restore();
     // ---- center: round ----
-    const label = W.mode === 'practice' ? 'PRACTICE' : W.mode === 'tutorial' ? 'TUTORIAL' : (W.finale ? 'FINAL CURTAIN' : 'ROUND ' + W.round);
+    const label = W.mode === 'practice' ? 'PRACTICE' : W.mode === 'tutorial' ? 'TUTORIAL' : W.trialInfo ? 'ROUND ' + W.trialInfo.k + '/' + W.trialInfo.n : (W.finale ? 'FINAL CURTAIN' : 'ROUND ' + W.round);
     art.text(ctx, label, 640, 22, 26, P.warn, 'center', 6);
-    art.text(ctx, W.arena.name.toUpperCase() + (W.mode === 'endless' ? ' · ENDLESS' : ''), 640, 46, 12, P.cream, 'center', 3);
+    art.text(ctx, W.arena.name.toUpperCase() + (W.mode === 'endless' ? ' · ENDLESS' : '') + (W.trialInfo ? ' · CHALLENGE: ' + W.trialInfo.name.toUpperCase() : ''), 640, 46, 12, P.cream, 'center', 3);
     // ---- boss block ----
     const b = W.boss;
     if (b) {

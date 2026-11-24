@@ -12,14 +12,17 @@
         maxHp: 100, shield: 0, dmgMul: 1, rateMul: 1, spreadMul: 1, sizeMul: 1, pSpeedMul: 1, areaMul: 1, bounceAdd: 0,
         critChance: 0.05, critMul: 2, dashCharges: 1, dashCd: 1.1, dashIframe: 0.22, thrustMul: 1, speedMul: 1, iframes: 1.0, hitR: 8,
         shieldDelay: 3, shieldRate: 14, regen: 0, utilCdMul: 1, utilCharges: 1, cards: 3,
-        burnChance: 0, burnMax: 5, burnDur: 3, bleedChance: 0, pointBlank: 0, ram: 0, eater: 0, dmgTakenMul: 1, ablative: 0
+        burnChance: 0, burnMax: 5, burnDur: 3, bleedChance: 0, pointBlank: 0, ram: 0, eater: 0, dmgTakenMul: 1, ablative: 0,
+        gravMul: 1, climbMul: 1, dashLen: 0, oRegen: 0, oLeech: 0, oLong: 0, oFocus: 0
       },
       f: {}
     };
   };
   // flatten build → runtime multipliers used by weapons
   SO.buildMul = B => ({ dmgMul: B.s.dmgMul, rateMul: B.s.rateMul, spreadMul: B.s.spreadMul, sizeMul: B.s.sizeMul, pSpeedMul: B.s.pSpeedMul, areaMul: B.s.areaMul, bounceAdd: B.s.bounceAdd });
-  SO.weaponParams = (w, B) => SO.WEAPONS[w.id].calc(w, SO.buildMul(B));
+  // per-weapon multipliers (Square the Original's classic weapon upgrades)
+  SO.weaponMul = (B, w) => { const m = SO.buildMul(B); if (w && w.dmgX) m.dmgMul *= w.dmgX; if (w && w.rateX) m.rateMul *= w.rateX; return m; };
+  SO.weaponParams = (w, B) => SO.WEAPONS[w.id].calc(w, SO.weaponMul(B, w));
 
   const has = (B, id) => B.weapons.some(w => w.id === id);
   const wep = (B, id) => B.weapons.find(w => w.id === id);
@@ -173,7 +176,8 @@
       'Post-hit invulnerability': f2(s.iframes) + 's', 'Spread': pc(s.spreadMul), 'Projectile speed': pc(s.pSpeedMul), 'Projectile size': pc(s.sizeMul), 'Blast radius': pc(s.areaMul),
       'Extra wall bounces': s.bounceAdd, 'Weapon slots': B.maxWeapons, 'Burn on hit': pc(s.burnChance), 'Bleed on hit': pc(s.bleedChance), 'Burn stack cap': s.burnMax,
       'Shield refill delay': s.shield ? f2(s.shieldDelay) + 's' : '—', 'Repair': s.regen ? f2(s.regen) + ' HP/s' : '—', 'Utility cooldown': pc(s.utilCdMul), 'Utility charges': s.utilCharges,
-      'Close-range bonus': '+' + pc(s.pointBlank), 'Ram damage': s.ram ? s.ram + '/s' : '—', 'Bullet-eat chance': pc(s.eater), 'Workshop cards': s.cards, 'Damage taken': pc(s.dmgTakenMul), 'Ablative plates': s.ablative
+      'Close-range bonus': '+' + pc(s.pointBlank), 'Ram damage': s.ram ? s.ram + '/s' : '—', 'Bullet-eat chance': pc(s.eater), 'Workshop cards': s.cards, 'Damage taken': pc(s.dmgTakenMul), 'Ablative plates': s.ablative,
+      'Gravity': pc(s.gravMul), 'Climb speed': pc(s.climbMul), 'Dash length': f2(0.16 + s.dashLen) + 's', 'Constant repair': s.oRegen ? f2(s.oRegen) + ' HP/s' : '—', 'Repair per 10 hits': s.oLeech ? 2 * s.oLeech + ' HP' : '—', 'Long-range bonus': '+' + pc(s.oLong), 'No-thrust bonus': '+' + pc(s.oFocus)
     };
   };
   // exact change list for an upgrade
@@ -201,7 +205,7 @@
     const a = SO.buildSheet(B), b = SO.buildSheet(after);
     for (const k in b) if (String(a[k]) !== String(b[k])) out.push({ label: k, from: a[k], to: b[k] });
     // ripple into weapons for global multipliers
-    if (['g_rate', 'g_dmg', 'g_area', 'p_calib', 'x_bounce', 'R_glass', 'R_mega', 'f_overhaul'].includes(id)) {
+    if (['g_rate', 'g_dmg', 'g_area', 'p_calib', 'x_bounce', 'R_glass', 'R_mega', 'f_overhaul', 'o_damage', 'o_rate'].includes(id)) {
       for (const w of B.weapons.slice(0, 3)) {
         const p0 = SO.weaponParams(w, B), p1 = SO.weaponParams(after.weapons.find(x => x.id === w.id), after);
         const d0 = Math.round(p0.dps || 0), d1 = Math.round(p1.dps || 0); if (d0 !== d1) out.push({ label: SO.WEAPONS[w.id].name + ' ≈DPS', from: d0, to: d1 });
@@ -231,7 +235,7 @@
   /* ---------------- offers ---------------- */
   const RW = { common: 1, rare: 0.6, epic: 0.2 };
   SO.offerPlayer = function (B, rng, n, ctx) {
-    const pool = UPS.filter(u => !u.fallback && (B.counts[u.id] || 0) < u.max && u.req(B, ctx) === true);
+    const pool = UPS.filter(u => !u.fallback && !!u.orig === !!B.f.original && !(ctx.noNew && u.kind === 'new') && (B.counts[u.id] || 0) < u.max && u.req(B, ctx) === true);
     const picks = [];
     const weight = u => {
       let w = RW[u.rarity] || 1;

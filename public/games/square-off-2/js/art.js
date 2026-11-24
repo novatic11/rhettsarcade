@@ -132,6 +132,7 @@
     // squash & stretch anchored at center
     ctx.scale(p.sx || 1, p.sy || 1);
     const face = p.facing || 1;
+    if (chr && chr.look.original) { art.drawOriginal(ctx, p, S, t); ctx.restore(); return; }
     // jetpack (behind)
     const jx = -face * (h + 3);
     ctx.save();
@@ -178,10 +179,25 @@
     if (chr) art.accessory(ctx, chr.look.acc, h, t, face);
     ctx.restore();
   };
+  // Square, the Original: drawn exactly like the hero of the first Square Off (flat lime square, two dark eyes, olive feet, lime jets)
+  art.drawOriginal = function (ctx, p, S, t) {
+    const k = S / 28, rr = (x, y, w, hh, r, fill) => { ctx.beginPath(); ctx.roundRect(x, y, w, hh, r); ctx.fillStyle = fill; ctx.fill(); };
+    ctx.rotate(Math.max(-0.075, Math.min(0.075, (p.vx || 0) / 5000)));
+    if (p.thrusting || p.dashing) { const len = (13 + Math.sin(t * 60) * 5) * k * (p.dashing ? 1.5 : 1); for (const dx of [-5, 5]) { ctx.fillStyle = '#d5ff6390'; ctx.beginPath(); ctx.moveTo((dx - 3) * k, 18 * k); ctx.lineTo(dx * k, 18 * k + len); ctx.lineTo((dx + 3) * k, 18 * k); ctx.fill(); ctx.fillStyle = '#f4ffd7'; art.circ(ctx, dx * k, 20 * k, 2 * k); ctx.fill(); } }
+    rr(-8 * k, 12 * k, 6 * k, 7 * k, 2 * k, '#596446'); rr(2 * k, 12 * k, 6 * k, 7 * k, 2 * k, '#596446');
+    rr(-S / 2, -S / 2, S, S, S * 0.22, p.justHit > 0 ? '#f6f8ed' : '#d5ff63');
+    ctx.fillStyle = '#161b26';
+    for (const dx of [-0.17, 0.17]) { ctx.beginPath(); if (p.blink > 0) ctx.ellipse(S * dx, -S * 0.025, S * 0.06, S * 0.015, 0, 0, Math.PI * 2); else ctx.ellipse(S * dx, -S * 0.025, S * 0.047, S * 0.065, 0, 0, Math.PI * 2); ctx.fill(); }
+  };
   // character accessories (drawn in body space, h = half body size)
   art.accessory = function (ctx, acc, h, t, face) {
     const line = (pts, lw = 2.5, col = P.ink) => { ctx.beginPath(); ctx.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) ctx.lineTo(pts[i], pts[i + 1]); ctx.lineWidth = lw; ctx.strokeStyle = col; ctx.lineCap = 'round'; ctx.stroke(); };
     switch (acc) {
+      case 'wave': line([-h + 4, h * 0.55, -h * 0.4, h * 0.15, 0, h * 0.55, h * 0.4, h * 0.15, h - 4, h * 0.55], 2.6, '#ff3fb4'); art.ink(ctx, () => art.poly(ctx, [-face * h * 0.55, -h + 1, face * h * 0.75, -h - 9, -face * h * 0.1, -h + 1]), '#ff3fb4', 2); break;
+      case 'lumen': { line([h * 0.3, -h, h * 0.3, -h - 10]); art.inkRect(ctx, h * 0.3 - 6, -h - 22, 12, 13, 3, '#3a3850', 2); ctx.save(); ctx.globalAlpha = 0.75 + 0.25 * Math.sin(t * 7); art.inkCirc(ctx, h * 0.3, -h - 15.5, 4, P.warn, 1.2); ctx.restore(); break; }
+      case 'flip': for (const sy of [-1, 1]) art.ink(ctx, () => art.poly(ctx, [-h * 0.45 + sy * h * 0.45 - 5, -h - 3 + (sy < 0 ? 0 : -8), -h * 0.45 + sy * h * 0.45 + 5, -h - 3 + (sy < 0 ? 0 : -8), -h * 0.45 + sy * h * 0.45, -h - 3 + (sy < 0 ? -9 : 1)]), sy < 0 ? '#22d3c5' : '#ff9ad0', 1.8); break;
+      case 'tabby': { for (const sx of [-1, 1]) art.ink(ctx, () => art.poly(ctx, [sx * h * 0.85, -h + 2, sx * h * 0.6, -h - 11, sx * h * 0.25, -h + 2]), '#f2a65a', 2.2); ctx.fillStyle = 'rgba(140,70,20,0.55)'; for (const y of [0.35, 0.6, 0.85]) ctx.fillRect(-h + 3, y * h, h * 0.5, 2.5); for (const sx of [-1, 1]) for (const dy of [-2, 2]) line([sx * 4, h * 0.05 + dy, sx * (h + 7), h * 0.05 + dy * 2.5], 1.4, P.ink); break; }
+      case 'dynamo': { ctx.save(); ctx.translate(0, -h - 8); ctx.rotate(t * 4); for (let i = 0; i < 6; i++) { ctx.rotate(Math.PI / 3); art.inkRect(ctx, -2.5, -10, 5, 5, 1, P.warn, 1.5); } art.inkCirc(ctx, 0, 0, 6.5, P.warn, 2); ctx.fillStyle = P.ink; art.circ(ctx, 0, 0, 2); ctx.fill(); ctx.restore(); break; }
       case 'pip': line([h * 0.4, -h, h * 0.6, -h - 11]); art.inkCirc(ctx, h * 0.6, -h - 13, 3.5, P.warn, 2); break;
       case 'brick': art.ink(ctx, () => { ctx.beginPath(); ctx.ellipse(0, -h + 3, h * 0.92, h * 0.5, 0, Math.PI, 0); ctx.closePath(); }, P.warn, 2.5); art.inkRect(ctx, -h - 4, -h + 1, h * 2 + 8, 5, 2, P.warnDark, 2); line([0, -h - h * 0.45, 0, -h + 2], 2); break;
       case 'hex': for (const sx of [-1, 1]) art.ink(ctx, () => art.poly(ctx, [sx * h * 0.35, -h + 1, sx * h * 0.75, -h - 12, sx * h * 0.7, -h + 1]), P.coral, 2); ctx.save(); ctx.globalAlpha = 0.35 + 0.25 * Math.sin(t * 8); ctx.strokeStyle = P.violet; ctx.lineWidth = 3; art.rr(ctx, -h - 4, -h - 4, h * 2 + 8, h * 2 + 8, 9); ctx.stroke(); ctx.restore(); break;

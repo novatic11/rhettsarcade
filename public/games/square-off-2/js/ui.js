@@ -30,7 +30,7 @@
   SO.sourceName = function (src) {
     if (SO.WEAPONS[src]) return SO.WEAPONS[src].name;
     if (SO.BOSS_ATTACKS[src]) return SO.BOSS_ATTACKS[src].name;
-    return ({ shoulder: 'Shoulder Charge', slam: 'Ground Pound', reflect: 'Mirror Dash', fusehead: 'Fuse Head', blocked: 'Ablative Plating', burn: 'Burn', bleed: 'Bleed', ram: 'Ram Plating', comet: 'Comet Form', dashvolley: 'Dash Volley', shrapnel: 'Shrapnel', critspark: 'Crit Sparks', blink: 'Blink Bomb', hazard: 'Arena hazard', reactive: 'Reactive Plating', vengeful: 'Vengeful Core', thorns: 'Thorns', bossquake: 'Landing Shockwave', bossphase: 'Echo Burst', bosscomet: 'Comet Trail', bosswreck: 'Wrecking Ball', bosschime: 'Chime Bell', bossshrapnel: 'Bounce Shrapnel', laser: 'Laser', boss: 'Boss', misc: 'Misc' })[src] || src;
+    return ({ shoulder: 'Shoulder Charge', slam: 'Ground Pound', reflect: 'Mirror Dash', fusehead: 'Fuse Head', blocked: 'Ablative Plating', burn: 'Burn', bleed: 'Bleed', ram: 'Ram Plating', comet: 'Comet Form', dashvolley: 'Dash Volley', shrapnel: 'Shrapnel', critspark: 'Crit Sparks', blink: 'Blink Bomb', hazard: 'Arena hazard', reactive: 'Reactive Plating', vengeful: 'Vengeful Core', thorns: 'Thorns', bossquake: 'Landing Shockwave', bossphase: 'Echo Burst', bosscomet: 'Comet Trail', bosswreck: 'Wrecking Ball', bosschime: 'Chime Bell', bossshrapnel: 'Bounce Shrapnel', laser: 'Laser', boss: 'Boss', misc: 'Misc', lava: 'The Floor Is Lava', restless: 'Standing still', drain: 'Leaky Hull', featherlight: 'Too many hits (Featherlight)', clock: 'Out of time' })[src] || src;
   };
 
   /* ================= animated boss demos ================= */
@@ -148,7 +148,7 @@
         B.s.shield ? h('div', { class: 'row' }, h('span', null, 'Shield'), h('b', null, B.s.shield)) : null,
         h('div', { class: 'row' }, h('span', null, 'Damage / Fire rate'), h('b', null, '×' + B.s.dmgMul.toFixed(2) + ' / ×' + B.s.rateMul.toFixed(2))),
         h('div', { class: 'row' }, h('span', null, 'Crit'), h('b', null, Math.round(B.s.critChance * 100) + '% ×' + B.s.critMul.toFixed(1))),
-        h('div', { class: 'row' }, h('span', null, 'Dash'), h('b', null, B.s.dashCharges + ' × ' + B.s.dashCd.toFixed(2) + 's')),
+        h('div', { class: 'row' }, h('span', null, 'Dash'), h('b', null, B.f.noDash ? 'Locked (find Air dash)' : B.s.dashCharges + ' × ' + B.s.dashCd.toFixed(2) + 's')),
         h('div', { class: 'row' }, h('span', null, 'Utility [E]'), h('b', null, B.utility ? SO.UTILS[B.utility].name : '—')),
         ups.length ? h('div', { class: 'sec' }, 'UPGRADES') : null,
         ups.map(id => h('div', { class: 'row' }, h('span', null, SO.PLAYER_UP[id].name), h('b', null, B.counts[id] > 1 ? '×' + B.counts[id] : '')))));
@@ -170,7 +170,7 @@
   ui.title = function () {
     const d = D(); const run = d.run; const g = G();
     g.toMenu();
-    const resume = run ? btn(h('span', null, 'Resume Run', h('small', null, `${run.mode === 'endless' ? 'Endless' : 'Standard'} · Round ${run.round}${run.phase === 'workshop' ? ' (workshop)' : ''} · ${SO.KITS[run.kit] ? SO.KITS[run.kit].name : ''}`)), () => g.resumeRun(), 'warn') : null;
+    const resume = run ? btn(h('span', null, 'Resume Run', h('small', null, `${run.trial && SO.TRIALS[run.trial] ? 'Challenge: ' + SO.TRIALS[run.trial].name : run.mode === 'endless' ? 'Endless' : 'Standard'} · Round ${run.round}${run.phase === 'workshop' ? ' (workshop)' : ''} · ${SO.KITS[run.kit] ? SO.KITS[run.kit].name : ''}`)), () => g.resumeRun(), 'warn') : null;
     const el = h('div', { class: 'screen' },
       h('div', { class: 'title-wrap' },
         h('div', { class: 'logo' }, 'SQUARE', h('br'), 'OFF ', h('span', { class: 'two' }, '2')),
@@ -179,6 +179,7 @@
           resume,
           btn(h('span', null, 'Standard Run', h('small', null, '10 rounds + a final confrontation' + (d.records.standardWins ? ` · ${d.records.standardWins} win(s)` : ''))), () => ui.runSetup('standard'), 'primary'),
           btn(h('span', null, 'Endless', h('small', null, 'Escalating rounds · Best: ' + (d.records.endlessBest ? 'Round ' + d.records.endlessBest : '—'))), () => ui.runSetup('endless'), 'boss'),
+          btn(h('span', null, 'Challenges', h('small', null, 'Short twisted runs · ' + SO.TRIAL_ORDER.filter(SO.trialDone).length + '/' + SO.TRIAL_ORDER.length + ' cleared' + (d.unlocks.secretSeen ? ' · ' + SO.SECRET_TRIAL_ORDER.filter(SO.trialDone).length + '/' + SO.SECRET_TRIAL_ORDER.length + ' secret' : ''))), () => ui.challenges(), 'warn'),
           btn(h('span', null, 'Practice Workshop', h('small', null, 'Test weapons & boss patterns, no risk')), () => ui.practice()),
           h('div', { class: 'menu-row' },
             btn(d.unlocks.tutorialDone ? 'Tutorial' : 'Tutorial ★', () => g.startTutorial(), d.unlocks.tutorialDone ? '' : 'warn'),
@@ -190,13 +191,14 @@
 
   ui.portrait = function (cv, k, locked) {
     const g = cv.getContext('2d'), w = cv.width, hh = cv.height; const C = SO.KITS[k];
+    if (locked && C.secret) { g.fillStyle = '#1e1e26'; g.fillRect(0, 0, w, hh); art.text(g, '?', w / 2, hh / 2, w * 0.45, '#8a8a96', 'center', 6); g.lineWidth = 4; g.strokeStyle = P.ink; g.strokeRect(2, 2, w - 4, hh - 4); return; }
     g.fillStyle = locked ? '#2a2a3a' : P.blueDeep; g.fillRect(0, 0, w, hh);
     if (!locked) { g.fillStyle = SO.ROLE_COLOR[C.role]; g.globalAlpha = 0.22; for (let i = 0; i < 12; i++) { g.beginPath(); g.moveTo(w / 2, hh / 2); g.arc(w / 2, hh / 2, w, i / 12 * Math.PI * 2, (i + 0.5) / 12 * Math.PI * 2); g.fill(); } g.globalAlpha = 1; }
     const sc = w / 50; g.save(); g.scale(sc, sc);
     const look = { x: 25, y: 33, size: 31, bodyOff: -4, facing: 1, look: 0.3, sx: 1, sy: 1, thrusting: !locked && !(C.flags || {}).grounded, aim: -0.3 };
     if (locked) g.globalAlpha = 0.25;
     art.drawPlayer(g, look, { char: k, time: 0.3, noJet: !!(C.flags || {}).grounded });
-    if (!locked && C.weapons.length) art.drawPlayerGuns(g, look, C.weapons.map(id => ({ id, recoil: 0 })), 0);
+    if (!locked && C.weapons.length && !(C.flags || {}).original) art.drawPlayerGuns(g, look, C.weapons.map(id => ({ id, recoil: 0 })), 0);
     g.restore();
     if (locked) { art.text(g, '?', w / 2, hh / 2, w * 0.4, P.cream, 'center', 6); }
     g.lineWidth = 4; g.strokeStyle = P.ink; g.strokeRect(2, 2, w - 4, hh - 4);
@@ -206,9 +208,9 @@
     const d = D(); const g = G();
     let kit = (d.lastKit && d.unlocks.kits.includes(d.lastKit)) ? d.lastKit : 'tinkerer'; const chal = new Set((d.lastChallenges || []).filter(c => d.unlocks.challenges.includes(c)));
     const owned = k => d.unlocks.kits.includes(k);
-    const ROLES = ['All', 'Classic', 'Twist', 'Hard Mode', 'Overhaul'];
+    const ROLES = ['All', 'Classic', 'Twist', 'Hard Mode', 'Overhaul', 'Secret'];
     let hover = null, role = 'All', grid = null, detailSlot = null;
-    const visible = () => SO.KIT_ORDER.filter(k => role === 'All' || SO.KITS[k].role === role);
+    const visible = () => SO.KIT_ORDER.filter(k => role === 'All' ? !SO.KITS[k].secret : SO.KITS[k].role === role);
     let pokes = 0;
     const choose = k => {
       if (k === 'glitch' && !owned(k)) {
@@ -221,30 +223,30 @@
     const showDetail = k => { if (hover === k) return; hover = k; const nd = detailFor(); detailSlot.replaceWith(nd); detailSlot = nd; };
     const start = () => { d.lastKit = kit; d.lastChallenges = [...chal]; SO.save.write(); if (d.run && !confirm('Starting a new run will replace your unfinished run. Continue?')) return; g.newRun(mode, kit, [...chal]); };
     const detailFor = () => {
-      const show = hover || kit; const K = SO.KITS[show]; const lockedShow = !owned(show);
-      const big = h('canvas', { width: 220, height: 220 }); ui.portrait(big, show, false);
+      const show = hover || kit; const K = SO.KITS[show]; const lockedShow = !owned(show); const hide = lockedShow && K.secret;
+      const big = h('canvas', { width: 220, height: 220 }); ui.portrait(big, show, hide);
       const chals = h('div', { class: 'chal-list' }, SO.CHALLENGE_ORDER.map(c => { const C = SO.CHALLENGES[c]; const locked = !d.unlocks.challenges.includes(c); return h('div', { class: 'chal2' + (chal.has(c) ? ' on' : '') + (locked ? ' locked' : ''), title: locked ? 'Win a Standard Run' : C.desc, onclick: () => { if (locked) return; chal.has(c) ? chal.delete(c) : chal.add(c); SO.sfx.play('select'); render(); } }, h('div', { class: 'box' }, chal.has(c) ? '✓' : locked ? '🔒' : ''), h('span', null, C.name)); }));
       return h('div', { class: 'cdetail panel' + (lockedShow ? ' is-locked' : '') },
-        h('div', { class: 'dhead' }, big, h('div', null, h('h2', null, K.name), h('div', { class: 'ctitle' }, K.title), h('span', { class: 'role', style: 'background:' + SO.ROLE_COLOR[K.role] }, K.role), h('div', { class: 'stars' }, 'Difficulty ' + '★'.repeat(K.stars) + '☆'.repeat(5 - K.stars)))),
-        h('p', { class: 'cdesc' }, K.desc),
-        h('ul', { class: 'traits' }, K.traits.map(t => h('li', null, t))),
+        h('div', { class: 'dhead' }, big, h('div', null, h('h2', null, hide ? '???' : K.name), h('div', { class: 'ctitle' }, hide ? 'Classified' : K.title), h('span', { class: 'role', style: 'background:' + SO.ROLE_COLOR[K.role] + (K.role === 'Secret' ? ';color:#fff' : '') }, K.role), h('div', { class: 'stars' }, 'Difficulty ' + (hide ? '?????' : '★'.repeat(K.stars) + '☆'.repeat(5 - K.stars))))),
+        h('p', { class: 'cdesc' }, hide ? 'Nothing is known about this character until it is unlocked.' : K.desc),
+        hide ? null : h('ul', { class: 'traits' }, K.traits.map(t => h('li', null, t))),
         lockedShow ? h('div', { class: 'unlock-pop' }, '🔒 Unlock: ' + K.unlockText) : null,
-        h('div', { class: 'sec2' }, 'CHALLENGES (optional)'), chals,
+        h('div', { class: 'sec2' }, 'MODIFIERS (optional)'), chals,
         h('div', { style: 'margin-top:auto;display:flex;justify-content:flex-end;padding-top:8px' }, btn('Start as ' + SO.KITS[kit].name, start, 'primary', 'Enter')));
     };
     const render = () => {
       const list = visible();
       const total = SO.KIT_ORDER.length, got = SO.KIT_ORDER.filter(owned).length;
       const tabs = h('div', { class: 'role-tabs' }, ROLES.map(r => {
-        const n = r === 'All' ? total : SO.KIT_ORDER.filter(k => SO.KITS[k].role === r).length;
-        return h('button', { class: 'role-tab' + (role === r ? ' on' : ''), style: r === 'All' ? '' : '--rc:' + SO.ROLE_COLOR[r], onclick: () => { role = r; SO.sfx.play('select'); render(); } }, r, h('span', null, n));
+        const n = r === 'All' ? SO.KIT_ORDER.filter(k => !SO.KITS[k].secret).length : SO.KIT_ORDER.filter(k => SO.KITS[k].role === r).length;
+        return h('button', { class: 'role-tab' + (role === r ? ' on' : ''), style: r === 'All' ? '' : '--rc:' + SO.ROLE_COLOR[r], onclick: () => { role = r; SO.sfx.play('select'); if (r === 'Secret' && !d.unlocks.secretSeen) { d.unlocks.secretSeen = true; SO.save.write(); setTimeout(() => ui.toast('<b>…something shifted.</b> Secret challenges are now listed at the top of the Challenges page.', 'unlock', 7), 250); } render(); } }, r, h('span', null, n));
       }));
       const randomPick = () => { const pool = list.filter(owned).filter(k => k !== kit); if (!pool.length) { SO.sfx.play('deny'); return; } choose(pool[Math.floor(Math.random() * pool.length)]); };
       grid = h('div', { class: 'roster' }, list.map(k => {
         const C = SO.KITS[k]; const locked = !owned(k);
         const cv = h('canvas', { width: 112, height: 112 }); ui.portrait(cv, k, locked);
-        return h('div', { class: 'rchar' + (kit === k ? ' sel' : '') + (locked ? ' locked' : '') + (k === 'glitch' && locked ? ' glitchy' : ''), style: '--rc:' + SO.ROLE_COLOR[C.role], title: locked ? C.name + ' — 🔒 ' + C.unlockText : C.name + ', ' + C.title, onclick: () => choose(k), onmouseenter: () => showDetail(k) },
-          cv, h('div', { class: 'rname' }, locked ? '🔒 ' + C.name : C.name), h('div', { class: 'rstars' }, '★'.repeat(C.stars)));
+        return h('div', { class: 'rchar' + (kit === k ? ' sel' : '') + (locked ? ' locked' : '') + (k === 'glitch' && locked ? ' glitchy' : ''), style: '--rc:' + SO.ROLE_COLOR[C.role], title: locked ? (C.secret ? '???' : C.name) + ' — 🔒 ' + C.unlockText : C.name + ', ' + C.title, onclick: () => choose(k), onmouseenter: () => showDetail(k) },
+          cv, h('div', { class: 'rname' }, locked ? '🔒 ' + (C.secret ? '???' : C.name) : C.name), h('div', { class: 'rstars' }, locked && C.secret ? '?' : '★'.repeat(C.stars)));
       }));
       grid.addEventListener('mouseleave', () => { if (hover) { hover = null; const nd = detailFor(); detailSlot.replaceWith(nd); detailSlot = nd; } });
       detailSlot = detailFor(); hover = null;
@@ -351,8 +353,8 @@
         btn('Weapon & Boss Guide', () => ui.guide(ui.pause)),
         mode === 'practice' ? btn('Back to Practice Setup', () => ui.practice()) : null,
         mode === 'tutorial' ? btn('Exit Tutorial', () => { g.endTutorial(false); }) : null,
-        (mode === 'standard' || mode === 'endless') ? btn('Quit to Title', () => { g.saveRun(); ui.title(); }, 'boss') : null),
-      (mode === 'standard' || mode === 'endless') ? h('p', { class: 'muted', style: 'font-size:12px;max-width:360px;margin:12px 0 0' }, 'Runs save automatically between rounds. Quitting now resumes from the start of Round ' + g.run.round + '.') : null,
+        (mode === 'standard' || mode === 'endless' || mode === 'challenge') ? btn('Quit to Title', () => { g.saveRun(); ui.title(); }, 'boss') : null),
+      (mode === 'standard' || mode === 'endless' || mode === 'challenge') ? h('p', { class: 'muted', style: 'font-size:12px;max-width:360px;margin:12px 0 0' }, 'Runs save automatically between rounds. Quitting now resumes from the start of Round ' + g.run.round + '.') : null,
       h('p', { class: 'muted', style: 'font-size:12px;margin:8px 0 0' }, 'A/D move · SPACE thrust · S fast-fall / drop · SHIFT dash (+direction) · E utility')));
     ui.set(el, e => { if (e.code === 'Escape' || e.code === 'KeyP') g.resume(); });
   };
@@ -439,14 +441,14 @@
     const render = () => {
       const paints = h('div', { class: 'paints' }, Object.keys(SO.PAINTS).map(k => { const lock = !u.cosmetics.includes(k); const cv = h('canvas', { width: 60, height: 60 }); const g = cv.getContext('2d'); g.fillStyle = P.blueDeep; g.fillRect(0, 0, 60, 60); art.drawPlayer(g, { x: 30, y: 34, size: 34, bodyOff: -4, facing: 1, look: 0, sx: 1, sy: 1 }, { paint: k, time: 0 });
         return h('div', { class: 'paint' + (d.settings.paint === k ? ' on' : '') + (lock ? ' lock' : ''), title: lock ? SO.COSMETIC_UNLOCKS[k] : '', onclick: () => { if (lock) return; d.settings.paint = k; SO.save.write(); SO.sfx.play('select'); render(); } }, cv, h('div', null, SO.PAINTS[k].label), lock ? h('div', { class: 'muted' }, '🔒 ' + SO.COSMETIC_UNLOCKS[k]) : null); }));
-      const kits = h('div', { class: 'ulist' }, SO.KIT_ORDER.map(k => h('div', { class: 'it ' + (u.kits.includes(k) ? 'got' : 'lock') }, h('b', null, SO.KITS[k].name), h('span', null, u.kits.includes(k) ? 'Unlocked' : '🔒 ' + SO.KITS[k].unlockText))));
+      const kits = h('div', { class: 'ulist' }, SO.KIT_ORDER.map(k => h('div', { class: 'it ' + (u.kits.includes(k) ? 'got' : 'lock') }, h('b', null, SO.KITS[k].secret && !u.kits.includes(k) ? '??? (Secret)' : SO.KITS[k].name), h('span', null, u.kits.includes(k) ? 'Unlocked' : '🔒 ' + SO.KITS[k].unlockText))));
       const wl = SO.WEAPON_ORDER.filter(id => SO.WEAPONS[id].unlock);
       const weps = h('div', { class: 'ulist' }, wl.map(id => h('div', { class: 'it ' + (u.weapons.includes(id) ? 'got' : 'lock') }, h('b', null, SO.WEAPONS[id].name), h('span', null, u.weapons.includes(id) ? 'In the pool' : '🔒 ' + SO.WEAPON_UNLOCK_TEXT[SO.WEAPONS[id].unlock]))));
       const chals = h('div', { class: 'ulist' }, SO.CHALLENGE_ORDER.map(c => h('div', { class: 'it ' + (u.challenges.includes(c) ? 'got' : 'lock') }, h('b', null, SO.CHALLENGES[c].name), h('span', null, u.challenges.includes(c) ? 'Available' : '🔒 Win a Standard Run'))));
-      const recs = h('div', { class: 'ulist' }, [['Runs played', r.runs], ['Standard wins', r.standardWins], ['Best Standard round cleared', r.bestStandardRound || '—'], ['Endless best round cleared', r.endlessBest || '—'], ['Fastest win', r.fastestWin ? Math.round(r.fastestWin) + 's' : '—'], ['Bosses beaten', r.bossesBeaten], ['Modules broken', r.modulesBroken], ['Challenge wins', r.challengeWins]].map(([a, b]) => h('div', { class: 'it' }, h('span', null, a), h('b', null, String(b)))),
+      const recs = h('div', { class: 'ulist' }, [['Runs played', r.runs], ['Standard wins', r.standardWins], ['Best Standard round cleared', r.bestStandardRound || '—'], ['Endless best round cleared', r.endlessBest || '—'], ['Fastest win', r.fastestWin ? Math.round(r.fastestWin) + 's' : '—'], ['Bosses beaten', r.bossesBeaten], ['Modules broken', r.modulesBroken], ['Modifier wins', r.challengeWins], ['Challenges cleared', SO.TRIAL_ORDER.filter(SO.trialDone).length + '/' + SO.TRIAL_ORDER.length]].map(([a, b]) => h('div', { class: 'it' }, h('span', null, a), h('b', null, String(b)))),
         Object.keys(r.endlessBestKit || {}).length ? h('div', { class: 'it' }, h('span', null, 'Endless best by character'), h('b', null, Object.entries(r.endlessBestKit).map(([k, v]) => (SO.KITS[k] ? SO.KITS[k].name : k) + ' R' + v).join(' · '))) : null);
       ui.set(h('div', { class: 'screen solid' }, h('div', { class: 'page' }, h('div', { class: 'page-head' }, h('h1', null, 'UNLOCKS & RECORDS'), h('div', { class: 'muted', style: 'font-weight:700' }, 'Progression unlocks options, never raw power. A fresh save can win.'), h('div', { class: 'spacer' }), btn('Back', ui.title, 'small', 'Esc')),
-        h('div', { class: 'ul' }, h('div', { class: 'panel scroll' }, h('h2', null, 'PAINT JOBS'), paints, h('h2', { style: 'margin-top:12px' }, 'CHARACTERS'), kits, h('h2', { style: 'margin-top:12px' }, 'CHALLENGES'), chals),
+        h('div', { class: 'ul' }, h('div', { class: 'panel scroll' }, h('h2', null, 'PAINT JOBS'), paints, h('h2', { style: 'margin-top:12px' }, 'CHARACTERS'), kits, h('h2', { style: 'margin-top:12px' }, 'RUN MODIFIERS'), chals),
           h('div', { class: 'panel scroll' }, h('h2', null, 'RECORDS'), recs, h('h2', { style: 'margin-top:12px' }, 'WEAPON UNLOCKS'), weps)))), e => { if (e.code === 'Escape') ui.title(); });
     };
     render();
@@ -459,13 +461,14 @@
     const totalDealt = Object.values(S.dmgBySource).reduce((a, b) => a + b, 0), totalTaken = Object.values(S.dmgTaken).reduce((a, b) => a + b, 0);
     const mm = Math.floor(S.time / 60), ss = Math.round(S.time % 60);
     const el = h('div', { class: 'screen solid' }, h('div', { class: 'page' },
-      h('div', { class: 'page-head' }, h('h1', null, S.won ? 'CURTAIN CALL!' : 'KNOCKED OUT'), h('div', { class: 'muted', style: 'font-weight:700;font-size:15px' }, (S.mode === 'endless' ? 'Endless' : 'Standard') + ' · ' + (SO.KITS[S.kit] ? SO.KITS[S.kit].name : '') + (S.challenges.length ? ' · ' + S.challenges.map(c => SO.CHALLENGES[c].name).join(', ') : '')), h('div', { class: 'spacer' }), btn('Quick Restart', () => g.quickRestart(), 'primary', 'R'), btn('Main Menu', ui.title, 'small', 'Esc')),
+      h('div', { class: 'page-head' }, h('h1', null, S.trial ? (S.won ? 'CHALLENGE CLEARED!' : 'CHALLENGE FAILED') : S.won ? 'CURTAIN CALL!' : 'KNOCKED OUT'), h('div', { class: 'muted', style: 'font-weight:700;font-size:15px' }, (S.trial ? 'Challenge: ' + SO.TRIALS[S.trial].name : S.mode === 'endless' ? 'Endless' : 'Standard') + ' · ' + (SO.KITS[S.kit] ? SO.KITS[S.kit].name : '') + (S.challenges.length ? ' · ' + S.challenges.map(c => SO.CHALLENGES[c].name).join(', ') : '')), h('div', { class: 'spacer' }), btn(S.trial ? 'Retry Challenge' : 'Quick Restart', () => g.quickRestart(), 'primary', 'R'), S.trial ? btn('Challenges', () => ui.challenges(), 'small') : null, btn('Main Menu', ui.title, 'small', 'Esc')),
       h('div', { class: 'sum' },
         h('div', { class: 'panel scroll' }, h('h2', null, 'THE RUN'),
           h('div', { class: 'bigstat' }, h('div', null, h('b', null, S.roundsCleared), h('span', null, 'Rounds cleared')), h('div', null, h('b', null, mm + ':' + String(ss).padStart(2, '0')), h('span', null, 'Fight time')), h('div', null, h('b', null, S.modulesBroken), h('span', null, 'Modules broken'))),
           h('div', { class: 'bigstat' }, h('div', null, h('b', null, Math.round(totalDealt)), h('span', null, 'Damage dealt')), h('div', null, h('b', null, Math.round(totalTaken)), h('span', null, 'Damage taken'))),
           !S.won && S.killedBy ? h('div', { class: 'unlock-pop', style: 'background:var(--coral-light)' }, 'Defeated by: ' + SO.sourceName(S.killedBy) + ' in Round ' + S.lastRound) : null,
           S.newRecord ? h('div', { class: 'unlock-pop' }, '★ ' + S.newRecord) : null,
+          S.trial && S.won ? h('div', { class: 'unlock-pop' }, S.trialNew ? '✓ First clear: ' + SO.TRIALS[S.trial].name + '!' : '✓ Cleared again: ' + SO.TRIALS[S.trial].name) : null,
           S.unlocks.map(t => h('div', { class: 'unlock-pop' }, '🔓 Unlocked ' + t)),
           h('h2', { style: 'margin-top:10px' }, 'DAMAGE TAKEN FROM'), bars(S.dmgTaken, 'boss')),
         h('div', { class: 'panel scroll' }, h('h2', null, 'YOUR BUILD — ', h('span', { style: 'color:var(--teal-dark)' }, S.identity)),
@@ -517,6 +520,46 @@
             h('div', { class: 'sel-row' }, sel('Chassis', cfg.chassis, t1.map(k => [k, SO.CHASSIS[k].name]), v => { cfg.chassis = v; cfg.tier2 = ''; }), tier2s.length ? sel('Tier 2', cfg.tier2, [['', 'None']].concat(tier2s.map(k => [k, SO.CHASSIS[k].name])), v => cfg.tier2 = v) : null),
             h('div', { class: 'sel-row' }, sel('Stage', cfg.arena, SO.ARENA_ORDER.map(k => [k, SO.ARENAS[k].name]), v => cfg.arena = v), sel('Round tuning', cfg.round, [[1, 'Round 1'], [3, 'Round 3'], [6, 'Round 6'], [10, 'Round 10']], v => cfg.round = +v)),
             h('div', { class: 'sel-row', style: 'gap:16px' }, tg('god', 'Invincible'), tg('infinite', 'Endless boss HP'), tg('hazards', 'Stage hazards')))))),
+        e => { if (typing()) return; if (e.code === 'Escape') ui.title(); else if (e.code === 'Enter') start(); });
+    };
+    render();
+  };
+
+  /* ================= challenges ================= */
+  ui.challenges = function () {
+    const d = D(), g = G(); g.toMenu();
+    const secretOn = !!d.unlocks.secretSeen;
+    const order = (secretOn ? SO.SECRET_TRIAL_ORDER : []).concat(SO.TRIAL_ORDER);
+    let sel = d.lastTrial && order.includes(d.lastTrial) ? d.lastTrial : order[0];
+    let kit = d.unlocks.kits.includes(d.lastTrialKit) ? d.lastTrialKit : (d.unlocks.kits.includes(d.lastKit) ? d.lastKit : 'tinkerer');
+    const rewardLine = T => {
+      if (!T.reward) return null; const K = SO.KITS[T.reward]; const got = d.unlocks.kits.includes(T.reward);
+      return h('div', { class: 'unlock-pop', style: got ? '' : 'background:#4a4a55;color:#fff' }, got ? '🔓 Reward: ' + K.name + ', ' + K.title + ' (unlocked)' : '🔒 Reward: ??? — a Secret character');
+    };
+    const start = () => {
+      const T = SO.TRIALS[sel]; d.lastTrial = sel; d.lastTrialKit = kit; SO.save.write();
+      if (d.run && !confirm('Starting a challenge will replace your unfinished run. Continue?')) return;
+      g.newRun('challenge', T.rules.kit || kit, [], sel);
+    };
+    const render = () => {
+      const T = SO.TRIALS[sel]; const done = SO.trialDone(sel);
+      const card = id => { const C = SO.TRIALS[id]; return h('div', { class: 'tcard' + (C.secret ? ' secret' : '') + (id === sel ? ' on' : '') + (SO.trialDone(id) ? ' done' : ''), onclick: () => { sel = id; SO.sfx.play('select'); render(); } },
+        h('div', { class: 'tname' }, C.name), h('div', { class: 'tmeta' }, C.rounds + ' rounds' + (C.secret ? ' · SECRET' : '') + (C.reward ? ' · ★' : '')), SO.trialDone(id) ? h('div', { class: 'tcheck' }, '✓') : null); };
+      const kits = SO.KIT_ORDER.filter(k => d.unlocks.kits.includes(k));
+      const kitSel = T.rules.kit ? h('b', null, SO.KITS[T.rules.kit].name + ' (fixed)')
+        : h('select', { onchange: e => { kit = e.target.value; } }, kits.map(k => h('option', { value: k, selected: k === kit ? true : null }, SO.KITS[k].name + ', ' + SO.KITS[k].title)));
+      ui.set(h('div', { class: 'screen solid' }, h('div', { class: 'page' },
+        h('div', { class: 'page-head' }, h('h1', null, 'CHALLENGES'), h('div', { class: 'muted', style: 'font-weight:700;max-width:520px' }, 'Short runs of 3–5 rounds, each with a twist. Clear one to tick it off — some hand out characters.'), h('div', { class: 'spacer' }), btn('Back', ui.title, 'small', 'Esc')),
+        h('div', { class: 'trials' },
+          h('div', { class: 'panel scroll tlist' },
+            secretOn ? h('h2', { class: 'tsec secret' }, 'SECRET CHALLENGES') : null, secretOn ? h('div', { class: 'tgrid' }, SO.SECRET_TRIAL_ORDER.map(card)) : null,
+            h('h2', { class: 'tsec' }, 'CHALLENGES · ' + SO.TRIAL_ORDER.filter(SO.trialDone).length + '/' + SO.TRIAL_ORDER.length + ' CLEARED'), h('div', { class: 'tgrid' }, SO.TRIAL_ORDER.map(card))),
+          h('div', { class: 'panel tdetail' + (T.secret ? ' secret' : '') },
+            h('h2', null, T.name), h('div', { class: 'tmeta big' }, T.rounds + ' rounds' + (T.rules.startRound ? ' · starts at Round ' + T.rules.startRound : '') + (done ? ' · ✓ CLEARED' : '')),
+            h('p', { class: 'cdesc' }, T.desc), rewardLine(T),
+            h('div', { class: 'sec2' }, 'CHARACTER'), kitSel,
+            h('p', { class: 'muted', style: 'font-size:12.5px' }, 'Challenge runs never change your Standard or Endless records. Quit any time from the pause menu.'),
+            h('div', { style: 'margin-top:auto;display:flex;justify-content:flex-end;padding-top:8px' }, btn('Start Challenge', start, 'primary', 'Enter')))))),
         e => { if (typing()) return; if (e.code === 'Escape') ui.title(); else if (e.code === 'Enter') start(); });
     };
     render();

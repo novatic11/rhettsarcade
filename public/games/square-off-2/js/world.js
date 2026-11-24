@@ -33,6 +33,7 @@
       this.twin = this.build.f.twin ? { x: 0, y: 0, ws: null } : null;
       this.controlLock = false; this.weaponsOff = false; this.bannerT = 0;
       this.bossHpMul = o.bossHpMul || 1; this.bossCdMul = o.bossCdMul || 1; this.contract = null;
+      this.tr = o.trial || {}; this.timeScale = this.tr.fast || 1; this.trialInfo = o.trialInfo || null; this.trialChip = null;
       if (this.boss && this.bossHpMul !== 1 && !o.bossHp) { this.boss.maxHp = Math.round(this.boss.maxHp * this.bossHpMul); this.boss.hp = this.boss.maxHp; for (const m of this.boss.modules) { m.maxHp *= this.bossHpMul; m.hp = m.maxHp; } }
     }
     get mouse() { return this.mouseOverride || SO.input.mouse; }
@@ -83,7 +84,7 @@
       this.beamsE = this.beamsE.filter(b => !b.dead);
       // hazards (scheduled through the director so they never stack with zone attacks)
       if (this.hazardsOn && this.arena.hazard && this.state === 'fight' && this.boss) {
-        this.hazardT -= sdt;
+        this.hazardT -= sdt * (this.tr.hazardSpeed || 1);
         if (this.hazardT <= 0) { if (this.canHazard()) { this.hazards.push(this.arena.hazard.make(this)); this.hazardT = this.arena.hazard.interval * M.rand(0.85, 1.2); } else this.hazardT = 0.6; }
       }
       for (const h of this.hazards) if (!h.dead) h.update(sdt);
@@ -115,13 +116,14 @@
     targetPos() { return this.decoy || { x: this.player.x, y: this.player.y }; }
     bulletSpeed(v) {
       const bb = this.bb || { passives: {} };
-      let m = Math.min(1.25, 1 + 0.025 * (this.round - 1)) * (bb.passives.tempered ? 1.12 : 1) * Math.pow(1.04, bb.passives.escal || 0) * (this.boss ? this.boss.chassisDef.bspeed : 1);
+      let m = Math.min(1.25, 1 + 0.025 * (this.round - 1)) * (bb.passives.tempered ? 1.12 : 1) * Math.pow(1.04, bb.passives.escal || 0) * (this.boss ? this.boss.chassisDef.bspeed : 1) * (bb.bspeed || 1);
       return Math.min(BULLET_CAP, v * m);
     }
     eBullet(x, y, a, spd, o = {}) {
       if (this.eShots.length >= ESHOT_MAX || this.state !== 'fight') return null;
       const v = this.bulletSpeed(spd);
       const s = Object.assign({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: 6, dmg: 12, life: 8, kind: 'orb', src: 'boss', age: 0, bounces: 0 }, o);
+      if (this.bb && this.bb.bsize) s.r += this.bb.bsize;
       if (s.maxSpeed) s.maxSpeed = Math.min(BULLET_CAP, this.bulletSpeed(s.maxSpeed));
       if (s.homing) s.homing = Math.min(2.6, s.homing);
       this.eShots.push(s); return s;
@@ -141,7 +143,8 @@
         if (s.homing && (s.homeT == null || s.homeT > 0)) { const tp = this.targetPos(); const cur = Math.atan2(s.vy, s.vx); const sp = Math.hypot(s.vx, s.vy); const na = M.turnToward(cur, M.ang(s.x, s.y, tp.x, tp.y), s.homing * dt); s.vx = Math.cos(na) * sp; s.vy = Math.sin(na) * sp; if (s.homeT != null) s.homeT -= dt; }
         if (s.accel) { const sp = Math.hypot(s.vx, s.vy); const ns = Math.min(s.maxSpeed || BULLET_CAP, sp + s.accel * dt); if (sp > 0) { s.vx *= ns / sp; s.vy *= ns / sp; } }
         if (b && b.lodestone > 0 && s.metal && b.alive) { const d = M.dist(s.x, s.y, b.x, b.y); if (d < 170) { const a = M.ang(s.x, s.y, b.x, b.y); s.vx = s.vx * (1 - dt * 4) + Math.cos(a) * 900 * dt; s.vy = s.vy * (1 - dt * 4) + Math.sin(a) * 900 * dt; if (d < b.h) { s.dead = true; this.hitBoss(4 * this.build.s.dmgMul, 'harpoon', s.x, s.y, { noWord: true }); this.fxSpark(s.x, s.y, P.coral, 4); continue; } } }
-        s.x += s.vx * dt; s.y += s.vy * dt; s.life -= dt;
+        const ldt = f.lantern && M.dist2(s.x, s.y, P.x, P.y) < 22500 ? dt * 0.6 : dt;
+        s.x += s.vx * ldt; s.y += s.vy * ldt; s.life -= dt;
         if (s.timer != null) { s.timer -= dt; if (s.timer <= 0) { s.timer = null; if (s.onTimer) s.onTimer(s); } }
         if (s.bounce) {
           let hit = false;
@@ -556,6 +559,10 @@
         if (this.inSpotlight) add += 0.15;
         if (f.blitz) add += this.stats.time < 12 ? 0.6 : this.stats.time > 45 ? -0.15 : 0;
         if (f.ember) { const fr = P.hp / P.maxHp; add += fr < 0.25 ? 0.7 : fr < 0.5 ? 0.25 : 0; }
+        if (f.oRage && P.hp < P.maxHp * 0.5) add += 0.35;
+        if (s.oLong && dist > 400) add += s.oLong;
+        if (s.oFocus && !P.thrusting) add += s.oFocus;
+        if (s.oLeech && !o.beam) { P.leechN = (P.leechN || 0) + 1; if (P.leechN >= 10) { P.leechN = 0; P.heal(2 * s.oLeech); } }
         if (f.combo && !o.beam) { P.combo = (P.combo || 0) + 1; add += Math.min(0.3, Math.floor(P.combo / 10) * 0.02); if (P.combo % 10 === 0 && P.combo <= 150) this.word('COMBO ×' + P.combo, P.x, P.y - 60, 'good'); }
         if (f.static && P.staticN > 0 && !o.beam) { add += 0.5; P.staticN--; }
         if (o.metal && b.st.magnet > 0) add += 0.15;
@@ -734,6 +741,7 @@
       for (const d of this.decals) { ctx.save(); ctx.globalAlpha = Math.max(0, 0.7 * (1 - d.t / 9)); art.text(ctx, 'SQUARE OFF 2', d.x, d.y - 8, 18, P.blueDeep, 'center', 0); ctx.restore(); }
       for (const p of this.platforms) { if (this.arena.drawPlatform) this.arena.drawPlatform(ctx, p); else art.inkRect(ctx, p.x, p.y, p.w, 16, 3, P.paperDeep, 3); }
       for (const h of this.hazards) h.draw(ctx);
+      if (this.tr.lava) { const k = 0.55 + 0.2 * Math.sin(t * 5); ctx.save(); ctx.globalAlpha = k; ctx.fillStyle = P.coral; ctx.fillRect(A.L, A.B - 8, A.R - A.L, 10); ctx.globalAlpha = k * 0.35; ctx.fillStyle = P.warn; ctx.fillRect(A.L, A.B - 26, A.R - A.L, 18); ctx.restore(); }
       // enemy telegraphs (under everything so actors stay readable)
       for (const be of this.beamsE) if (be.phase === 'warn') be.draw(ctx);
       for (const l of this.lenses) this.drawLens(ctx, l);
@@ -764,6 +772,7 @@
       if (!this.demoMode) SO.drawStageFrame(ctx, t, this.arena.accent);
       if (this.flashT > 0) { ctx.fillStyle = `rgba(255,250,240,${this.flashT * 0.5})`; ctx.fillRect(0, 0, SO.W, SO.H); }
       if (this.hurtFlash > 0) { const a = set.reducedFlash ? this.hurtFlash * 0.35 : this.hurtFlash; const g = ctx.createRadialGradient(640, 360, 300, 640, 360, 760); g.addColorStop(0, 'rgba(255,47,99,0)'); g.addColorStop(1, `rgba(255,47,99,${a * 0.55})`); ctx.fillStyle = g; ctx.fillRect(0, 0, SO.W, SO.H); }
+      if (this.tr.dark && !this.demoMode) { const px = P2.x + this.shakeX, py = P2.y + this.shakeY; const g = ctx.createRadialGradient(px, py, 70, px, py, 240); g.addColorStop(0, 'rgba(6,8,18,0)'); g.addColorStop(1, 'rgba(6,8,18,0.96)'); ctx.fillStyle = g; ctx.fillRect(0, 0, SO.W, SO.H); }
       if (!this.demoMode && !this.attract && SO.drawHUD) SO.drawHUD(ctx, this);
     }
     drawLens(ctx, l) {

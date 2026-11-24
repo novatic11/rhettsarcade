@@ -52,8 +52,8 @@
     const ctx = G.ctx;
     try {
       if (G.state === 'play' && G.world) {
-        const steps = Math.max(1, Math.ceil(dt / (1 / 90)));
-        for (let i = 0; i < steps; i++) G.world.update(dt / steps);
+        const wdt = dt * (G.world.timeScale || 1); const steps = Math.max(1, Math.ceil(wdt / (1 / 90)));
+        for (let i = 0; i < steps; i++) G.world.update(wdt / steps);
         G.afterUpdate();
       } else if (G.state === 'menu' && G.attract) {
         if (G.attract.boss) G.attract.mouseOverride = { x: G.attract.boss.x, y: G.attract.boss.y };
@@ -76,6 +76,11 @@
       } else if (ev.type === 'phase') SO.ui.toast(`<b>GEAR SHIFT!</b> The boss enters phase ${ev.idx + 1} and can overlap more patterns. Its core is open — punish it!`, 'boss', 4);
     }
     if (G.tutorial) G.tutorialTick();
+    const run = G.run, T = W.mode === 'challenge' && run ? G.trialOf(run) : null;
+    if (T && W.state === 'fight') {
+      if (T.rules.maxHits && (run.trialHits || 0) + W.stats.hitsTaken >= T.rules.maxHits) W.onPlayerDefeated('featherlight');
+      else if (T.rules.timeLimit && W.stats.time >= T.rules.timeLimit) W.onPlayerDefeated('clock');
+    }
     if (W.result) { const r = W.result; W.result = null; if (W.mode === 'tutorial') G.endTutorial(r === 'win'); else if (W.mode === 'practice') G.practiceEnded(r); else G.roundEnded(r); }
   };
   G.pause = function () { if (G.state !== 'play') return; G.state = 'pause'; SO.music.setDuck(0.4); SO.input.clearBuffer(); SO.ui.pause(); };
@@ -96,11 +101,19 @@
     if (B.f.glitch) { const pool = SO.GLITCH_FORMS.filter(id => !run.pUps.some(x => x.id === id)); if (pool.length) { const id = pool[Math.floor(SO.RNG((run.seed ^ (run.round * 7919)) >>> 0)() * pool.length)]; B.glitchForm = id; SO.applyPlayerUp(B, id); } }
     for (const x of run.pUps) SO.applyPlayerUp(B, x.id);
     if (run.challenges.includes('glass')) B.s.maxHp = Math.max(25, Math.round(B.s.maxHp * 0.5));
+    const T = G.trialOf(run), r = T ? T.rules : {};
+    if (r.pHp) B.s.maxHp = Math.max(1, Math.round(B.s.maxHp * r.pHp));
+    if (r.pDmg) B.s.dmgMul *= r.pDmg;
+    if (r.bigHitbox) B.s.hitR *= r.bigHitbox;
+    if (B.f.lives) { B.s.maxHp = Math.max(1, 9 + Math.floor((B.s.maxHp - 100) / 25) + Math.floor(B.s.shield / 20)); B.s.shield = 0; }
+    if (r.oneHp) { B.s.maxHp = 1; B.s.shield = 0; }
     return B;
   };
-  G.repairFrac = run => Math.min(run.challenges.includes('halfheal') ? 0.5 : 1, (((SO.KITS[run.kit] || {}).flags || {}).lowRepair) ? 0.25 : 1);
+  G.trialOf = run => (run && run.trial && SO.TRIALS[run.trial]) || null;
+  G.repairFrac = run => (G.trialOf(run) && G.trialOf(run).rules.noHeal) ? 0 : Math.min(run.challenges.includes('halfheal') ? 0.5 : 1, (((SO.KITS[run.kit] || {}).flags || {}).lowRepair) ? 0.25 : 1);
   G.bossFor = function (run, excludeCurrent) {
-    const bb = SO.newBossBuild();
+    const bb = (((SO.KITS[run.kit] || {}).flags || {}).original) ? SO.classicBossBuild() : SO.newBossBuild();
+    const T = G.trialOf(run); if (T && T.rules.bossStart) for (const id of T.rules.bossStart) SO.applyBossUp(bb, id);
     if (run.challenges.includes('armored')) SO.applyBossUp(bb, 'bp_armor');
     if (run.kitRandom && run.kitRandom.bossUp) SO.applyBossUp(bb, run.kitRandom.bossUp);
     for (const x of run.bUps) { if (excludeCurrent && x.round === run.round) continue; SO.applyBossUp(bb, x.id); }
@@ -109,8 +122,10 @@
   G.saveRun = function () { if (!G.run) return; D().run = G.run; SO.save.write(); };
 
   /* ---------------- runs ---------------- */
-  G.newRun = function (mode, kit, challenges) {
+  G.newRun = function (mode, kit, challenges, trialId) {
     const d = D(); const seed = (Math.random() * 2147483647) | 0;
+    const TR = trialId ? SO.TRIALS[trialId] : null;
+    if (TR) { if (TR.rules.kit) kit = TR.rules.kit; challenges = (TR.rules.mods || []).slice(); }
     const K = SO.KITS[kit];
     const run = { v: 1, mode, kit, challenges: challenges.slice(), seed, round: 1, rerolls: challenges.includes('noreroll') ? 0 : 3 + (K.rerolls || 0), pUps: [], bUps: [], phase: 'ready', hp: null, ws: null, stats: { dmgBySource: {}, dmgTaken: {}, modulesBroken: 0, time: 0, rounds: [] }, kitRandom: null, continued: false, rrGain: {} };
     if (K.random) {
@@ -124,13 +139,24 @@
       const bossUp = SO.offerBoss(SO.newBossBuild(), rng, 3, { round: 1 })[0];
       run.kitRandom = { weapon, ups, utility, bossUp };
     }
+    if (TR) {
+      run.trial = trialId; run.round = TR.rules.startRound || 1; run.trialStart = run.round; run.trialHits = 0;
+      const rng = SO.RNG(seed + 991), r0 = run.round - 1; const orig = !!(K.flags || {}).original;
+      if (TR.rules.extraWeapons) { const held = G.buildFor(run).weapons.map(w => w.id); const pool = M.shuffle(SO.WEAPON_ORDER.filter(id => !held.includes(id)), rng); pool.slice(0, TR.rules.extraWeapons).forEach(id => run.pUps.push({ id: (orig ? 'o_w_' : 'w_') + id, round: r0 })); }
+      for (let i = 0; i < (TR.rules.freeUps || 0); i++) {
+        const B = G.buildFor(run); const pid = SO.offerPlayer(B, rng, 1, { round: run.round, unlockedWeapons: d.unlocks.weapons })[0]; if (pid) run.pUps.push({ id: pid, round: r0 });
+        const bid = SO.offerBoss(G.bossFor(run), rng, 1, { round: run.round, B, orig })[0]; if (bid) run.bUps.push({ id: bid, round: r0 });
+      }
+      if (TR.rules.freeUps && !orig) run.bUps.push({ id: 'ch_' + rng.pick(SO.CHASSIS_T1), round: r0 });
+      run.pUps = run.pUps.filter(x => SO.PLAYER_UP[x.id]);
+    }
     d.records.runs++; d.records.charsUsed = d.records.charsUsed || []; if (!d.records.charsUsed.includes(kit)) d.records.charsUsed.push(kit);
-    G.run = run; G.lastCfg = { mode, kit, challenges: challenges.slice() };
+    G.run = run; G.lastCfg = { mode, kit, challenges: challenges.slice(), trial: trialId || null };
     G.checkUnlocks();
     G.startRound();
   };
   G.resumeRun = function () {
-    const d = D(); if (!d.run) return; G.run = d.run; G.lastCfg = { mode: G.run.mode, kit: G.run.kit, challenges: G.run.challenges.slice() };
+    const d = D(); if (!d.run) return; G.run = d.run; G.lastCfg = { mode: G.run.mode, kit: G.run.kit, challenges: G.run.challenges.slice(), trial: G.run.trial || null };
     if (G.run.phase === 'workshop' && G.run.ws) { G.state = 'workshop'; G.world = null; SO.music.play(G.runMusic(G.run)); SO.ui.workshop(); }
     else G.startRound();
   };
@@ -139,7 +165,11 @@
     const ar = SO.arenaForRound(run.round, run.mode); const finale = run.mode === 'standard' && run.round === 10 && !run.continued;
     const hp = G.repairFrac(run) < 1 && run.hp != null ? Math.min(B.s.maxHp, run.hp) : null;
     const KF = (SO.KITS[run.kit] || {}).flags || {};
-    G.world = new SO.World({ mode: run.mode, round: run.round, build: B, bb, arena: ar.id, hazards: ar.hazards, challenges: run.challenges, finale, playerHp: hp, bossHpMul: KF.hex ? 1.3 : 1, bossCdMul: KF.hex ? 0.85 : 1 });
+    const TR = G.trialOf(run), tr = TR ? TR.rules : null;
+    G.world = new SO.World({ mode: run.mode, round: run.round, build: B, bb, arena: ar.id, hazards: ar.hazards || !!(tr && tr.hazards), challenges: run.challenges, finale, playerHp: hp, bossHpMul: (KF.hex ? 1.3 : 1) * ((tr && tr.bossHp) || 1), bossCdMul: KF.hex ? 0.85 : 1, trial: tr, trialInfo: TR ? { name: TR.name, k: run.round - run.trialStart + 1, n: TR.rounds } : null });
+    if (tr && tr.maxHits) G.world.trialChip = W => 'HITS TO SPARE: ' + Math.max(0, tr.maxHits - 1 - ((run.trialHits || 0) + W.stats.hitsTaken));
+    else if (tr && tr.timeLimit) G.world.trialChip = W => 'TIME LEFT: ' + Math.max(0, Math.ceil(tr.timeLimit - W.stats.time)) + 's';
+    if (TR && run.round === run.trialStart) setTimeout(() => SO.ui.toast('<b>CHALLENGE: ' + TR.name + '</b> — ' + TR.desc, 'boss', 7), 500);
     if (B.glitchForm) setTimeout(() => SO.ui.toast('<b>GLITCH:</b> this round you are running <b>' + SO.PLAYER_UP[B.glitchForm].name + '</b>.', 'boss', 6), 700);
     if (KF.tally) { const hasMod = G.world.boss.modules.length > 0; const keys = Object.keys(SO.CONTRACTS).filter(k => !SO.CONTRACTS[k].needsModule || hasMod); const id = SO.RNG(run.seed ^ SO.hash('c' + run.round)).pick(keys); run.contract = id; G.world.contract = { id, round: run.round }; setTimeout(() => SO.ui.toast('<b>CONTRACT:</b> ' + SO.CONTRACTS[id].text(run.round) + '. Pays a bonus pick + 1 reroll.', 'unlock', 7), 1200); }
     run.phase = 'ready'; run.ws = null; G.saveRun(); SO.music.play(G.runMusic(run)); SO.music.setDuck(1);
@@ -160,6 +190,7 @@
     const W = G.world, run = G.run, d = D(); const st = run.stats;
     for (const k in W.stats.dmgBySource) st.dmgBySource[k] = (st.dmgBySource[k] || 0) + W.stats.dmgBySource[k];
     for (const k in W.stats.dmgTaken) st.dmgTaken[k] = (st.dmgTaken[k] || 0) + W.stats.dmgTaken[k];
+    if (run.trial) run.trialHits = (run.trialHits || 0) + W.stats.hitsTaken;
     st.modulesBroken += W.stats.modulesBroken; st.time += W.stats.time; st.rounds.push({ round: run.round, time: W.stats.time, won: result === 'win' });
     const feats = d.records.feats = d.records.feats || []; const feat = k => { if (!feats.includes(k)) feats.push(k); };
     st.erased = (st.erased || 0) + (W.stats.erased || 0); if (st.erased >= 300) feat('sponge');
@@ -171,12 +202,16 @@
     if (W.build.weapons.length >= 6) feat('sixguns');
     d.records.bossesBeaten++; d.records.totalDamage += Object.values(W.stats.dmgBySource).reduce((a, b) => a + b, 0);
     if (run.mode === 'standard') d.records.bestStandardRound = Math.max(d.records.bestStandardRound, run.round);
-    else { d.records.endlessBest = Math.max(d.records.endlessBest, run.round); d.records.endlessBestKit[run.kit] = Math.max(d.records.endlessBestKit[run.kit] || 0, run.round); }
+    else if (run.mode === 'endless') { d.records.endlessBest = Math.max(d.records.endlessBest, run.round); d.records.endlessBestKit[run.kit] = Math.max(d.records.endlessBestKit[run.kit] || 0, run.round); }
     if (run.mode === 'standard' && run.continued) d.records.endlessBest = Math.max(d.records.endlessBest, run.round);
     if (W.contract) { const C = SO.CONTRACTS[W.contract.id]; run.bountyPaid = !!C.check(W, run.round); SO.ui.toast(run.bountyPaid ? '<b>CONTRACT PAID!</b> Bonus pick + 1 reroll.' : '<b>Contract failed.</b> No bounty this round.', run.bountyPaid ? 'good' : 'boss', 5); }
     if (G.repairFrac(run) < 1) { const mx = W.player.maxHp; run.hp = Math.min(mx, W.player.hp + mx * G.repairFrac(run)); }
     const un = G.checkUnlocks(); un.forEach(t => SO.ui.toast('🔓 <b>Unlocked</b> ' + t, 'unlock', 6));
     run.unlocksEarned = (run.unlocksEarned || []).concat(un);
+    if (run.trial && run.round - run.trialStart + 1 >= SO.TRIALS[run.trial].rounds) {
+      const tl = d.records.trials = d.records.trials || []; if (!tl.includes(run.trial)) { tl.push(run.trial); run.trialNew = true; }
+      run.unlocksEarned = run.unlocksEarned.concat(G.checkUnlocks()); SO.save.write(); G.endRun(true); return;
+    }
     if (run.mode === 'standard' && run.round === 10 && !run.continued) {
       d.records.standardWins++; if (!d.records.fastestWin || st.time < d.records.fastestWin) d.records.fastestWin = st.time;
       if (run.challenges.length) d.records.challengeWins++;
@@ -192,8 +227,9 @@
   G.genOffers = function (kind) {
     const run = G.run, ws = run.ws; const B = G.buildFor(run), bb = G.bossFor(run);
     const rng = SO.RNG(run.seed ^ SO.hash(kind + ':' + run.round + ':' + (ws.rolls || 0) + ':' + ((ws.bossPicks || []).length)));
-    if (kind === 'player') return SO.offerPlayer(B, rng, B.s.cards, { round: run.round, unlockedWeapons: D().unlocks.weapons, exclude: ws.offersP || [] });
-    if (kind === 'boss') return SO.offerBoss(bb, rng, 3, { round: run.round, B });
+    const TR = G.trialOf(run), tr = TR ? TR.rules : {};
+    if (kind === 'player') return SO.offerPlayer(B, rng, tr.playerCards || B.s.cards, { round: run.round, unlockedWeapons: D().unlocks.weapons, exclude: ws.offersP || [], noNew: !!tr.noNew });
+    if (kind === 'boss') return SO.offerBoss(bb, rng, 3, { round: run.round, B, orig: !!B.f.original });
     return SO.chassisOptions(bb, rng);
   };
   G.enterWorkshop = function () {
@@ -227,7 +263,7 @@
     } else if (ws.step === 'chassis') { run.bUps.push({ id, round: run.round }); ws.pickC = id; ws.step = 'review'; }
     G.saveRun(); SO.ui.workshop();
   };
-  G.chassisEligibleNow = function (run) { if (run.round !== 3 && run.round !== 7) return false; const bb = G.bossFor(run); if (run.round === 3 && bb.chassis !== 'proto') return false; return SO.chassisOptions(bb, SO.RNG(1)).length > 0; };
+  G.chassisEligibleNow = function (run) { if (run.round !== 3 && run.round !== 7) return false; if (((SO.KITS[run.kit] || {}).flags || {}).original) return false; const bb = G.bossFor(run); if (run.round === 3 && bb.chassis !== 'proto') return false; return SO.chassisOptions(bb, SO.RNG(1)).length > 0; };
   G.bossPicksNeeded = run => (run.challenges.includes('double') ? 2 : 1) + (((SO.KITS[run.kit] || {}).flags || {}).tally && run.round % 3 === 0 ? 1 : 0);
   G.freeRerollReady = run => !!(((SO.KITS[run.kit] || {}).flags || {}).freeReroll && run.ws && !run.ws.freeUsed && (run.ws.step === 'player' || run.ws.step === 'boss'));
   G.rerollsAvail = run => run.rerolls + (G.freeRerollReady(run) ? 1 : 0);
@@ -240,14 +276,14 @@
     const un = G.checkUnlocks(); const unlocks = (run.unlocksEarned || []).concat(un);
     let newRecord = null;
     if (run.mode === 'endless' && cleared && cleared >= d.records.endlessBest) newRecord = 'Endless record: Round ' + cleared + ' cleared!';
-    const S = { mode: run.mode, kit: run.kit, challenges: run.challenges, won, killedBy, roundsCleared: cleared, lastRound: run.round, time: run.stats.time, dmgBySource: run.stats.dmgBySource, dmgTaken: run.stats.dmgTaken, modulesBroken: run.stats.modulesBroken,
+    const S = { mode: run.mode, kit: run.kit, challenges: run.challenges, won, trial: run.trial || null, trialNew: !!run.trialNew, killedBy, roundsCleared: cleared, lastRound: run.round, time: run.stats.time, dmgBySource: run.stats.dmgBySource, dmgTaken: run.stats.dmgTaken, modulesBroken: run.stats.modulesBroken,
       pUps: run.pUps, bUps: run.bUps, identity: SO.buildIdentity(B),
       loadout: B.weapons.map(w => SO.WEAPONS[w.id].name + (w.evo ? ' (' + SO.WEAPONS[w.id].evos[w.evo].name + ')' : w.mods ? ' +' + w.mods : '')).join(' · ') + (B.utility ? ' · [E] ' + SO.UTILS[B.utility].name : ''), chassis: SO.CHASSIS[bb.chassis].name + (bb.tier2 ? ' → ' + SO.CHASSIS[bb.tier2].name : '') + ' · ' + SO.bossAttackList(bb).length + ' attacks', unlocks, newRecord,
       bossNote: won ? 'You picked every one of these upgrades — and still won.' : 'Every part of it was your choice. Maybe next time, skip the ' + (killedBy && SO.BOSS_ATTACKS[killedBy] ? SO.BOSS_ATTACKS[killedBy].name : 'mean one') + '?' };
     d.run = null; SO.save.write(); G.run = null; G.world = null; G.state = 'summary'; SO.music.play('menu'); SO.music.setDuck(1);
     SO.ui.summary(S);
   };
-  G.quickRestart = function () { const c = G.lastCfg; if (!c) { SO.ui.title(); return; } const d = D(); const kit = d.unlocks.kits.includes(c.kit) ? c.kit : 'tinkerer'; G.newRun(c.mode, kit, c.challenges.filter(x => d.unlocks.challenges.includes(x))); };
+  G.quickRestart = function () { const c = G.lastCfg; if (!c) { SO.ui.title(); return; } const d = D(); const kit = d.unlocks.kits.includes(c.kit) ? c.kit : 'tinkerer'; if (c.trial) { G.newRun('challenge', kit, [], c.trial); return; } G.newRun(c.mode, kit, c.challenges.filter(x => d.unlocks.challenges.includes(x))); };
 
   G.checkUnlocks = function () {
     const d = D(), u = d.unlocks, r = d.records; const out = [];
@@ -288,6 +324,8 @@
     if (F.includes('sponge')) kit('sponge');
     if (F.includes('knockout')) kit('underdog');
     if (F.includes('glitch')) kit('glitch');
+    if (SO.so1Best() >= 5) kit('original');
+    for (const id in SO.TRIALS) if (SO.TRIALS[id].reward && (r.trials || []).includes(id)) kit(SO.TRIALS[id].reward);
     if (r.standardWins >= 1) { wep(['plasma', 'jet']); ch(['double', 'heavy', 'halfheal', 'armored']); cos('gold'); }
     if (r.endlessBest >= 11) cos('blueprint');
     if (r.chassisSeen.filter(c => c !== 'proto').length >= 3) cos('news');

@@ -23,10 +23,11 @@
       this.ablative = s.ablative || 0; this.secondWindUsed = false; this.closeCallHealed = 0; this.siphonRate = 0;
       this.guard = 10; this.guardDelay = 0; this.guardBroken = 0; this.jumps = 0; this.slamming = false; this.reflectLeft = 0;
       this.pod = B.f.pod ? { x: this.x + 60, y: this.y - 90 } : null; this.podTarget = null;
+      this.gdir = W.tr && W.tr.invert ? -1 : 1; this.waveTrail = []; this.lifeAcc = 0; this.stillT = 0; this.lavaT = 0;
       this.weapons = B.weapons.map(w => this.makeWS(w));
       this.gunList = this.weapons.map(ws => ws);
     }
-    makeWS(w) { const def = SO.WEAPONS[w.id]; return { w, id: w.id, def, p: def.calc(w, SO.buildMul(this.B)), cd: Math.random() * 0.3, recoil: 0 }; }
+    makeWS(w) { const def = SO.WEAPONS[w.id]; return { w, id: w.id, def, p: def.calc(w, SO.weaponMul(this.B, w)), cd: Math.random() * 0.3, recoil: 0 }; }
     get gx() { return this.pod ? this.pod.x : this.x; }
     get gy() { return this.pod ? this.pod.y : this.y + this.bodyOff; }
     guardHit(n) { this.guard -= n; this.guardDelay = 1; if (this.guard <= 0) { this.guard = 0; this.guardBroken = 3; this.W.word('GUARD BROKEN', this.x, this.y - 50, 'hurt'); this.W.sfx('break', 0.5); } }
@@ -37,6 +38,9 @@
       const ctrl = !W.controlLock && !W.aiControl;
       let L = ctrl && I.down('left'), R = ctrl && I.down('right'), U = ctrl && I.down('up'), D = ctrl && I.down('down'), T = ctrl && I.down('thrust');
       if (W.aiControl) { const ai = W.aiControl(this, dt); L = ai.L; R = ai.R; T = ai.T; D = false; U = false; }
+      if (W.tr.mirror) { const t0 = L; L = R; R = t0; }
+      if (f.flip && ctrl && I.take('down')) { this.gdir *= -1; this.platform = null; this.dropT = 0.2; W.sfx('dash', 0.5); W.fxRing(this.x, this.y, 8, 34, '#ff9ad0', 0.2); if (W.canWord('flip', 0.5)) W.word('FLIP!', this.x, this.y - 44 * this.gdir, 'small'); }
+      if (f.flip) D = false;
       const m = W.mouse;
       if (this.pod) {
         let tx = m.x, ty = m.y; const by = this.y + this.bodyOff; if (M.dist(this.x, by, tx, ty) > 320) { const a = M.ang(this.x, by, tx, ty); tx = this.x + Math.cos(a) * 320; ty = by + Math.sin(a) * 320; }
@@ -60,11 +64,14 @@
       if (this.maxShield > 0 && W.time - this.lastHurtT > s.shieldDelay) this.shield = Math.min(this.maxShield, this.shield + s.shieldRate * dt);
       this.siphonRate = Math.max(0, this.siphonRate - dt * 3);
       if (this.tempShield > 0 && W.time - this.lastHurtT > 4 && !f.overshield) this.tempShield = Math.max(0, this.tempShield - dt);
-      if (s.regen && W.time - this.lastHurtT > 4 && this.hp > 0) { const nh = this.hp + s.regen * dt; if (nh > this.maxHp && f.overshield) this.tempShield = Math.min(30, this.tempShield + nh - this.maxHp); this.hp = Math.min(this.maxHp, nh); }
+      if (s.regen && W.time - this.lastHurtT > 4 && this.hp > 0) { if (f.lives) this.lifeHp(s.regen * dt); else { const nh = this.hp + s.regen * dt; if (nh > this.maxHp && f.overshield) this.tempShield = Math.min(30, this.tempShield + nh - this.maxHp); this.hp = Math.min(this.maxHp, nh); } }
+      if (s.oRegen && this.hp > 0 && W.state === 'fight') { if (f.lives) this.lifeHp(s.oRegen * dt); else this.hp = Math.min(this.maxHp, this.hp + s.oRegen * dt); }
+      if (W.tr.drain && this.hp > 0 && W.state === 'fight') { this.hp -= W.tr.drain * dt / (f.lives ? 25 : 1); if (this.hp <= 0) { this.hp = 0; W.stats.lastHitBy = 'drain'; W.onPlayerDefeated('drain'); } }
+      if (W.tr.restless && W.state === 'fight') { if (Math.hypot(this.vx, this.vy) < 70 && !this.dashing && !this.grapple) this.stillT += dt; else this.stillT = Math.max(0, this.stillT - dt * 2); if (this.stillT >= 1) { this.stillT = 0; this.hurt(10, 'restless'); } }
       this.vampAcc = Math.max(0, this.vampAcc - dt * 4);
       this.nextBlink -= dt; if (this.nextBlink <= 0) { this.blink = 0.12; this.nextBlink = M.rand(2, 5); } this.blink = Math.max(0, this.blink - dt);
       this.inWater = W.waterY != null && this.y > W.waterY;
-      const heavy = W.challenges.includes('heavy');
+      const heavy = W.challenges.includes('heavy'); const gd = this.gdir; const ice = W.tr.ice ? 0.18 : 1;
       const dir = (R ? 1 : 0) - (L ? 1 : 0);
       if (ctrl && I.take('util')) this.useUtility();
       // grapple flight overrides physics
@@ -74,7 +81,7 @@
         if (d < 12 || g.t > 0.5) { this.vx = Math.cos(a) * 320; this.vy = Math.sin(a) * 320; this.grapple = null; }
         this.collide(this.y + this.bodyOff + this.size / 2, false); this.updateWeapons(dt); return;
       }
-      if (this.B.f.anchor) { if (ctrl && I.take('dash') && W.canWord('anch', 1.5)) W.word('ANCHORED', this.x, this.y - 44, 'small'); }
+      if (this.B.f.anchor || f.noDash || W.tr.noDash) { if (ctrl && I.take('dash') && W.canWord('anch', 1.5)) W.word(f.anchor ? 'ANCHORED' : 'NO DASH', this.x, this.y - 44, 'small'); }
       else if (ctrl && I.take('dash') && this.dashCharges > 0 && this.dashT <= 0) this.startDash(dir, U, D);
       else if (W.aiDash && W.aiDash(this) && this.dashCharges > 0 && this.dashT <= 0) this.startDash(dir || this.facing, false, false);
       if (this.dashT > 0) {
@@ -85,23 +92,31 @@
       } else {
         this.dashing = false;
         const maxSpd = 330 * s.speedMul * (this.slipT > 0 ? 1.35 : 1) * (this.inWater ? 0.78 : 1);
-        if (dir) { let acc = this.grounded ? 3000 : 2300; if (Math.sign(this.vx) !== dir && Math.abs(this.vx) > 20) acc *= 1.8; if (Math.abs(this.vx) > maxSpd && Math.sign(this.vx) === dir) acc = 900; this.vx = M.approach(this.vx, dir * maxSpd, acc * dt); }
-        else this.vx = M.approach(this.vx, 0, (this.grounded ? 2600 : 950) * dt);
-        const g = 1500 * (heavy ? 1.35 : 1) * (this.inWater ? 0.45 : 1);
+        if (f.wave) {
+          // Geometry-Dash-style wave: no momentum. Holding thrust moves you straight up, letting go moves you straight down
+          this.vx = dir * maxSpd; this.thrusting = T; this.vy = (T ? -1 : 1) * maxSpd * gd;
+          if (this.grounded && !T) this.vy = 0;
+        } else {
+        if (dir) { let acc = (this.grounded ? 3000 : 2300) * ice; if (Math.sign(this.vx) !== dir && Math.abs(this.vx) > 20) acc *= 1.8; if (Math.abs(this.vx) > maxSpd && Math.sign(this.vx) === dir) acc = 900; this.vx = M.approach(this.vx, dir * maxSpd, acc * dt); }
+        else this.vx = M.approach(this.vx, 0, (this.grounded ? 2600 : 950) * ice * dt);
+        const g = 1500 * (heavy ? 1.35 : 1) * (this.inWater ? 0.45 : 1) * s.gravMul;
         if (f.grounded) {
           this.thrusting = false; if (this.grounded) { this.jumps = 2; if (ctrl) I.take('down', 1e7); }
           if (ctrl && I.take('thrust') && this.jumps > 0) { this.vy = -720 * Math.sqrt(s.thrustMul) * (this.inWater ? 0.75 : 1); this.jumps--; this.slamming = false; this.platform = null; this.sx = 0.8; this.sy = 1.25; W.fxPuff(this.x, this.y + 12, 9, P.paperDeep); W.sfx('dash', 0.4); }
           if (!this.grounded && ctrl && I.take('down') && !this.slamming) { this.slamming = true; this.vy = 1250; this.sx = 0.8; this.sy = 1.25; }
         }
         else this.thrusting = T;
-        if (T && !f.grounded) { const ta = 2750 * s.thrustMul * (heavy ? 1.15 : 1) * (this.inWater ? 0.8 : 1); this.vy -= ta * dt; const maxUp = -420 * Math.sqrt(s.thrustMul); if (this.vy < maxUp) this.vy = M.approach(this.vy, maxUp, 3200 * dt); if (Math.random() < dt * 30) W.fxJet(this); }
-        this.vy += g * dt * (f.grounded && T && this.vy < 0 ? 0.55 : 1);
+        if (T && !f.grounded) { const ta = 2750 * s.thrustMul * (heavy ? 1.15 : 1) * (this.inWater ? 0.8 : 1); this.vy -= ta * dt * gd; const maxUp = 420 * Math.sqrt(s.thrustMul) * s.climbMul; if (-this.vy * gd > maxUp) this.vy = M.approach(this.vy, -maxUp * gd, 3200 * dt); if (Math.random() < dt * 30) W.fxJet(this); }
+        this.vy += g * dt * gd * (f.grounded && T && this.vy < 0 ? 0.55 : 1);
         let term = D ? 760 : 540; if (f.hover && !T && !dir && !D) term = 190; if (this.inWater) term *= 0.5;
-        if (this.vy > term && !this.slamming) this.vy = M.approach(this.vy, term, 2600 * dt);
+        if (this.vy * gd > term && !this.slamming) this.vy = M.approach(this.vy, term * gd, 2600 * dt);
+        }
         this.vx += this.pullX * dt; this.vy += this.pullY * dt;
       }
       this.pullX = 0; this.pullY = 0;
       for (const tr of this.trail) tr.t -= dt; this.trail = this.trail.filter(tr => tr.t > 0);
+      if (f.wave) { this.waveTrail.push({ x: this.x, y: this.y + this.bodyOff, t: 0.45 }); for (const tr of this.waveTrail) tr.t -= dt; this.waveTrail = this.waveTrail.filter(tr => tr.t > 0); }
+      if (W.tr.lava && W.state === 'fight') { if (this.onFloor && !this.dashing) { this.lavaT += dt; if (this.lavaT >= 0.25) { this.lavaT = 0; if (this.hurt(8, 'lava')) this.vy = -380; } } else this.lavaT = 0; }
       // move & collide
       const prevBottom = this.y + this.bodyOff + this.size / 2;
       if (this.grounded && this.platform) { this.x += this.platform.dx || 0; this.y += this.platform.dy || 0; }
@@ -133,6 +148,7 @@
       }
       // fire-rate boosts
       let rb = 1; if (this.overdriveT > 0) rb *= 1.6; if (this.frenzyT > 0) rb *= 1.4; if (f.thrustSync && this.thrusting) rb *= 1.2; if (this.heatT > 0) rb *= 2; if (this.planted) rb *= 1.4;
+      if (f.dynamo) { const sp = Math.hypot(this.vx, this.vy); rb *= sp < 40 ? 0.65 : 1 + Math.min(0.7, sp / 470 * 0.7); }
       this.rateBoost = rb;
       this.updateWeapons(dt);
     }
@@ -162,17 +178,17 @@
       const wasGround = this.grounded, landV = this.vy; this.grounded = false; this.onFloor = false;
       if (this.x - half < A.L) { this.x = A.L + half; if (this.vx < 0) this.vx = 0; }
       if (this.x + half > A.R) { this.x = A.R - half; if (this.vx > 0) this.vx = 0; }
-      if (this.y + this.bodyOff - half < A.T) { this.y = A.T + half - this.bodyOff; if (this.vy < 0) this.vy = 0; }
+      if (this.y + this.bodyOff - half < A.T) { this.y = A.T + half - this.bodyOff; if (this.vy < 0) this.vy = 0; if (this.gdir < 0) { this.grounded = true; this.platform = null; } }
       const bot = this.y + this.bodyOff + half;
       if (bot >= A.B) { this.y = A.B - half - this.bodyOff; if (this.vy > 0) this.vy = 0; this.grounded = true; this.onFloor = true; this.platform = null; }
-      else if (this.vy >= 0 && this.dropT <= 0 && !this.grapple) {
+      else if (this.vy >= 0 && this.gdir > 0 && this.dropT <= 0 && !this.grapple) {
         for (const p of W.platforms) {
           if (this.x + half * 0.7 < p.x || this.x - half * 0.7 > p.x + p.w) continue;
           if (prevBottom <= p.y + 6 + Math.abs(p.dy || 0) && bot >= p.y) { this.y = p.y - half - this.bodyOff; this.vy = 0; this.grounded = true; this.platform = p; break; }
         }
       }
       if (!this.grounded) this.platform = null;
-      if (this.grounded && !wasGround && landV > 260) { this.sx = 1.28; this.sy = 0.76; W.fxPuff(this.x - 12, this.y + 12, 7, P.paperDeep); W.fxPuff(this.x + 12, this.y + 12, 7, P.paperDeep); }
+      if (this.grounded && !wasGround && Math.abs(landV) > 260) { this.sx = 1.28; this.sy = 0.76; W.fxPuff(this.x - 12, this.y + 12, 7, P.paperDeep); W.fxPuff(this.x + 12, this.y + 12, 7, P.paperDeep); }
       if (this.grounded && this.platform && D && !this.dashing) this.dropT = 0.25;
     }
     startDash(dir, U, D) {
@@ -180,7 +196,7 @@
       let dx = dir, dy = (D ? 1 : 0) - (U ? 1 : 0);
       if (!dx && !dy) dx = this.facing;
       const l = Math.hypot(dx, dy); this.dashDir = { x: dx / l, y: dy / l };
-      this.dashT = 0.16 * (f.comet ? 1.6 : 1); this.dashSpeed = 980;
+      this.dashT = (0.16 + s.dashLen) * (f.comet ? 1.6 : 1); this.dashSpeed = 980;
       this.dashInv = this.dashT + s.dashIframe - 0.1;
       this.dashCharges--; if (this.dashCdT <= 0) this.dashCdT = s.dashCd;
       this.phaseLeft = f.phase ? 6 : 0; this.reflectLeft = f.reflect ? 12 : 0; this.slamming = false; this.cometHit = false; this.dropT = Math.max(this.dropT, this.dashDir.y > 0.3 ? 0.2 : 0);
@@ -219,10 +235,11 @@
       if (f.fireproof && src === 'hazard') { if (W.canWord('fp', 1)) W.word('FIREPROOF', this.x, this.y - 44, 'small'); return false; }
       W.stats.hitsTaken++;
       if (this.ablative > 0) { this.ablative--; this.invuln = s.iframes; this.lastHurtT = W.time; W.word('PLATE LOST', this.x, this.y - 44, 'small'); W.sfx('break', 0.4); for (let i = 0; i < 4; i++) W.fx.push({ type: 'debris', x: this.x, y: this.y, vx: SO.M.rand(-200, 200), vy: SO.M.rand(-300, -80), t: 0, life: 0.8, size: 6, rot: 0, col: P.blueLight }); W.stats.dmgTaken.blocked = W.stats.dmgTaken.blocked || 0; return true; }
-      let d = W.godMode ? 0 : Math.max(1, Math.round(dmg * (s.dmgTakenMul || 1) * (this.planted ? 0.5 : 1)));
+      let d = W.godMode ? 0 : Math.max(1, Math.round(dmg * (s.dmgTakenMul || 1) * (this.planted ? 0.5 : 1) * ((W.bb && W.bb.dmgMul) || 1) * (W.tr.bossDmg || 1)));
+      if (f.lives) d = W.godMode ? 0 : 1;
       if (f.mirage) this.mirT = Math.max(this.mirT || 0, 5);
-      if (this.tempShield > 0) { const a = Math.min(this.tempShield, d); this.tempShield -= a; d -= a; }
-      if (this.shield > 0) { const a = Math.min(this.shield, d); this.shield -= a; d -= a; if (this.shield <= 0 && a > 0) W.word('SHIELD DOWN', this.x, this.y - 60, 'small'); }
+      if (this.tempShield > 0 && !f.lives) { const a = Math.min(this.tempShield, d); this.tempShield -= a; d -= a; }
+      if (this.shield > 0 && !f.lives) { const a = Math.min(this.shield, d); this.shield -= a; d -= a; if (this.shield <= 0 && a > 0) W.word('SHIELD DOWN', this.x, this.y - 60, 'small'); }
       this.hp -= d;
       W.stats.dmgTaken[src] = (W.stats.dmgTaken[src] || 0) + dmg; W.stats.lastHitBy = src;
       this.lastHurtT = W.time; this.invuln = s.iframes; this.justHit = 0.12; this.hurtFace = 0.5;
@@ -238,7 +255,8 @@
       }
       return true;
     }
-    heal(n) { if (this.hp <= 0) return; const before = this.hp; if (this.B.f.overshield && this.hp + n > this.maxHp) this.tempShield = Math.min(30, this.tempShield + (this.hp + n - this.maxHp)); this.hp = Math.min(this.maxHp, this.hp + n); if (this.hp - before >= 1) { this.W.floatText('+' + Math.round(this.hp - before), this.x, this.y - 30, P.green); this.W.sfx('heal'); } }
+    lifeHp(n) { this.lifeAcc += n; while (this.lifeAcc >= 25) { this.lifeAcc -= 25; if (this.hp < this.maxHp) { this.hp = Math.min(this.maxHp, this.hp + 1); this.W.floatText('+1 LIFE', this.x, this.y - 30, P.green); this.W.sfx('heal'); } } }
+    heal(n) { if (this.hp <= 0) return; if (this.B.f.lives) { this.lifeHp(n); return; } const before = this.hp; if (this.B.f.overshield && this.hp + n > this.maxHp) this.tempShield = Math.min(30, this.tempShield + (this.hp + n - this.maxHp)); this.hp = Math.min(this.maxHp, this.hp + n); if (this.hp - before >= 1) { this.W.floatText('+' + Math.round(this.hp - before), this.x, this.y - 30, P.green); this.W.sfx('heal'); } }
     addTempShield(n, max) { this.tempShield = Math.min(max, this.tempShield + n); }
     restoreShield(n) { if (this.maxShield > 0) this.shield = Math.min(this.maxShield, this.shield + n); else this.heal(n * 0.5); }
 
@@ -247,13 +265,18 @@
       const surf = W.surfaceBelow(this.x, this.y);
       const hgt = M.clamp((surf - this.y) / 400, 0, 1);
       art.floorShadow(ctx, this.x, surf - 2, 20 * (1 - hgt * 0.5), 5 * (1 - hgt * 0.5), 0.45);
+      if (this.B.f.lantern) { const g = ctx.createRadialGradient(this.x, this.gy, 10, this.x, this.gy, 150); g.addColorStop(0, 'rgba(255,233,138,0.28)'); g.addColorStop(1, 'rgba(255,233,138,0)'); ctx.fillStyle = g; art.circ(ctx, this.x, this.gy, 150); ctx.fill(); ctx.save(); ctx.globalAlpha = 0.35; ctx.setLineDash([5, 8]); ctx.lineDashOffset = -t * 20; ctx.strokeStyle = '#ffe98a'; ctx.lineWidth = 2; art.circ(ctx, this.x, this.gy, 150); ctx.stroke(); ctx.restore(); }
+      if (this.waveTrail.length > 1) { ctx.save(); ctx.lineJoin = 'round'; ctx.lineCap = 'round'; for (const [lw, col] of [[9, P.ink], [5, '#3ad6ff'], [2, P.white]]) { ctx.lineWidth = lw; ctx.strokeStyle = col; ctx.beginPath(); this.waveTrail.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.lineTo(this.x, this.gy); ctx.stroke(); } ctx.restore(); }
+      if (this.stillT > 0.3) { const k = Math.min(1, (this.stillT - 0.3) / 0.7); ctx.save(); ctx.strokeStyle = P.enemy; ctx.lineWidth = 4; ctx.globalAlpha = 0.5 + 0.5 * k; ctx.beginPath(); ctx.arc(this.x, this.gy, 34, -Math.PI / 2, -Math.PI / 2 + k * Math.PI * 2); ctx.stroke(); ctx.restore(); }
       for (const tr of this.trail) { ctx.save(); ctx.globalAlpha = tr.t * 2.5; art.inkRect(ctx, tr.x - this.size / 2, tr.y + this.bodyOff - this.size / 2, this.size, this.size, 7, P.tealLight, 0); ctx.restore(); }
       if (this.grapple) { ctx.save(); ctx.strokeStyle = P.ink; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(this.x, this.gy); ctx.lineTo(this.grapple.tx, this.grapple.ty); ctx.stroke(); art.inkCirc(ctx, this.grapple.tx, this.grapple.ty, 6, P.warn, 2); ctx.restore(); }
       let alpha = 1;
       if (this.invuln > 0 && !this.dashing) alpha = set.reducedFlash ? 0.55 : ((Math.floor(t * 18) % 2) ? 0.35 : 0.95);
       ctx.save(); ctx.globalAlpha = alpha;
+      if (this.gdir < 0) this.sy = -Math.abs(this.sy);
       art.drawPlayer(ctx, this, { paint: set.paint, time: t, char: this.B.char, noJet: !!this.B.f.grounded });
-      if (!this.pod) art.drawPlayerGuns(ctx, this, this.gunList, t);
+      if (this.gdir < 0) this.sy = Math.abs(this.sy);
+      if (!this.pod && !this.B.f.original) art.drawPlayerGuns(ctx, this, this.gunList, t);
       ctx.restore();
       if (this.pod) {
         const pd = this.pod; ctx.save(); ctx.setLineDash([4, 6]); ctx.strokeStyle = 'rgba(27,26,46,0.45)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(this.x, this.y + this.bodyOff); ctx.lineTo(pd.x, pd.y); ctx.stroke(); ctx.restore();

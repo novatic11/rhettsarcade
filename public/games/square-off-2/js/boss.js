@@ -693,17 +693,17 @@
   SO.bossHp = function (round, bb, mode, finale) {
     const r = round - 1; let hp = 1050 * (1 + 0.45 * r + 0.05 * r * r);
     const ch = SO.CHASSIS[bb.chassis]; hp *= ch.hp || 1; if (bb.tier2) hp *= SO.CHASSIS[bb.tier2].hp || 1;
-    hp *= Math.pow(1.22, bb.passives.heavy || 0) * Math.pow(1.12, bb.passives.escal || 0);
+    hp *= Math.pow(1.22, bb.passives.heavy || 0) * Math.pow(1.12, bb.passives.escal || 0) * (bb.hpMul || 1);
     if (finale) hp *= 1.2;
     if (mode === 'practice') hp = 4000;
     return Math.round(hp);
   };
   SO.bossArmor = bb => Math.min(0.5, 0.15 * (bb.passives.armor || 0) + (SO.CHASSIS[bb.chassis].armor || 0) + (bb.tier2 ? SO.CHASSIS[bb.tier2].armor || 0 : 0));
   SO.bossSheet = function (bb, round) {
-    const oc = Math.pow(0.88, bb.passives.overclock || 0);
+    const oc = Math.pow(0.88, bb.passives.overclock || 0) * (bb.cdMul || 1);
     return {
       'Max HP (next round)': SO.bossHp(round, bb, 'standard', false), Armor: pc(SO.bossArmor(bb)), 'Attack cooldowns': pc(oc), Attacks: SO.bossAttackList(bb).length,
-      Chassis: SO.CHASSIS[bb.chassis].name + (bb.tier2 ? ' → ' + SO.CHASSIS[bb.tier2].name : ''), 'Projectile speed': pc((bb.passives.tempered ? 1.12 : 1) * Math.pow(1.04, bb.passives.escal || 0)),
+      Chassis: SO.CHASSIS[bb.chassis].name + (bb.tier2 ? ' → ' + SO.CHASSIS[bb.tier2].name : ''), 'Projectile speed': pc((bb.passives.tempered ? 1.12 : 1) * Math.pow(1.04, bb.passives.escal || 0) * (bb.bspeed || 1)), 'Attack damage': pc(bb.dmgMul || 1), 'Bullet size': '+' + (bb.bsize || 0) + 'px',
       'Pattern budget': '+' + ((bb.passives.combo ? 0.4 : 0)).toFixed(1)
     };
   };
@@ -716,7 +716,7 @@
     return out;
   };
   SO.offerBoss = function (bb, rng, n, ctx) {
-    const pool = BUPS.filter(u => u.kind !== 'chassis' && (bb.counts[u.id] || 0) < u.max && u.req(bb, ctx.B));
+    const pool = BUPS.filter(u => u.kind !== 'chassis' && !!u.orig === !!ctx.orig && (bb.counts[u.id] || 0) < u.max && u.req(bb, ctx.B));
     const byKind = k => pool.filter(u => u.kind === k);
     const picks = [];
     const take = list => { const c = list.filter(u => !picks.includes(u)); if (!c.length) return null; const u = c[Math.floor(rng() * c.length)]; picks.push(u); return u; };
@@ -760,7 +760,7 @@
     }
     load() { return this.active.reduce((s, r) => s + r.def.cost, 0); }
     zoneActive() { return this.active.some(r => r.def.zone); }
-    cdMul() { const b = this.b; let m = Math.pow(0.88, b.bb.passives.overclock || 0); if (b.raging) m *= 0.75; if (this.W.challenges.includes('rush')) m *= 0.8; const ch = b.chassisDef; if (ch.gcd) m *= ch.gcd; return m * (this.W.bossCdMul || 1); }
+    cdMul() { const b = this.b; let m = Math.pow(0.88, b.bb.passives.overclock || 0); if (b.raging) m *= 0.75; if (this.W.challenges.includes('rush')) m *= 0.8; const ch = b.chassisDef; if (ch.gcd) m *= ch.gcd; return m * (this.W.bossCdMul || 1) * (b.bb.cdMul || 1); }
     cancelAll() { for (const r of this.active) r.cancel(); this.active = []; this.b.charging = null; this.b.stompPhase = null; }
     cancelAttack(id) { for (const r of this.active) if (r.id === id) r.cancel(); this.active = this.active.filter(r => !r.done); }
     holding() { return this.active.some(r => r.hold && !r.done); }

@@ -1,5 +1,19 @@
 [
   {
+    "id": "square-off-2-challenges-secrets",
+    "gameId": "square-off-2",
+    "date": "2026-11-24T19:38:39.782Z",
+    "title": "Square Off 2: Challenges and secrets",
+    "summary": "Twenty short Challenge runs, a few hidden ones, and a new Secret Characters tab.",
+    "changes": [
+      "New Challenges button on the main menu: 20 short runs of 3-5 rounds, each with its own twist (Black Ice, Mirror World, The Floor Is Lava, Boss Rush and more).",
+      "New Secret Characters tab in character select. Secret characters reveal nothing about themselves until you unlock them.",
+      "Opening the Secret Characters tab for the first time reveals secret challenges at the top of the Challenges page.",
+      "Veterans of the original Square Off may find an old friend waiting.",
+      "The optional run challenges in character select are now called Modifiers."
+    ]
+  },
+  {
     "id": "backrooms-vents-looks",
     "gameId": "backrooms-for-science",
     "date": "2026-11-24T18:58:10.059Z",
