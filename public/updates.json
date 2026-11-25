@@ -1,5 +1,18 @@
 [
   {
+    "id": "backrooms-ui-redesign",
+    "gameId": "backrooms-for-science",
+    "date": "2026-11-25T00:28:22.636Z",
+    "title": "Backrooms: For Science: redesigned menus",
+    "summary": "Every menu and screen has a new look, built around M.E.G. paperwork and 1995 hardware.",
+    "changes": [
+      "The title computer now runs a proper DOS-style terminal, with a menu bar, a selection bar and a key strip.",
+      "Death, shift-end, pause, credits and epilogue screens read like typed M.E.G. reports.",
+      "The sound warning is now a paper memo, and achievements pop in as commendation slips.",
+      "Cleaner HUD, custom night, loadout, achievements, gallery, gamemode and shop panels, with less glow and fewer boxes."
+    ]
+  },
+  {
     "id": "square-off-2-square-unlock-fix",
     "gameId": "square-off-2",
     "date": "2026-11-24T20:05:21.939Z",
