@@ -122,7 +122,7 @@ body.mon #hud .flags{top:auto;bottom:calc(70px + env(safe-area-inset-bottom,0px)
 #monitor .tools{position:absolute;left:28px;bottom:calc(38px + min(450px,(100vw - 56px) * 0.909,100vh - 300px) + env(safe-area-inset-bottom,0px));display:flex;gap:8px}
 #monitor .tools button{background:#1d1a0c;border:1px solid #8a7c3a;font-family:var(--osd);font-size:20px;padding:2px 10px;cursor:pointer;color:#efe6bf}
 #monitor .tools button:disabled{opacity:.4;cursor:default}
-#monitor .tools #ventBtn{border-color:#6fb3c8;color:#d6f2fa;background:#0f1c20}
+#monitor .tools{align-items:flex-end} #monitor .tools #ventBtn{border-color:#6fb3c8;border-width:2px;color:#d6f2fa;background:#0f1c20;font-size:30px;padding:10px 24px;min-height:56px;letter-spacing:1px}
 #monitor .tools #ventBtn:hover{background:#18303a}
 #monitor .tools #ventBtn.low{border-color:var(--danger);color:#ffd2c8;background:#3a120c;animation:hblink .8s steps(2) infinite}
 #ventWarn{position:absolute;left:50%;bottom:calc(46px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);font-family:var(--osd);font-size:17px;letter-spacing:2px;color:#ffd2c8;background:rgba(50,10,6,.78);border:1px solid var(--danger);padding:2px 12px;white-space:nowrap;pointer-events:none;z-index:6;animation:hblink 1s steps(2) infinite}
@@ -9770,7 +9770,7 @@ function step(dt, t) {
   // vents: an invisible timer. REFRESH VENTS on the monitor resets it; it runs out faster every night. Boss fights skip it.
   if (G.vent && !G.bossMode && !G.freeze && !G.powerOut && G.passT == null) {
     G.vent.t -= dt;
-    const low = G.vent.t <= 7;
+    const low = G.vent.t <= 17; // warn 17 s out: enough time to flip the monitor up and click
     if (low && !G.vent.warned) { G.vent.warned = true; AU.tone({ freq: 440, dur: 0.14, gain: 0.06, type: 'square', filter: { freq: 1400 } }); AU.tone({ freq: 330, dur: 0.18, gain: 0.06, type: 'square', delay: 0.18, filter: { freq: 1400 } }); }
     if ($('#ventWarn').hidden === low) $('#ventWarn').hidden = !low;
     $('#ventBtn').classList.toggle('low', low);
@@ -11999,7 +11999,7 @@ const ESHOP = (() => {
   const RULE = {
     drain: { n: 'BROWNOUT', d: 'Everything uses 50% more power.', ic: `<path d="M26 8l-11 18h9l-3 14 12-19h-9z" ${STK}/>`, on: () => { G.modPow *= 1.5; } },
     heat: { n: 'HEAT WAVE', d: 'The office heats up 70% faster.', ic: `<path d="M21 10a3 3 0 0 1 6 0v16a7 7 0 1 1-6 0z" ${STK}/><path d="M24 18v12" ${STK}/>`, on: () => { G.modHeat *= 1.7; } },
-    stale: { n: 'STALE AIR', d: 'The vents clog 40% faster.', ic: `<rect x="10" y="12" width="28" height="24" rx="2" ${STK}/><path d="M14 19h20M14 24h20M14 29h20" ${STK}/>`, on: () => { G.vent.max = Math.max(14, Math.round(G.vent.max * 0.6)); G.vent.t = G.vent.max; } },
+    stale: { n: 'STALE AIR', d: 'The vents clog 40% faster.', ic: `<rect x="10" y="12" width="28" height="24" rx="2" ${STK}/><path d="M14 19h20M14 24h20M14 29h20" ${STK}/>`, on: () => { G.vent.max = Math.max(24, Math.round(G.vent.max * 0.6)); G.vent.t = G.vent.max; } },
     dry: { n: 'DRY SPELL', d: 'Two fewer bottles of almond water on the desk.', ic: `<rect x="17" y="14" width="14" height="24" rx="4" ${STK}/><path d="M20 9h8M12 38l24-26" ${STK}/>`, on: () => { G.water = Math.max(0, G.water - 2); } },
     low: { n: 'LOW BATTERY', d: 'You start the night with 35% less power.', ic: `<rect x="9" y="16" width="26" height="16" rx="2" ${STK}/><path d="M35 21v6" ${STK}/><rect x="12" y="19" width="6" height="10" fill="#ff7a5a"/>`, on: () => { G.power = Math.max(25, G.power - 35); } },
     angry: { n: 'BAD MOOD', d: 'Every specimen is 2 AI angrier.', ai: 2, ic: `<circle cx="24" cy="24" r="13" ${STK}/><path d="M17 19l5 2M31 19l-5 2M18 32c3-4 9-4 12 0" ${STK}/>` },

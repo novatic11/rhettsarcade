@@ -1,5 +1,16 @@
 [
   {
+    "id": "backrooms-vent-warning",
+    "gameId": "backrooms-for-science",
+    "date": "2026-11-25T02:32:48.214Z",
+    "title": "Backrooms: For Science: earlier vent warning",
+    "summary": "The stale-air warning shows up sooner, and the vent button is easier to hit.",
+    "changes": [
+      "The \"air going stale\" warning now appears 10 seconds earlier, giving you about 17 seconds to refresh the vents.",
+      "The REFRESH VENTS button on the monitor is bigger."
+    ]
+  },
+  {
     "id": "backrooms-endless-shops",
     "gameId": "backrooms-for-science",
     "date": "2026-11-25T02:17:41.241Z",
