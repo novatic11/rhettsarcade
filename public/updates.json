@@ -1,5 +1,21 @@
 [
   {
+    "id": "backrooms-fairness-pass",
+    "gameId": "backrooms-for-science",
+    "date": "2026-11-25T03:08:23.945Z",
+    "title": "Backrooms: For Science: fairer entities",
+    "summary": "A fairness pass over every entity, after testing hundreds of entity combinations.",
+    "changes": [
+      "Dullers, Camo Crawlers and the Child of the Walls no longer appear in spots you can't see from the desk.",
+      "Threats that need your hands never overlap the Night Stalker or the Neighborhood Watch. Switching things off is now safe while the Night Stalker watches.",
+      "Being paralyzed or hypnotized no longer lets timed threats finish you off. They wait until you can move again.",
+      "Hound and Stalkers never charge a door the Mimic is disguising or that has shorted out, and nothing steps into a shorted doorway.",
+      "The Shocker Ghoul no longer shorts a door you had to shut on something else, and its thanks can no longer lower your power.",
+      "The Windows only kill if you rest the light on the glass, not if the beam sweeps past or lights the desk.",
+      "Wranglers can still be lured away once they reach a door. Tagalongs wait while the Windows drag your view. Bulb-Bug eggs build slower with the monitor down."
+    ]
+  },
+  {
     "id": "backrooms-vent-warning",
     "gameId": "backrooms-for-science",
     "date": "2026-11-25T02:32:48.214Z",
