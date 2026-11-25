@@ -1039,7 +1039,7 @@ select:hover{border-color:var(--wall-dim)}
 </script>
 <script>
 /* release build tag, shown on the title screen */
-const GAME_VERSION = '2.7.0';
+const GAME_VERSION = '2.8.0';
 
 /* crash guard: a stray error should never leave the player staring at a frozen screen.
    One-off errors are logged quietly; if errors keep coming (the game loop is stuck throwing), offer a reload. */
@@ -11600,8 +11600,8 @@ const RELEASE = (() => {
 <script>
 /* ==================================================================
    GAMEMODES (title computer → GAMEMODES)
-   ENDLESS: night after night, each one starting at 4:00 AM. After a night you visit the Partypooper's (2D) shop,
-   then pick new specimens from a lineup of 5. Easy adds 1 per round, Normal 1.5 (1, 2, 1, 2...), Hard 2.
+   ENDLESS: night after night, each one starting at 4:00 AM. After a night you choose one of 4 shops (out of 15, see
+   eshops.js: each its own keeper, wares, music and sometimes a challenge), then pick new specimens from a lineup of 5. Easy adds 1 per round, Normal 1.5 (1, 2, 1, 2...), Hard 2.
    Endless-only upgrades: a bigger lineup, rerolls, banishment, sedatives, a later start, hazard pay, savings,
    a field scout and a second wind. The run is saved between nights (U.store('endlessRun')).
    BOSS BUILDER lives in bossbuilder.js. Loaded last (after release.js) so its hooks wrap everything else.
@@ -11646,13 +11646,13 @@ const ENDLESS = (() => {
     E.run = resume || fresh(diff); E.run.up = (E.run.up || []).filter((u) => UPGBY[u]); E.run.inv = (E.run.inv || []).filter((c) => CONS[c]);
     E.run.roster = E.run.roster.filter((id) => ENT.some((d) => d.id === id)); save(); E.music(true);
     await FADE.to(1, 0.6); TITLE.hide(); q$('#title').hidden = true;
-    if (resume && resume.at === 'shop') E.shop(); else if (resume && resume.at === 'night') E.night(); else E.pick(); // quit mid-night: replay that night, no extra picks
+    if (resume && (resume.at === 'shop' || resume.at === 'shops')) E.shop(); else if (resume && resume.at === 'night') E.night(); else E.pick(); // quit mid-night: replay that night, no extra picks
   };
   E.quit = () => {
     E.music(false); E.on = false; E.phase = null; hideAll(); AU.stopAll(); endEntities(); q$('#pause').hidden = true; q$('#win').hidden = true; q$('#death').hidden = true; q$('#hud').hidden = true; q$('#monitor').hidden = true;
     if (AU.ctx) AU.ctx.resume(); TITLE.backTo = 'modes'; TITLE.show();
   };
-  function hideAll() { ['#endPick', '#endShop'].forEach((s) => { const e = q$(s); if (e) e.hidden = true; }); }
+  function hideAll() { ['#endPick', '#endShop', '#endShops'].forEach((s) => { const e = q$(s); if (e) e.hidden = true; }); }
   function overlay(id) { let el = q$('#' + id); if (!el) { el = document.createElement('div'); el.id = id; el.className = 'endScr'; q$('#app').appendChild(el); } el.hidden = false; return el; }
 
   /* ---------------------------------------------------------------- the lineup: choose N of 5+ */
@@ -11690,21 +11690,26 @@ const ENDLESS = (() => {
   /* ---------------------------------------------------------------- the night: 4:00 to 6:00 AM */
   E.night = async () => {
     const R = E.run; E.phase = 'night'; hideAll(); R.at = 'night'; save();
-    await FADE.to(1, 0.4); await ensureModels(R.roster, 'PREPARING ROUND ' + R.round); if (!E.on) return;
-    const cfg = {}; R.roster.forEach((id) => (cfg[id] = ai(R.round)));
+    const extra = (R.chal && R.chal.extra || []).filter((id) => ENT.some((d) => d.id === id)); // tonight-only specimens from a shop's challenge or bounty
+    await FADE.to(1, 0.4); await ensureModels(R.roster.concat(extra), 'PREPARING ROUND ' + R.round); if (!E.on) return;
+    const mod = typeof ESHOP !== 'undefined' ? ESHOP.aiMod(R) : 0, cfg = {}; R.roster.forEach((id) => (cfg[id] = U.clamp(ai(R.round) + mod, 1, 20)));
+    extra.forEach((id) => (cfg[id] = U.clamp((cfg[id] || ai(R.round) + mod) + (R.chal.aiPlus || 0), 1, 20)));
     E.invSnap = R.inv.slice();
-    startNight(cfg, -1, { freeze: true, sub: 'ENDLESS · ROUND ' + R.round + ' · ' + DNAME[R.diff], up: new Set(R.up), inv: R.inv, card: { big: 'ROUND ' + R.round, sub: 'ENDLESS · ' + DNAME[R.diff], small: '4:00 AM · ' + R.roster.length + (R.roster.length === 1 ? ' SPECIMEN' : ' SPECIMENS') + ' · AI ' + ai(R.round) } });
-    G.t = 4 * HOUR + (R.lv.late || 0) * (HOUR / 3); const pr = pressure(R.round); G.modPow = pr.pow; G.modHeat = pr.heat; G.hour = -1; G._min = -1; G.freeze = false;
+    const n = Object.keys(cfg).length;
+    startNight(cfg, -1, { freeze: true, sub: 'ENDLESS · ROUND ' + R.round + ' · ' + DNAME[R.diff], up: new Set(R.up), inv: R.inv, card: { big: 'ROUND ' + R.round, sub: 'ENDLESS · ' + DNAME[R.diff] + (R.chal ? ' · ' + R.chal.n : ''), small: '4:00 AM · ' + n + (n === 1 ? ' SPECIMEN' : ' SPECIMENS') + ' · AI ' + U.clamp(ai(R.round) + mod, 1, 20) } });
+    G.t = 4 * HOUR + (R.lv.late || 0) * (HOUR / 3); const pr = pressure(R.round); G.modPow = pr.pow; G.modHeat = pr.heat; G.hour = -1; G._min = -1;
+    if (typeof ESHOP !== 'undefined') ESHOP.nightSetup(R); G.freeze = false;
     FADE.set(1); FADE.to(0, 1.0);
   };
   E.won = () => {
     const R = E.run; E.phase = 'won'; clearOverlays(); G.state = 'won'; AU.stopAll(); AU.chime(); endEntities(); q$('#hud').hidden = true; q$('#monitor').hidden = true;
     R.inv = R.inv.filter((c) => c !== 'box');
     const base = 70 + 15 * R.round + (R.up.includes('overtime') ? 40 : 0), pw = Math.round(Math.max(0, G.power) / 2), pay = Math.round((base + pw) * (1 + 0.25 * (R.lv.hazard || 0))), intr = R.lv.interest ? Math.min(150, Math.round(R.money * 0.1)) : 0;
-    R.money += pay + intr; const survived = R.round; R.round++; R.at = 'shop'; R.deals = null; save();
+    const bonus = typeof ESHOP !== 'undefined' ? ESHOP.nightWon(R) : { cash: 0, txt: '' }; // challenge / bounty rewards, then tonight's drinks and deliveries wear off
+    R.money += pay + intr + bonus.cash; const survived = R.round; R.round++; R.at = 'shops'; R.shopAt = null; R.deals = null; R.shops = null; save();
     const nb = setBest(R.diff, survived); if (typeof ACH !== 'undefined') { if (survived >= 10) ACH.give('endless10'); }
-    q$('#win').hidden = false; G.winRoll(); q$('#wSub').textContent = 'ROUND ' + survived + ' SURVIVED · +$' + pay + (intr ? ' · +$' + intr + ' INTEREST' : '') + ' · ' + Math.max(0, Math.ceil(G.power)) + '% POWER LEFT';
-    R.earned = (R.earned || 0) + pay + intr; q$('#wNext').textContent = (nb ? '★ NEW BEST: ' : 'BEST: ') + best(R.diff) + (best(R.diff) === 1 ? ' ROUND' : ' ROUNDS') + ' · ROSTER ' + R.roster.length + ' · NEXT ROUND AI ' + ai(R.round) + ' · NEXT: THE PARTYPOOPER\'S SHOP'; q$('#wMenu').textContent = 'VISIT THE SHOP';
+    q$('#win').hidden = false; G.winRoll(); q$('#wSub').textContent = 'ROUND ' + survived + ' SURVIVED · +$' + pay + (intr ? ' · +$' + intr + ' INTEREST' : '') + bonus.txt + ' · ' + Math.max(0, Math.ceil(G.power)) + '% POWER LEFT';
+    R.earned = (R.earned || 0) + pay + intr + bonus.cash; q$('#wNext').textContent = (nb ? '★ NEW BEST: ' : 'BEST: ') + best(R.diff) + (best(R.diff) === 1 ? ' ROUND' : ' ROUNDS') + ' · ROSTER ' + R.roster.length + ' · NEXT ROUND AI ' + ai(R.round) + ' · NEXT: PICK A SHOP'; q$('#wMenu').textContent = 'CHOOSE A SHOP';
   };
   E.dead = () => {
     const R = E.run; const lives = R.tok.life || 0;
@@ -11774,34 +11779,7 @@ const ENDLESS = (() => {
     max: ["You've already got all of that one!", "That one's maxed out. You're well covered there."],
     bye: ["Good luck out there. You've got this.", "Stay safe, okay? I'll be here when you get back.", "Go get 'em. I'll keep the lights on."],
   };
-  const SH = { say: '' };
-  function deals(R) { if (!R.deals) { R.deals = { up: U.shuffle(UPG.map((u) => u.id).filter((id) => !R.up.includes(id) && !NOUSE.includes(id))).slice(0, 4) }; save(); } return R.deals; }
   const eupPrice = (u, R) => (u.tok ? u.p[0] : u.p[Math.min(u.p.length - 1, R.lv[u.id] || 0)]);
-  E.shop = async (line) => {
-    const R = E.run; E.phase = 'shop'; G.state = 'endless'; R.at = 'shop'; save(); hideAll(); q$('#win').hidden = true; q$('#death').hidden = true; q$('#hud').hidden = true;
-    SH.say = line || U.pick(SAY.hi); E.renderShop(true); FADE.to(0, 0.5); E.music(true);
-  };
-  E.renderShop = (talk) => {
-    const R = E.run, el = overlay('endShop'), D = deals(R), keepY = el.querySelector('.wlist') ? el.querySelector('.wlist').scrollTop : 0;
-    const nextNeed = Math.min(Math.floor((R.acc || 0) + RATE[R.diff] + 1e-6), ENT.length - R.roster.length);
-    const row = (key, icon, name, desc, price, state) => SHOPUI.card({ cls: state === 'own' || state === 'max' ? 'own' : '', icon, name: esc(name), desc: esc(desc), btn: state === 'own' ? SHOPUI.tag('✓ OWNED', 'ok') : state === 'max' ? SHOPUI.tag('MAXED', 'ok') : SHOPUI.buy(price, R.money, `data-buy="${key}"`, { full: key.indexOf('c:') === 0 && R.inv.length >= INV_MAX }) });
-    const sup = SUPPLY.map((c) => row('c:' + c, ITEMICON(c), CONS[c].n, CONS[c].d, CONS[c].p)).join('');
-    const ups = D.up.map((u) => { const x = UPGBY[u]; return { p: x.p, h: row('u:' + u, UPICON(u), x.n, x.d, x.p, R.up.includes(u) ? 'own' : '') }; });
-    const FAM = { wide: 'vision', calm: 'defense', late: 'power', hazard: 'money', interest: 'money', scout: 'vision', reroll: 'lamp', banish: 'defense', life: 'body' };
-    const ex = EUP.map((u) => { const lv = R.lv[u.id] || 0, max = !u.tok && lv >= u.max; const tag = u.tok ? (R.tok[u.id] ? ' · HAVE ' + R.tok[u.id] : '') : u.max > 1 ? ' · LV ' + lv + '/' + u.max : ''; const [c1, c2] = UPFAM[FAM[u.id]] || UPFAM.money; const pr = eupPrice(u, R); return { p: max ? 1e9 : pr, h: row('e:' + u.id, TILE(u.ic, c1, c2), u.n + tag, u.d, pr, max ? 'max' : '') }; });
-    const allUp = ex.concat(ups).sort((a, b) => a.p - b.p).map((x) => x.h).join('');
-    const inv = Array.from({ length: INV_MAX }, (_, i) => (R.inv[i] ? `<i title="${esc(CONS[R.inv[i]] ? CONS[R.inv[i]].n : '')}">${ITEMICON(R.inv[i])}</i>` : '<i class="emp"></i>')).join('');
-    el.innerHTML = `<div class="awn"></div><div class="stall">
-      <div class="keeper${talk ? ' talk' : ''}">${PPBACK}${PPX}<div class="bubble">${esc(SH.say)}</div><div class="counter"><span>THE PARTYPOOPER'S STALL</span><em>NO PARTIES · NO REFUNDS</em></div></div>
-      <div class="wares"><div class="whd"><div><div class="k">ENDLESS · ${DNAME[R.diff]} · BEFORE ROUND ${R.round}</div><h2>SHOP</h2><div class="nx">NEXT ROUND · AI ${ai(R.round)} · +${nextNeed} SPECIMEN${nextNeed === 1 ? '' : 'S'} · ${R.roster.length} ON ROSTER</div></div><div class="cash${SH.paid ? ' paid' : ''}">$${R.money}</div></div>
-        <div class="wlist"><h3>UPGRADES</h3>${allUp}<h3>SUPPLIES</h3>${sup}</div>
-        <div class="wft"><div class="inv"><span class="k">POCKETS</span>${inv}</div><div class="eb"><button type="button" class="btn" data-a="quit">SAVE & QUIT</button><button type="button" class="begin" data-a="leave">LEAVE SHOP ►</button></div></div></div></div>`;
-    if (talk) { const kp = el.querySelector('.keeper'); setTimeout(() => kp && kp.classList.remove('talk'), 900); AU.voice && AU.voice(0, 150, 3 + Math.floor(Math.random() * 3), 0.05, [600, 1000], 0.11); }
-    SH.paid = false; const wl = el.querySelector('.wlist'); if (wl) wl.scrollTop = keepY;
-    el.querySelectorAll('[data-buy]').forEach((b) => b.onclick = () => E.buy(b.dataset.buy));
-    el.querySelector('[data-a="leave"]').onclick = () => { SH.say = U.pick(SAY.bye); R.at = 'pick'; save(); FADE.to(1, 0.4).then(() => E.on && E.pick()); };
-    el.querySelector('[data-a="quit"]').onclick = () => E.quit();
-  };
   // the Endless track: 30 seconds, looping for the whole run (quieter during nights so you can still hear them coming)
   const TRACK = (() => {
     // 30 s at 80 BPM, built to keep you on edge: a sinking tritone drone, a heartbeat that speeds up through the loop,
@@ -11817,26 +11795,23 @@ const ENDLESS = (() => {
     ev.push({ at: 28 * beat, noise: true, dur: 2.6, g: 0.011, filter: { type: 'bandpass', freq: 300, Q: 6, to: 2600 }, attack: 1.8 }); // a rising scrape
     return ev.sort((x, y) => x.at - y.at);
   })();
+  // the music player: the run's own track (TRACK), or whichever shop you are standing in (E.setTrack, from eshops.js)
+  const RUN = { len: 30, ev: TRACK, gain: 1 }; E.RUNTRACK = RUN; let cur = RUN, st = null;
+  E.setTrack = (trk) => { trk = trk || RUN; if (trk === cur) return; cur = trk; if (AU.ctx) st = { start: AU.ctx.currentTime + 0.15, i: 0 }; };
   E.music = (on) => {
     if (!on) { clearInterval(E._mus); E._mus = null; return; } if (E._mus || !AU.ctx) return;
-    const st = { start: AU.ctx.currentTime + 0.2, i: 0 };
+    st = { start: AU.ctx.currentTime + 0.2, i: 0 };
     E._mus = setInterval(() => {
       if (!E.on) { clearInterval(E._mus); E._mus = null; return; } const now = AU.ctx.currentTime; if (typeof SCORE !== 'undefined' && SCORE.active()) { st.start = now + 0.5; st.i = 0; return; } // the night score has the floor
-      if (now > st.start + 30 + 1) { st.start += 30 * Math.floor((now - st.start) / 30); st.i = 0; } // the tab was asleep: skip ahead
-      const vol = (E.phase === 'night' ? 0.55 : 1) * (G.opts.amb != null ? 1 : 1);
-      for (;;) { if (st.i >= TRACK.length) { st.start += 30; st.i = 0; } const e = TRACK[st.i], at = st.start + e.at; if (at > now + 0.6) break; st.i++; if (at < now - 0.05) continue; if (e.noise) AU.noise({ dur: e.dur, gain: e.g * vol, filter: e.filter, attack: e.attack, delay: at - now }); else AU.tone({ freq: e.f, slide: e.slide, dur: e.dur, gain: e.g * vol, type: e.type, attack: e.attack, filter: e.filter, delay: at - now }); }
+      if (E.phase === 'night' && cur !== RUN) { cur = RUN; st = { start: now + 0.2, i: 0 }; }
+      const T = cur, L = T.len;
+      if (now > st.start + L + 1) { st.start += L * Math.floor((now - st.start) / L); st.i = 0; } // the tab was asleep: skip ahead
+      const vol = (E.phase === 'night' ? 0.55 : 1) * (T.gain || 1);
+      for (;;) { if (st.i >= T.ev.length) { st.start += L; st.i = 0; } const e = T.ev[st.i], at = st.start + e.at; if (at > now + 0.6) break; st.i++; if (at < now - 0.05) continue; if (e.noise) AU.noise({ dur: e.dur, gain: e.g * vol, filter: e.filter, attack: e.attack, delay: at - now }); else AU.tone({ freq: e.f, slide: e.slide, dur: e.dur, gain: e.g * vol, type: e.type, attack: e.attack, filter: e.filter, vib: e.vib, detune: e.detune, delay: at - now }); }
     }, 200);
   };
-  E.buy = (key) => {
-    const R = E.run, [k, id] = key.split(':'); let price, ok = () => true, give;
-    if (k === 'c') { price = CONS[id].p; ok = () => (R.inv.length < INV_MAX ? true : 'full'); give = () => R.inv.push(id); }
-    else if (k === 'u') { price = UPGBY[id].p; ok = () => (R.up.includes(id) ? 'max' : true); give = () => R.up.push(id); }
-    else { const u = EUPBY[id]; price = eupPrice(u, R); ok = () => (!u.tok && (R.lv[id] || 0) >= u.max ? 'max' : true); give = () => { if (u.tok) R.tok[id] = (R.tok[id] || 0) + 1; else R.lv[id] = (R.lv[id] || 0) + 1; }; }
-    const st = ok(); if (st !== true) { SH.say = U.pick(SAY[st]); AU.tone({ freq: 120, dur: 0.15, gain: 0.06, type: 'square' }); E.renderShop(true); return; }
-    if (R.money < price) { SH.say = U.pick(SAY.poor); AU.tone({ freq: 120, dur: 0.15, gain: 0.06, type: 'square' }); E.renderShop(true); return; }
-    R.money -= price; give(); save(); SH.say = U.pick(SAY.buy); SH.paid = true; [1568, 2093].forEach((f, i) => AU.tone({ freq: f, dur: 0.18, gain: 0.04, type: 'triangle', delay: 0.14 + i * 0.07 })); AU.tone({ freq: 880, dur: 0.06, gain: 0.05, type: 'square' }); AU.tone({ freq: 1320, dur: 0.12, gain: 0.05, type: 'square', delay: 0.07 }); E.renderShop(true);
-  };
-
+  // shared with eshops.js
+  E.X = { ai, save, overlay, hideAll, best, DNAME, RATE, EUP, EUPBY, NOUSE, SUPPLY, eupPrice, pressure, PPX, PPBACK, SAY };
   /* ---------------------------------------------------------------- hooks */
   const w0 = win; win = function () { if (E.on && !G.bossMode) { E.won(); return; } return w0.apply(this, arguments); }; // eslint-disable-line no-global-assign
   const d0 = die; die = function () { const r = d0.apply(this, arguments); if (E.on && !G.bossMode) E.dead(); if (G.bossMode && typeof BB !== 'undefined' && BOSSES.cur === BB) q$('#dMenu').textContent = 'BACK TO BUILDER'; return r; }; // eslint-disable-line no-global-assign
@@ -11858,7 +11833,7 @@ const ENDLESS = (() => {
     } else if (k === 'enter') { const b = scr.querySelector('[data-a="leave"]'); if (b) b.click(); ev.preventDefault(); }
   }, true);
   const tp = togglePause; togglePause = function () { const r = tp.apply(this, arguments); // eslint-disable-line no-global-assign
-    if (G.state === 'paused' && E.on && E.run) { q$('#pSub').textContent = 'ENDLESS · ROUND ' + E.run.round + ' · ' + DNAME[E.run.diff]; q$('#pQuit').textContent = 'SAVE & QUIT'; ST.roster = E.run.roster.slice(); q$('#pNotes').hidden = !E.run.roster.length; }
+    if (G.state === 'paused' && E.on && E.run) { q$('#pSub').textContent = 'ENDLESS · ROUND ' + E.run.round + ' · ' + DNAME[E.run.diff]; q$('#pQuit').textContent = 'SAVE & QUIT'; ST.roster = E.run.roster.concat(((E.run.chal && E.run.chal.extra) || []).filter((id) => !E.run.roster.includes(id))); q$('#pNotes').hidden = !ST.roster.length; if (E.run.chal) q$('#pSub').textContent += ' · ' + E.run.chal.n; }
     else if (G.state === 'paused' && G.bossMode && typeof BB !== 'undefined' && BOSSES.cur === BB && BB.cfg) { q$('#pSub').textContent = 'BOSS BUILDER · ' + BB.cfg.name + ' · PHASE ' + BB.phase + ' / ' + BB.cfg.phases; q$('#pQuit').textContent = 'BACK TO BUILDER'; }
     return r; };
   return E;
@@ -11935,6 +11910,617 @@ ACH.LIST.push({ id: 'endless10', n: 'Overtime Forever', d: 'Survive 10 rounds in
 @media (max-width:760px){#endShop .stall{grid-template-columns:1fr;grid-template-rows:auto 1fr;inset:76px 0 0}#endShop .keeper{flex-direction:row;align-items:flex-end}#endShop .pp2d{width:110px}#endShop .bubble{position:static;flex:1;margin:0 0 30px 8px}#endShop .counter{display:none}}
 `; document.head.appendChild(css);
 }
+
+</script>
+<script>
+/* ==================================================================
+   ENDLESS SHOPS (v2.8): after every Endless night the Backrooms shifts and four doors open, drawn from 15 shops.
+   Every keeper is a friendly (or at least business-minded) entity or group from the community Backrooms wikis:
+   the Partypooper, M.E.G. Base Alpha, the B.N.T.G., Moley's Comedy Club & Bar (Entity 65), Blanche (Entity 140),
+   the Catmaster (Entity 220), the Wheelfolk (Entity 250), the Mail Carrier (Entity 133), the Masked Messengers
+   (Entity 182), the Blub Cats (Entity 29), the Facelings (Entity 9), the Malt Marters (Level 11), the Memory Merchant
+   (Entity 124), the Frowning Husks (Entity 68) and the Merchant Smiler (Entity 3-B).
+   Each shop has its own keeper art, voice, wares and a generated music loop. Some offer a challenge for tonight
+   (survive it for cash, a free upgrade or an item) or a bounty (take one extra specimen tonight for cash).
+   Ware keys: c: consumable · u: campaign upgrade · e: Endless upgrade · b: a drink or tea for tonight only
+              m: mail-order (arrives at 5:00 AM) · g: feed the Blub Cats · f: a Memory Merchant trade · free: charity
+   Run state: R.shops (tonight's 4 doors), R.shopAt, R.last, R.deals (this visit's stock and offers),
+              R.chal (tonight's challenge or bounty), R.buff (tonight's drinks), R.mail (tonight's deliveries).
+   ================================================================== */
+const ESHOP = (() => {
+  const E = ENDLESS, X = E.X, S = { trk: {} };
+  const r10 = (n) => Math.round(n / 10) * 10;
+  const STK = 'fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"';
+
+  /* ---------------------------------------------------------------- music: a small seeded song generator */
+  const rng = (str) => { let h = 2166136261; for (let i = 0; i < str.length; i++) h = Math.imul(h ^ str.charCodeAt(i), 16777619); return () => { h = (h + 0x6d2b79f5) | 0; let t = Math.imul(h ^ (h >>> 15), 1 | h); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
+  const SC = { major: [0, 2, 4, 5, 7, 9, 11], minor: [0, 2, 3, 5, 7, 8, 10], dorian: [0, 2, 3, 5, 7, 9, 10], phryg: [0, 1, 3, 5, 7, 8, 10], harm: [0, 2, 3, 5, 7, 8, 11], lyd: [0, 2, 4, 6, 7, 9, 11], whole: [0, 2, 4, 6, 8, 10], penta: [0, 2, 4, 7, 9] };
+  const mf = (m) => 440 * Math.pow(2, (m - 69) / 12);
+  function song(o) {
+    const r = rng(o.seed), sc = SC[o.scale], n = sc.length, beat = 60 / o.bpm, bpb = o.meter || 4, sub = o.sub || 2, stp = beat / sub, spb = bpb * sub;
+    const prog = o.prog, bars = prog.length, len = bars * bpb * beat, ev = [];
+    const deg = (d, oct) => { const k = ((d % n) + n) % n; return mf(o.root + 12 * (oct + Math.floor(d / n)) + sc[k]); };
+    const sw = (i) => (i % 2 === 1 ? (o.swing || 0) * stp : 0);
+    const filt = (f) => (f ? { freq: f } : undefined);
+    const motif = () => { const out = []; for (let i = 0; i < spb; i++) { if (i === 0 || r() < (i % sub === 0 ? o.dens + 0.2 : o.dens - 0.2)) out.push({ i, mv: [-2, -1, -1, 1, 1, 2, 0, 3][Math.floor(r() * 8)] }); } return out; };
+    const M = { A: motif(), B: motif() }, form = o.form || 'AABA', ctr = o.ctr == null ? n + 2 : o.ctr;
+    prog.forEach((cd, b) => {
+      const t0 = b * bpb * beat, chord = [cd, cd + 2, cd + 4];
+      if (o.pad) chord.forEach((d, k) => ev.push({ at: t0 + k * 0.012, f: deg(d, o.pad.oct || 0), dur: bpb * beat * 1.04, g: o.pad.g, type: o.pad.type || 'triangle', attack: o.pad.attack || 0.3, filter: filt(o.pad.filt), detune: o.pad.det ? (k - 1) * o.pad.det : undefined }));
+      const B = o.bass;
+      if (B) {
+        const bo = B.oct == null ? -2 : B.oct, bn = (at, d, dur, acc = 1) => ev.push({ at, f: deg(d, bo), dur, g: B.g * acc, type: B.type || 'triangle', attack: 0.008, filter: filt(B.filt) });
+        if (B.pat === 'root') for (let i = 0; i < bpb; i++) bn(t0 + i * beat, cd, beat * 0.85, i ? 0.75 : 1);
+        else if (B.pat === 'half') { bn(t0, cd, beat * bpb * 0.48); bn(t0 + beat * bpb / 2, cd + 4 - n, beat * bpb * 0.45, 0.85); }
+        else if (B.pat === 'oompah') { bn(t0, cd, beat * 0.55); for (let i = 1; i < bpb; i++) { if (bpb === 4 && i === 2) { bn(t0 + i * beat, cd + 4 - n, beat * 0.5, 0.85); continue; } chord.forEach((d) => ev.push({ at: t0 + i * beat, f: deg(d, bo + 1), dur: beat * 0.32, g: B.g * 0.32, type: B.type || 'triangle', attack: 0.005, filter: filt(B.filt ? B.filt * 2 : 0) })); } }
+        else if (B.pat === 'walk') { const nx = prog[(b + 1) % bars], line = [cd, cd + 2, cd + 4, nx + (r() < 0.5 ? 1 : -1)]; for (let i = 0; i < bpb; i++) bn(t0 + i * beat, line[i % 4], beat * 0.82, i ? 0.85 : 1); }
+        else if (B.pat === 'drone') bn(t0, cd, bpb * beat * 1.06);
+        else if (B.pat === 'bossa') [[0, cd, 1.5], [1.5, cd + 4 - n, 0.5], [2, cd + 4 - n, 1.5], [3.5, cd, 0.5]].forEach(([s0, d, l]) => { if (s0 < bpb) bn(t0 + s0 * beat, d, l * beat * 0.9); });
+        else if (B.pat === 'arp') for (let i = 0; i < spb; i++) bn(t0 + i * stp + sw(i), chord[i % 3] + (i % 6 >= 3 ? n : 0), stp * 1.6, 0.75);
+      }
+      const D = o.drums;
+      if (D) ['k', 's', 'h', 'c'].forEach((kind) => { const pat = D[kind]; if (!pat) return; for (let i = 0; i < spb; i++) { const ch = pat[i % pat.length]; if (ch === '.') continue; const acc = ch === 'X' ? 1.45 : 1, at = t0 + i * stp + sw(i);
+        if (kind === 'k') ev.push({ at, f: 120, slide: 42, dur: 0.2, g: D.g * 2.4 * acc, type: 'sine', attack: 0.003 });
+        else if (kind === 's') ev.push({ at, noise: true, dur: 0.13, g: D.g * acc, filter: { type: 'bandpass', freq: D.sf || 1800, Q: 0.8 }, attack: 0.002 });
+        else if (kind === 'h') ev.push({ at, noise: true, dur: 0.04, g: D.g * 0.6 * acc, filter: { type: 'highpass', freq: 7000 } });
+        else ev.push({ at, noise: true, dur: 0.06, g: D.g * 0.8 * acc, filter: { type: 'bandpass', freq: D.cf || 3200, Q: 4 } });
+      } });
+      const L = o.lead;
+      if (L && !(o.rest || []).includes(b)) {
+        const mo = M[form[b % form.length]] || M.A; let idx = ctr;
+        mo.forEach((nt, j) => {
+          const strong = nt.i % (sub * 2) === 0;
+          let want = j === 0 ? ctr : idx + nt.mv;
+          if (strong) { let best = want, bd = 99; for (let c = 0; c <= 3 * n; c++) { if (![0, 2, 4].includes((((c - cd) % n) + n) % n)) continue; const dd = Math.abs(c - want); if (dd < bd) { bd = dd; best = c; } } want = best; }
+          idx = U.clamp(want, o.lo == null ? 2 : o.lo, o.hi == null ? 2 * n + 2 : o.hi);
+          const nx = mo[j + 1] ? mo[j + 1].i : spb, durS = Math.min(nx - nt.i, L.hold || 3), at = t0 + nt.i * stp + sw(nt.i), f = deg(idx, L.oct || 0);
+          ev.push({ at, f, dur: Math.max(0.08, durS * stp * (L.leg || 0.9)), g: L.g * (strong ? 1 : 0.82), type: L.type || 'square', attack: L.attack || 0.01, filter: filt(L.filt), vib: L.vib, detune: L.det ? (r() - 0.5) * L.det : undefined });
+          if (L.echo) ev.push({ at: at + L.echo, f, dur: Math.max(0.08, durS * stp * 0.8), g: L.g * 0.32, type: L.type || 'square', attack: L.attack || 0.01, filter: filt(L.filt) });
+          if (L.oct2) ev.push({ at, f: f * 2, dur: Math.max(0.06, durS * stp * 0.5), g: L.g * 0.22, type: 'sine', attack: 0.004 });
+        });
+      }
+    });
+    if (o.extra) o.extra(ev, { len, beat, deg, r, bars, bpb });
+    ev.sort((x, y) => x.at - y.at); return { len, ev, gain: o.gain || 1 };
+  }
+  S.track = (id) => { const s = BY[id]; if (!s) return null; if (!S.trk[id]) S.trk[id] = song(Object.assign({ seed: 'bfs-shop-' + id }, s.music)); return S.trk[id]; };
+
+  /* ---------------------------------------------------------------- tonight-only drinks, and challenge rules */
+  const CUP = (inner, c1, c2) => TILE(inner, c1, c2);
+  const BUFF = {
+    chill: { n: 'Iced Almond Water', d: 'On the rocks. The office heats up 40% slower tonight.', p: 70, ic: () => CUP(`<path d="M15 14h18l-3 22H18z" ${STK}/><path d="M18 22h12" ${STK}/><rect x="19" y="24" width="5" height="5" fill="#cfefff"/><rect x="25" y="27" width="5" height="5" fill="#cfefff"/>`, '#3a8ad0', '#0e2a4a'), on: () => { G.modHeat *= 0.6; } },
+    charge: { n: 'The Jumper Cable', d: 'Fizzy, with a copper aftertaste. Start tonight with +25% power.', p: 90, ic: () => CUP(`<path d="M14 12h20l-8 13v11h-4V25z" ${STK}/><path d="M26 15l-4 6h4l-3 6" stroke="#ffd84a" stroke-width="2.4" fill="none" stroke-linecap="round"/>`, '#c79a1c', '#4a3006'), on: () => { G.powerMax += 25; G.power += 25; } },
+    water: { n: 'Almond Water, Double', d: 'Two extra bottles on your desk tonight.', p: 60, ic: () => CUP(`<rect x="13" y="16" width="9" height="20" rx="3" ${STK}/><rect x="26" y="16" width="9" height="20" rx="3" ${STK}/><path d="M15 12h5M28 12h5" ${STK}/>`, '#d8cfa8', '#5a5030'), on: () => { G.water += 2; G.waterMax = Math.max(G.waterMax || 0, G.water); } },
+    slow: { n: "Moley's Nightcap", d: 'You show up 15 minutes late tonight, and nobody minds.', p: 110, ic: () => CUP(`<path d="M14 13h20l-10 12z" ${STK}/><path d="M24 25v10M18 36h12" ${STK}/><circle cx="31" cy="11" r="3" fill="#e84a6a"/>`, '#7a3ac8', '#24104a'), on: () => { G.t += HOUR / 4; } },
+    calm: { n: 'Chamomile Tea', d: 'Every specimen is 2 AI calmer tonight.', p: 100, ai: -2, ic: () => CUP(`<path d="M12 20h20v6a10 10 0 0 1-20 0z" ${STK}/><path d="M32 22h3a3 3 0 0 1 0 6h-3" ${STK}/><path d="M18 15c0-3 3-3 3-6M25 15c0-3 3-3 3-6" ${STK}/>`, '#c8a040', '#4a3a10') },
+    vent: { n: 'Peppermint Tea', d: 'Clear lungs. The vents clog 40% slower tonight.', p: 70, ic: () => CUP(`<path d="M12 20h20v6a10 10 0 0 1-20 0z" ${STK}/><path d="M32 22h3a3 3 0 0 1 0 6h-3" ${STK}/><path d="M20 15c3-4 7-4 9-1-3 2-6 2-9 1z" fill="#8fe08a"/>`, '#3a9a5a', '#0e3a1e'), on: () => { G.vent.max = Math.round(G.vent.max * 1.4); G.vent.t = G.vent.max; } },
+    earl: { n: 'Earl Grey, Hot', d: 'Steady hands. Everything uses 15% less power tonight.', p: 90, ic: () => CUP(`<path d="M12 20h20v6a10 10 0 0 1-20 0z" ${STK}/><path d="M32 22h3a3 3 0 0 1 0 6h-3" ${STK}/><path d="M16 38h18" ${STK}/>`, '#8a5a3a', '#2a1406'), on: () => { G.modPow *= 0.85; } },
+  };
+  const RULE = {
+    drain: { n: 'BROWNOUT', d: 'Everything uses 50% more power.', ic: `<path d="M26 8l-11 18h9l-3 14 12-19h-9z" ${STK}/>`, on: () => { G.modPow *= 1.5; } },
+    heat: { n: 'HEAT WAVE', d: 'The office heats up 70% faster.', ic: `<path d="M21 10a3 3 0 0 1 6 0v16a7 7 0 1 1-6 0z" ${STK}/><path d="M24 18v12" ${STK}/>`, on: () => { G.modHeat *= 1.7; } },
+    stale: { n: 'STALE AIR', d: 'The vents clog 40% faster.', ic: `<rect x="10" y="12" width="28" height="24" rx="2" ${STK}/><path d="M14 19h20M14 24h20M14 29h20" ${STK}/>`, on: () => { G.vent.max = Math.max(14, Math.round(G.vent.max * 0.6)); G.vent.t = G.vent.max; } },
+    dry: { n: 'DRY SPELL', d: 'Two fewer bottles of almond water on the desk.', ic: `<rect x="17" y="14" width="14" height="24" rx="4" ${STK}/><path d="M20 9h8M12 38l24-26" ${STK}/>`, on: () => { G.water = Math.max(0, G.water - 2); } },
+    low: { n: 'LOW BATTERY', d: 'You start the night with 35% less power.', ic: `<rect x="9" y="16" width="26" height="16" rx="2" ${STK}/><path d="M35 21v6" ${STK}/><rect x="12" y="19" width="6" height="10" fill="#ff7a5a"/>`, on: () => { G.power = Math.max(25, G.power - 35); } },
+    angry: { n: 'BAD MOOD', d: 'Every specimen is 2 AI angrier.', ai: 2, ic: `<circle cx="24" cy="24" r="13" ${STK}/><path d="M17 19l5 2M31 19l-5 2M18 32c3-4 9-4 12 0" ${STK}/>` },
+    rush: { n: 'LAST CALL', d: 'At 5:00 AM every specimen gets 3 AI angrier.', ic: `<circle cx="24" cy="25" r="13" ${STK}/><path d="M24 17v8l6 3" ${STK}/><path d="M24 4v4" ${STK}/>` },
+    jam: { n: 'STICKY DOORS', d: 'Every 50 seconds a door shorts out for 5 seconds.', ic: `<rect x="13" y="8" width="20" height="32" rx="1" ${STK}/><path d="M36 14l-4 6h5l-4 7" stroke="#ffd84a" stroke-width="2.4" fill="none" stroke-linecap="round"/>` },
+  };
+  const ricon = (id) => TILE(RULE[id].ic, '#b8402a', '#3a0e06');
+  S.BUFF = BUFF; S.RULE = RULE;
+
+  /* ---------------------------------------------------------------- the keepers (2D art, 220 × 300, behind the counter) */
+  const sh = '<ellipse cx="110" cy="295" rx="88" ry="6" fill="rgba(0,0,0,.4)"/>';
+  const ART = {
+    meg: `<svg class="pp2d" viewBox="0 0 220 300" aria-hidden="true">${sh}
+      <path d="M20 300C20 232 46 196 110 190C174 196 200 232 200 300Z" fill="#4c5a33"/><path d="M110 196V300" stroke="#2c3820" stroke-width="3"/>
+      <path d="M84 194l26 34 26-34" fill="#ddd5bb"/><path d="M100 196l10 28 10-28" fill="#6a2a20"/>
+      <rect x="138" y="222" width="40" height="22" rx="3" fill="#2c3820"/><text x="158" y="237" font-size="11" fill="#e8d878" text-anchor="middle" font-family="monospace" font-weight="bold">M.E.G.</text>
+      <path d="M42 232h30M42 238h30" stroke="#c8b040" stroke-width="3"/>
+      <g class="ppHead"><rect x="95" y="166" width="30" height="30" fill="#c6966f"/><ellipse cx="110" cy="130" rx="42" ry="47" fill="#d9a882"/>
+        <path d="M62 112C64 66 156 66 158 112Z" fill="#3e4c29"/><path d="M58 110H170c6 8-8 14-20 10H64Z" fill="#2c3820"/><circle cx="110" cy="92" r="7" fill="#e8d878"/>
+        <path d="M86 122l14-2M134 122l-14-2" stroke="#5a3a22" stroke-width="3.5" stroke-linecap="round"/>
+        <g class="ppEyes"><ellipse cx="94" cy="132" rx="4" ry="5" fill="#1a1410"/><ellipse cx="126" cy="132" rx="4" ry="5" fill="#1a1410"/></g>
+        <path d="M105 144q5 5 10 0" stroke="#a8745a" stroke-width="2" fill="none"/><path class="ppMouth" d="M96 158q14 7 28 0" stroke="#5a2a1a" stroke-width="3.5" fill="none" stroke-linecap="round"/></g>
+      <g><rect x="140" y="244" width="46" height="56" rx="3" fill="#a8885a"/><rect x="146" y="252" width="34" height="44" fill="#f2ecd8"/><path d="M150 262h26M150 270h26M150 278h18" stroke="#666" stroke-width="2"/><rect x="155" y="240" width="16" height="8" rx="2" fill="#999"/></g>
+      <ellipse cx="150" cy="292" rx="14" ry="9" fill="#d9a882"/></svg>`,
+    bntg: `<svg class="pp2d" viewBox="0 0 220 300" aria-hidden="true">${sh}
+      <path d="M22 300C22 230 46 196 110 190C174 196 198 230 198 300Z" fill="#ece5d2"/>
+      <path d="M22 300C22 232 44 200 92 194L104 300ZM198 300C198 232 176 200 128 194L116 300Z" fill="#6c1e2c"/>
+      <circle cx="98" cy="236" r="3" fill="#e8c048"/><circle cx="98" cy="258" r="3" fill="#e8c048"/><circle cx="98" cy="280" r="3" fill="#e8c048"/>
+      <path d="M98 246q24 18 50 4" stroke="#e8c048" stroke-width="2.2" fill="none"/><path d="M110 196l-10 14h20z" fill="#2a6a4a"/>
+      <g class="ppHead"><rect x="96" y="166" width="28" height="30" fill="#a8704c"/><ellipse cx="110" cy="132" rx="40" ry="46" fill="#b9805a"/>
+        <path d="M70 118C70 82 150 82 150 118C138 104 82 104 70 118Z" fill="#3a2a1e"/>
+        <path d="M64 112h92l-12 14H76Z" fill="#2a8a4a" opacity=".85"/><path d="M64 112h92" stroke="#1a5a2e" stroke-width="3"/>
+        <g class="ppEyes"><ellipse cx="95" cy="134" rx="4" ry="4.5" fill="#1a1008"/><ellipse cx="125" cy="134" rx="4" ry="4.5" fill="#1a1008"/></g>
+        <circle cx="125" cy="134" r="9" fill="none" stroke="#e8c048" stroke-width="2"/><path d="M134 136q8 10 4 30" stroke="#e8c048" stroke-width="1.2" fill="none"/>
+        <path d="M92 152q18-9 36 0q-18 6-36 0z" fill="#3a2a1e"/><path class="ppMouth" d="M100 162q10 5 20 0" stroke="#5a2a1a" stroke-width="3" fill="none" stroke-linecap="round"/></g>
+      <g>${[0, 1, 2, 3, 4].map((k) => `<ellipse cx="54" cy="${292 - k * 7}" rx="20" ry="6" fill="${k % 2 ? '#d8a830' : '#f0c848'}" stroke="#8a6a10"/>`).join('')}<text x="54" y="267" font-size="9" text-anchor="middle" fill="#6a4a00" font-family="monospace" font-weight="bold">P</text>
+        ${[0, 1, 2].map((k) => `<ellipse cx="84" cy="${294 - k * 7}" rx="16" ry="5" fill="${k % 2 ? '#d8a830' : '#f0c848'}" stroke="#8a6a10"/>`).join('')}</g></svg>`,
+    moley: `<svg class="pp2d" viewBox="0 0 220 300" aria-hidden="true">${sh}
+      <path d="M26 300C26 236 50 204 110 198C170 204 194 236 194 300Z" fill="#f2efe6"/>
+      <path d="M26 300C26 236 48 206 90 200L100 300ZM194 300C194 236 172 206 130 200L120 300Z" fill="#1c1c26"/>
+      <path d="M92 204l18 9-18 9zM128 204l-18 9 18 9z" fill="#c8243a"/><circle cx="110" cy="213" r="5" fill="#a01a2c"/>
+      <g class="ppHead"><path d="M78 92C64 46 70 6 84 6C98 6 100 50 96 100Z" fill="#bfae9c"/><path d="M82 90C74 56 76 22 84 20C92 22 92 58 90 96Z" fill="#e8b4b8"/>
+        <path d="M142 92C156 46 150 6 136 6C122 6 120 50 124 100Z" fill="#bfae9c"/><path d="M138 90C146 56 144 22 136 20C128 22 128 58 130 96Z" fill="#e8b4b8"/>
+        <ellipse cx="110" cy="146" rx="48" ry="46" fill="#cdbca9"/><ellipse cx="110" cy="166" rx="26" ry="20" fill="#ece2d4"/>
+        <g class="ppEyes"><ellipse cx="88" cy="136" rx="8" ry="10" fill="#1a1010"/><ellipse cx="132" cy="136" rx="8" ry="10" fill="#1a1010"/><circle cx="91" cy="132" r="2.6" fill="#fff"/><circle cx="135" cy="132" r="2.6" fill="#fff"/></g>
+        <path d="M104 156h12l-6 7z" fill="#d8707a"/><path class="ppMouth" d="M100 168q5 6 10 0q5 6 10 0" stroke="#5a3a3a" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+        <rect x="105" y="170" width="10" height="9" rx="1.5" fill="#fff" stroke="#c8bca8"/>
+        <path d="M84 162l-30-4M84 168l-30 4M136 162l30-4M136 168l30 4" stroke="#8a7a68" stroke-width="1.4"/></g>
+      <g><path d="M150 250h28l-4 46h-20z" fill="rgba(220,240,255,.35)" stroke="#e8f4ff" stroke-width="2"/><path d="M153 266h22l-3 28h-16z" fill="#efe6c8" opacity=".85"/><rect x="157" y="258" width="8" height="8" fill="#dff4ff" opacity=".8"/>
+        <ellipse cx="162" cy="294" rx="16" ry="9" fill="#cdbca9"/></g>
+      <g transform="translate(10 222)"><circle cx="22" cy="40" r="20" fill="#3a6ac8"/><path d="M38 40l18 5-18 6z" fill="#f0a020"/><circle cx="28" cy="34" r="5" fill="#fff"/><circle cx="29" cy="34" r="2.4" fill="#111"/><path d="M10 22l6 8M18 18l3 10" stroke="#3a6ac8" stroke-width="4" stroke-linecap="round"/></g></svg>`,
+    blanche: `<svg class="pp2d" viewBox="0 0 220 300" aria-hidden="true">${sh}
+      <path d="M58 120C46 190 40 250 48 300H172C180 250 174 190 162 120Z" fill="#e6c870"/>
+      <path d="M30 300C30 236 54 202 110 196C166 202 190 236 190 300Z" fill="#f6f3ec"/><path d="M80 200q30 26 60 0" fill="none" stroke="#d8d0c0" stroke-width="3" stroke-dasharray="3 4"/>
+      <path d="M60 140C56 184 58 214 66 236L80 196ZM160 140C164 184 162 214 154 236L140 196Z" fill="#e6c870"/>
+      <g class="ppHead"><rect x="98" y="166" width="24" height="32" fill="#f0ddd0"/><ellipse cx="110" cy="132" rx="38" ry="44" fill="#f5e6da"/>
+        <path d="M70 128C64 70 156 70 150 128C140 96 116 92 110 104C100 92 80 98 70 128Z" fill="#ecd27e"/>
+        <g class="ppEyes"><path d="M90 134q6-5 12 0" stroke="#4a3a2a" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M118 134q6-5 12 0" stroke="#4a3a2a" stroke-width="3" fill="none" stroke-linecap="round"/></g>
+        <ellipse cx="88" cy="150" rx="7" ry="4" fill="#f2b8b0" opacity=".7"/><ellipse cx="132" cy="150" rx="7" ry="4" fill="#f2b8b0" opacity=".7"/>
+        <path class="ppMouth" d="M102 158q8 6 16 0" stroke="#b86a6a" stroke-width="2.6" fill="none" stroke-linecap="round"/></g>
+      <g><ellipse cx="110" cy="290" rx="34" ry="7" fill="#fff" stroke="#5a7ab8" stroke-width="2"/><path d="M90 262h40v12a20 16 0 0 1-40 0z" fill="#fff" stroke="#5a7ab8" stroke-width="2"/><path d="M130 266h6a6 6 0 0 1 0 12h-6" fill="none" stroke="#5a7ab8" stroke-width="2.5"/>
+        <g class="steam" stroke="#fff" stroke-width="2" fill="none" opacity=".6" stroke-linecap="round"><path d="M100 254c-4-6 4-8 0-14"/><path d="M112 252c-4-6 4-8 0-14"/><path d="M124 254c-4-6 4-8 0-14"/></g>
+        <ellipse cx="80" cy="282" rx="12" ry="8" fill="#f5e6da"/><ellipse cx="140" cy="282" rx="12" ry="8" fill="#f5e6da"/></g></svg>`,
+    catmaster: `<svg class="pp2d" viewBox="0 0 220 300" aria-hidden="true">${sh}<defs><radialGradient id="cmGlow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset=".4" stop-color="#cfe8ff" stop-opacity=".5"/><stop offset="1" stop-color="#cfe8ff" stop-opacity="0"/></radialGradient></defs>
+      <ellipse cx="110" cy="64" rx="44" ry="10" fill="none" stroke="#e8d070" stroke-width="2.5" stroke-dasharray="40 10 22 14" opacity=".55"/>
+      <path d="M40 300C34 230 60 170 110 168C160 170 186 230 180 300Z" fill="#0b0b0e"/><path d="M178 284C214 280 214 224 192 214" stroke="#0b0b0e" stroke-width="14" fill="none" stroke-linecap="round"/>
+      <g class="ppHead"><path d="M56 80L70 140H150L164 80L132 106H88Z" fill="#0b0b0e"/><ellipse cx="110" cy="140" rx="54" ry="44" fill="#0b0b0e"/>
+        <path d="M66 92q-4 20 2 34q2 10-2 18" stroke="#030304" stroke-width="5" fill="none"/><circle cx="64" cy="146" r="4" fill="#030304"/><path d="M154 92q4 20-2 34q-2 10 2 18" stroke="#030304" stroke-width="5" fill="none"/><circle cx="156" cy="148" r="4" fill="#030304"/>
+        <path d="M64 92q-2 12 2 22M156 92q2 12-2 22" stroke="#3a3a48" stroke-width="1.6" fill="none"/>
+        <g class="ppEyes"><circle cx="88" cy="136" r="16" fill="url(#cmGlow)"/><circle cx="132" cy="136" r="16" fill="url(#cmGlow)"/><ellipse cx="88" cy="136" rx="7" ry="8" fill="#fff"/><ellipse cx="132" cy="136" rx="7" ry="8" fill="#fff"/></g>
+        <path d="M106 154l4 4 4-4z" fill="#2a2a34"/><path class="ppMouth" d="M100 164q5 4 10 0q5 4 10 0" stroke="#2a2a34" stroke-width="2.4" fill="none"/>
+        <path d="M80 158l-34-4M80 164l-32 6M140 158l34-4M140 164l32 6" stroke="#2a2a34" stroke-width="1.4"/></g>
+      <g fill="none" stroke="#e8c048" stroke-width="3">${[[40, 284, -20], [70, 290, 15], [150, 288, -10], [176, 292, 25], [110, 296, 5]].map(([x, y, a]) => `<g transform="rotate(${a} ${x} ${y})"><circle cx="${x - 8}" cy="${y}" r="5"/><path d="M${x - 3} ${y}h16M${x + 9} ${y}v4M${x + 5} ${y}v3"/></g>`).join('')}</g></svg>`,
+    wheelfolk: `<svg class="pp2d" viewBox="0 0 220 300" aria-hidden="true">${sh}
+      <g class="ppHead"><path d="M70 90V200" stroke="#7a8590" stroke-width="7" stroke-linecap="round"/><path d="M62 86h18" stroke="#2a2a30" stroke-width="9" stroke-linecap="round"/>
+        <rect x="72" y="100" width="62" height="78" rx="8" fill="#3a5a8a"/><path d="M78 110h50M78 124h50M78 138h50" stroke="#2a4470" stroke-width="2"/>
+        <rect x="36" y="118" width="34" height="30" rx="4" fill="#e8e4da" stroke="#b8b0a0" stroke-width="2"/><path d="M53 124v18M44 133h18" stroke="#d83a2a" stroke-width="5"/></g>
+      <path d="M70 196H160" stroke="#7a8590" stroke-width="7" stroke-linecap="round"/><rect x="74" y="178" width="88" height="20" rx="6" fill="#3a5a8a"/>
+      <path d="M150 196L172 250" stroke="#7a8590" stroke-width="6" stroke-linecap="round"/><path d="M160 252h26" stroke="#2a2a30" stroke-width="6" stroke-linecap="round"/>
+      <circle cx="96" cy="240" r="50" fill="none" stroke="#2a2a30" stroke-width="9"/><circle cx="96" cy="240" r="44" fill="none" stroke="#a8b4c0" stroke-width="3"/>
+      <g class="spokes" stroke="#a8b4c0" stroke-width="2">${[0, 30, 60, 90, 120, 150].map((a) => `<path d="M${96 + 44 * Math.cos(a * Math.PI / 180)} ${240 + 44 * Math.sin(a * Math.PI / 180)}L${96 - 44 * Math.cos(a * Math.PI / 180)} ${240 - 44 * Math.sin(a * Math.PI / 180)}"/>`).join('')}</g><circle cx="96" cy="240" r="7" fill="#7a8590"/>
+      <circle cx="176" cy="280" r="14" fill="none" stroke="#2a2a30" stroke-width="6"/><circle cx="176" cy="280" r="3" fill="#7a8590"/>
+      <path d="M118 182q14-14 30 0" fill="none" stroke="#e85a7a" stroke-width="3"/><path d="M128 168c-6-8 4-12 6-4c2-8 12-4 6 4l-6 6z" fill="#e85a7a"/></svg>`,
+    mail: `<svg class="pp2d" viewBox="0 0 220 300" aria-hidden="true">${sh}
+      <path d="M62 300L70 124C78 110 142 110 150 124L158 300Z" fill="#14141a"/><path d="M98 120l12 70 12-70z" fill="#f2f0ea"/><path d="M100 124l10 6 10-6-10 6z" fill="#111"/><path d="M100 120l10 8 10-8v8l-10-4-10 4z" fill="#111"/>
+      <path d="M70 124L52 260M150 124L168 250" stroke="#14141a" stroke-width="18" stroke-linecap="round"/><ellipse cx="52" cy="264" rx="9" ry="7" fill="#f2f0ea"/>
+      <rect x="146" y="246" width="58" height="42" rx="4" fill="#5a3a22" stroke="#3a2412" stroke-width="2"/><path d="M164 246v-8h22v8" fill="none" stroke="#3a2412" stroke-width="4"/><rect x="171" y="262" width="8" height="6" fill="#c8a040"/>
+      <rect x="80" y="150" width="16" height="16" fill="#ffe680" transform="rotate(-8 88 158)"/><rect x="124" y="196" width="16" height="16" fill="#ffe680" transform="rotate(6 132 204)"/><rect x="86" y="230" width="14" height="14" fill="#ffd0e0" transform="rotate(4 93 237)"/>
+      <g class="ppHead"><rect x="102" y="86" width="16" height="32" fill="#c8c8cc"/><ellipse cx="110" cy="70" rx="24" ry="28" fill="#d0d0d4"/>
+        <g class="ppEyes"><circle cx="101" cy="70" r="3" fill="#18181c"/><circle cx="119" cy="70" r="3" fill="#18181c"/></g>
+        <path d="M78 44h64" stroke="#0a0a0e" stroke-width="7" stroke-linecap="round"/><rect x="88" y="0" width="44" height="44" rx="3" fill="#0a0a0e"/><rect x="88" y="32" width="44" height="6" fill="#6a1a2a"/></g></svg>`,
+    messengers: `<svg class="pp2d" viewBox="0 0 220 300" aria-hidden="true">${sh}
+      <g opacity=".95">${[-70, -45, -20, 0, 20, 45, 70].map((a) => `<g transform="rotate(${a} 110 230)"><path d="M110 230L110 70" stroke="#2a7a6a" stroke-width="6"/><ellipse cx="110" cy="78" rx="14" ry="20" fill="#1a8a7a"/><ellipse cx="110" cy="80" rx="7" ry="10" fill="#e8c048"/><circle cx="110" cy="82" r="4" fill="#1a2a6a"/></g>`).join('')}</g>
+      <path d="M66 300C62 230 80 176 110 172C140 176 158 230 154 300Z" fill="#2a5ab8"/><path d="M90 300C88 250 96 214 110 210C124 214 132 250 130 300Z" fill="#3a7ad8"/>
+      <path d="M140 210q34 20 24 70" stroke="#f4f0e0" stroke-width="4" fill="none"/><path d="M140 210q22 2 26 30q-14-8-26-30z" fill="#f4f0e0"/>
+      <g class="ppHead"><path d="M110 170C90 170 82 148 84 130C88 104 132 104 136 130C138 148 130 170 110 170Z" fill="#2a5ab8"/>
+        ${[[-24, 40], [-12, 30], [0, 26], [12, 30], [24, 40]].map(([dx, l]) => `<path d="M110 106l${dx} -${l}" stroke="#1a8a6a" stroke-width="2.4"/><circle cx="${110 + dx}" cy="${106 - l}" r="6" fill="${dx % 24 ? '#f28ab8' : '#ffd84a'}"/><circle cx="${110 + dx}" cy="${106 - l}" r="2.4" fill="#fff"/>`).join('')}
+        <path d="M84 126q26-14 52 0q-4 14-26 12q-22 2-26-12z" fill="#f6f2ea" stroke="#c8a040" stroke-width="1.5"/>
+        <g class="ppEyes"><ellipse cx="98" cy="128" rx="4" ry="4" fill="#111"/><ellipse cx="122" cy="128" rx="4" ry="4" fill="#111"/></g>
+        <path class="ppMouth" d="M104 144l6 18 6-18z" fill="#e8a030"/>
+        <g transform="translate(96 156) rotate(-6)"><rect x="0" y="0" width="34" height="22" fill="#f4ecd8" stroke="#a89a78"/><path d="M0 0l17 12 17-12" fill="none" stroke="#a89a78"/><circle cx="17" cy="14" r="5" fill="#b8202a"/></g></g></svg>`,
+    blubcats: `<svg class="pp2d" viewBox="0 0 220 300" aria-hidden="true">${sh}
+      ${[[52, 262, 34, '#f2efe8', '#d8d2c8', 0.8], [168, 266, 30, '#f0a050', '#d07a2a', 0.75]].map(([x, y, r, c, c2, k]) => `<g><path d="M${x - r * 0.8} ${y - r * 0.6}l6 -${r * 0.9} ${r * 0.5} ${r * 0.5}zM${x + r * 0.8} ${y - r * 0.6}l-6 -${r * 0.9} -${r * 0.5} ${r * 0.5}z" fill="${c2}"/><ellipse cx="${x}" cy="${y}" rx="${r}" ry="${r * 0.86}" fill="${c}"/><ellipse cx="${x - r * 0.35}" cy="${y - r * 0.1}" rx="${6 * k}" ry="${8 * k}" fill="#111"/><ellipse cx="${x + r * 0.35}" cy="${y - r * 0.1}" rx="${6 * k}" ry="${8 * k}" fill="#111"/><circle cx="${x - r * 0.3}" cy="${y - r * 0.2}" r="2" fill="#fff"/><circle cx="${x + r * 0.4}" cy="${y - r * 0.2}" r="2" fill="#fff"/><path d="M${x - 4} ${y + r * 0.25}q4 4 8 0" stroke="#5a4a40" stroke-width="2" fill="none"/></g>`).join('')}
+      <g class="ppHead"><path d="M62 150l12-54 34 34zM158 150l-12-54-34 34z" fill="#8a8e98"/><path d="M70 140l8-32 20 20zM150 140l-8-32-20 20z" fill="#e8b4c0"/>
+        <ellipse cx="110" cy="196" rx="70" ry="64" fill="#a4a8b2"/><ellipse cx="110" cy="214" rx="40" ry="30" fill="#c8ccd4"/>
+        <g class="ppEyes"><ellipse cx="84" cy="184" rx="15" ry="19" fill="#121216"/><ellipse cx="136" cy="184" rx="15" ry="19" fill="#121216"/><circle cx="90" cy="176" r="5" fill="#fff"/><circle cx="142" cy="176" r="5" fill="#fff"/><circle cx="80" cy="192" r="2.4" fill="#fff"/><circle cx="132" cy="192" r="2.4" fill="#fff"/></g>
+        <path d="M106 204h8l-4 5z" fill="#e88a9a"/><path class="ppMouth" d="M100 212q5 5 10 0q5 5 10 0" stroke="#4a4a52" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+        <path d="M76 206l-38-6M76 214l-36 4M144 206l38-6M144 214l36 4" stroke="#5a5e68" stroke-width="1.6"/></g>
+      <path d="M178 196q24-10 18-36" stroke="#a4a8b2" stroke-width="9" fill="none" stroke-linecap="round"/></svg>`,
+    facelings: `<svg class="pp2d" viewBox="0 0 220 300" aria-hidden="true">${sh}
+      <path d="M24 300C24 232 48 198 110 192C172 198 196 232 196 300Z" fill="#d8cfb8"/><path d="M64 214H156L164 300H56Z" fill="#2a7a4a"/><path d="M64 214l-8-14M156 214l8-14" stroke="#2a7a4a" stroke-width="6"/>
+      <rect x="92" y="250" width="36" height="24" rx="3" fill="#226a3e"/><g transform="translate(126 222) rotate(4)"><rect width="46" height="28" rx="3" fill="#fff" stroke="#c82a2a" stroke-width="2"/><rect width="46" height="9" rx="2" fill="#c82a2a"/><text x="23" y="7" font-size="5.6" fill="#fff" text-anchor="middle" font-family="monospace" font-weight="bold">HELLO MY NAME IS</text><path d="M8 21h30" stroke="#aaa" stroke-dasharray="2 2"/></g>
+      <g class="ppHead"><rect x="96" y="166" width="28" height="30" fill="#e0c4a8"/><ellipse cx="110" cy="128" rx="42" ry="48" fill="#ecd2b6"/><ellipse cx="96" cy="114" rx="22" ry="18" fill="#fff" opacity=".12"/>
+        <path d="M68 116C66 74 154 74 152 116C140 92 80 92 68 116Z" fill="#5a3e26"/><path d="M98 150q12 3 24 0" stroke="#d8b898" stroke-width="2" fill="none" opacity=".6"/></g>
+      <g><rect x="2" y="246" width="56" height="44" rx="4" fill="#8a8e98"/><rect x="8" y="252" width="44" height="14" fill="#1a3a1a"/><text x="30" y="263" font-size="10" fill="#6aff6a" text-anchor="middle" font-family="monospace">$?.??</text>${[0, 1, 2].map((k) => `<rect x="${10 + k * 14}" y="272" width="10" height="7" rx="1.5" fill="#d8d8d8"/>`).join('')}</g></svg>`,
+    malt: `<svg class="pp2d" viewBox="0 0 220 300" aria-hidden="true">${sh}
+      <path d="M26 300C26 230 50 194 110 188C170 194 194 230 194 300Z" fill="#9a5a2a"/><path d="M110 200V300" stroke="#6a3a16" stroke-width="3"/><path d="M80 240h60v40H80z" fill="#7a4418"/>
+      <g class="ppHead"><path d="M56 150C46 70 174 70 164 150C166 186 140 200 110 200C80 200 54 186 56 150Z" fill="#8a4c20"/><ellipse cx="110" cy="138" rx="38" ry="44" fill="#1c140c"/><ellipse cx="110" cy="134" rx="32" ry="34" fill="#c89a76"/>
+        <g class="ppEyes"><ellipse cx="97" cy="128" rx="4.5" ry="5" fill="#1a1008"/><ellipse cx="123" cy="128" rx="4.5" ry="5" fill="#1a1008"/></g><path d="M90 118l12 2M130 118l-12 2" stroke="#5a3a22" stroke-width="2.6" stroke-linecap="round"/>
+        <path d="M74 142C88 166 132 166 146 142L148 172C130 186 90 186 72 172Z" fill="#c83a3a"/><path d="M80 154h60M78 164h64" stroke="#a02a2a" stroke-width="2"/></g>
+      <g><path d="M48 252h124l-8 48H56z" fill="#b08850" stroke="#6a4a20" stroke-width="2"/><path d="M52 270h116" stroke="#6a4a20" stroke-width="2"/><text x="110" y="292" font-size="12" text-anchor="middle" fill="#4a2a08" font-family="monospace" font-weight="bold">M.M. SUPPLY</text>
+        ${[64, 84, 104, 124, 144].map((x) => `<rect x="${x}" y="228" width="12" height="26" rx="4" fill="#e8e0c0" stroke="#a89a70"/><rect x="${x + 3}" y="222" width="6" height="7" fill="#8a9098"/>`).join('')}
+        <g transform="translate(150 236) rotate(10)"><rect width="34" height="26" fill="#fff8d8" stroke="#c8b878"/><text x="17" y="11" font-size="7" text-anchor="middle" fill="#3a3a5a" font-family="cursive">for you</text><text x="17" y="21" font-size="8" text-anchor="middle" fill="#3a3a5a" font-family="cursive">:)</text></g></g></svg>`,
+    memory: `<svg class="pp2d" viewBox="0 0 220 300" aria-hidden="true"><defs><radialGradient id="mmGlow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#b8ff4a" stop-opacity=".55"/><stop offset=".6" stop-color="#7aff2a" stop-opacity=".12"/><stop offset="1" stop-color="#7aff2a" stop-opacity="0"/></radialGradient></defs>
+      <ellipse cx="110" cy="292" rx="60" ry="6" fill="rgba(122,255,42,.25)"/><circle cx="110" cy="140" r="108" fill="url(#mmGlow)"/>
+      <g class="ppHead mmStar"><path d="M110 30L136 96L200 110L136 124L110 250L84 124L20 110L84 96Z" fill="#d84ab8"/>
+        <path d="M110 30L136 96L110 110Z" fill="#f08ad8"/><path d="M110 30L84 96L110 110Z" fill="#c03aa0"/><path d="M200 110L136 96L110 110Z" fill="#e868c8"/><path d="M200 110L136 124L110 110Z" fill="#a82a8a"/>
+        <path d="M20 110L84 96L110 110Z" fill="#f4a0e0"/><path d="M20 110L84 124L110 110Z" fill="#b8389a"/><path d="M110 250L136 124L110 110Z" fill="#8a1e70"/><path d="M110 250L84 124L110 110Z" fill="#a02a84"/>
+        <path d="M110 30L136 96L200 110L136 124L110 250L84 124L20 110L84 96Z" fill="none" stroke="#b8ff4a" stroke-width="2" opacity=".7"/>
+        <g class="ppEyes"><circle cx="110" cy="110" r="6" fill="#efffd0"/></g></g>
+      <g class="motes" fill="#c8ff7a">${[[40, 60, 3], [180, 70, 2.5], [30, 200, 2], [192, 190, 3], [70, 26, 2], [150, 250, 2.4]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}"/>`).join('')}</g></svg>`,
+    husks: `<svg class="pp2d" viewBox="0 0 220 300" aria-hidden="true">${sh}
+      <path d="M22 300C22 230 46 194 110 188C174 194 198 230 198 300Z" fill="#5a6070"/><path d="M40 240l20 8M150 226l18 10M60 280l14-6" stroke="#7a8090" stroke-width="5" stroke-linecap="round"/>
+      <path d="M62 208H158L166 300H54Z" fill="#8a5a32"/><path d="M62 208l-10-14M158 208l10-14" stroke="#8a5a32" stroke-width="6"/>
+      <g class="ppHead"><rect x="96" y="164" width="28" height="28" fill="#6a8ac0"/><circle cx="110" cy="128" r="46" fill="#6a8ac0"/>
+        <path d="M64 92L96 18L126 86" fill="#e85a7a"/><path d="M72 76l40 8M80 58l34 8M88 40l28 6" stroke="#ffd84a" stroke-width="5"/><path d="M96 18l14 22" stroke="#5a6070" stroke-width="3"/><circle cx="96" cy="18" r="6" fill="#ffd84a"/>
+        <circle cx="110" cy="132" r="38" fill="#3b74d4" stroke="#1b4590" stroke-width="3"/>
+        <g class="ppEyes"><rect x="92" y="114" width="9" height="18" rx="4.5" fill="#0a1830"/><rect x="119" y="114" width="9" height="18" rx="4.5" fill="#0a1830"/></g>
+        <path class="ppMouth" d="M92 158Q110 144 128 158" fill="none" stroke="#0a1830" stroke-width="5.5" stroke-linecap="round"/><path d="M128 140l8 6" stroke="#1d4a9a" stroke-width="2"/></g>
+      <g><path d="M150 268h52l-4 30h-44z" fill="#3a3a40" stroke="#1a1a1e" stroke-width="2"/><path d="M146 268h60" stroke="#1a1a1e" stroke-width="4"/><g stroke="#ddd" stroke-width="2" fill="none" opacity=".5" class="steam"><path d="M164 262c-4-6 4-8 0-14"/><path d="M180 260c-4-6 4-8 0-14"/></g>
+        <path d="M60 300l-6-70" stroke="#8a8a90" stroke-width="5"/><ellipse cx="52" cy="226" rx="12" ry="8" fill="#8a8a90"/></g></svg>`,
+    smiler: `<svg class="pp2d" viewBox="0 0 220 300" aria-hidden="true"><defs><radialGradient id="smDark" cx=".5" cy=".45" r=".55"><stop offset="0" stop-color="#000"/><stop offset=".8" stop-color="#000" stop-opacity=".85"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient><radialGradient id="smJar" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#9ff8ff" stop-opacity=".9"/><stop offset="1" stop-color="#9ff8ff" stop-opacity="0"/></radialGradient></defs>
+      <ellipse cx="110" cy="150" rx="104" ry="150" fill="url(#smDark)"/>
+      <g class="ppHead"><g class="ppEyes"><ellipse cx="80" cy="112" rx="13" ry="9" fill="#f4f4f0" transform="rotate(-12 80 112)"/><ellipse cx="140" cy="112" rx="13" ry="9" fill="#f4f4f0" transform="rotate(12 140 112)"/></g>
+        <g class="ppMouth"><path d="M44 146Q110 214 176 146Q110 176 44 146Z" fill="#f4f4f0"/><path d="M44 146Q110 176 176 146" fill="none" stroke="#000" stroke-width="2"/>
+          ${Array.from({ length: 15 }, (_, i) => { const x = 50 + i * 8.6, y0 = 146 + Math.sin((i / 14) * Math.PI) * 15, y1 = 146 + Math.sin((i / 14) * Math.PI) * 33; return `<path d="M${x} ${y0}L${x} ${y1}" stroke="#000" stroke-width="1.6"/>`; }).join('')}</g></g>
+      <circle cx="152" cy="262" r="30" fill="url(#smJar)"/><path d="M140 246h24v34a6 6 0 0 1-6 6h-12a6 6 0 0 1-6-6z" fill="rgba(160,240,255,.35)" stroke="#bff" stroke-width="1.5"/><rect x="138" y="240" width="28" height="7" rx="2" fill="#888"/>
+      <path d="M120 300C122 284 128 272 140 270M132 300C136 288 140 282 146 280" stroke="#222" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M168 300C166 286 168 276 164 268" stroke="#222" stroke-width="5" fill="none" stroke-linecap="round"/></svg>`,
+  };
+  ART.partypooper = X.PPX;
+  // the wall behind each keeper
+  const back = (c1, c2, deco = '') => `<svg class="ppBack" viewBox="0 0 400 420" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><defs><linearGradient id="bk${c1.slice(1)}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs><rect width="400" height="420" fill="url(#bk${c1.slice(1)})"/>${deco}</svg>`;
+  const shelf = (y, col) => `<rect x="18" y="${y}" width="364" height="8" fill="${col}"/>`;
+  const BACK = {
+    partypooper: X.PPBACK,
+    meg: back('#2a3020', '#12160c', shelf(150, '#3a3a2a') + shelf(236, '#3a3a2a') + '<rect x="40" y="100" width="40" height="50" fill="#4c5a33"/><rect x="90" y="110" width="30" height="40" fill="#5a6a3a"/><rect x="290" y="96" width="70" height="54" fill="#2c3820"/><text x="325" y="128" font-size="14" text-anchor="middle" fill="#e8d878" font-family="monospace">BASE α</text><circle cx="60" cy="210" r="18" fill="#c8b040" opacity=".5"/><rect x="300" y="186" width="50" height="50" fill="#4c5a33"/>'),
+    bntg: back('#2a2210', '#120e06', shelf(150, '#5a4020') + shelf(236, '#5a4020') + '<rect x="30" y="40" width="340" height="40" fill="#6c1e2c"/><text x="200" y="68" font-size="22" text-anchor="middle" fill="#e8c048" font-family="monospace" font-weight="bold">TRADER\'S KEEP</text>' + [50, 100, 300, 340].map((x) => `<circle cx="${x}" cy="130" r="14" fill="#e8c048" opacity=".7"/>`).join('')),
+    moley: back('#2a0e1e', '#0e0408', '<rect x="0" y="0" width="400" height="420" fill="url(#mlCur)"/><defs><linearGradient id="mlCur" x1="0" y1="0" x2="1" y2="0">' + [0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => `<stop offset="${i / 8}" stop-color="${i % 2 ? '#5a0e22' : '#7a1a32'}"/>`).join('') + '</linearGradient></defs><circle cx="200" cy="140" r="90" fill="#ffe8a0" opacity=".12"/><text x="200" y="60" font-size="30" text-anchor="middle" fill="#ffd84a" font-family="cursive">Moley\'s</text>' + shelf(236, '#3a1a0a')),
+    blanche: back('#3a2e22', '#16100a', shelf(110, '#5a3a1e') + shelf(180, '#5a3a1e') + shelf(250, '#5a3a1e') + [110, 180, 250].map((y) => Array.from({ length: 22 }, (_, i) => `<rect x="${22 + i * 16}" y="${y - 42 + (i * 7) % 10}" width="12" height="${42 - (i * 7) % 10}" fill="${['#6a2a2a', '#2a4a6a', '#4a5a2a', '#7a6a3a', '#3a2a4a'][i % 5]}"/>`).join('')).join('')),
+    catmaster: back('#1a1a2e', '#06060c', [[60, 80], [140, 50], [260, 70], [340, 110], [90, 170], [310, 200]].map(([x, y]) => `<rect x="${x - 18}" y="${y - 30}" width="36" height="60" rx="2" fill="#2a2a44" stroke="#4a4a6a"/><circle cx="${x + 10}" cy="${y}" r="2.4" fill="#e8c048"/>`).join('')),
+    wheelfolk: back('#1e2e3a', '#0a1218', '<rect x="0" y="260" width="400" height="160" fill="#2a3a44"/><path d="M0 260H400" stroke="#4a5a64" stroke-width="3"/><rect x="40" y="70" width="90" height="70" fill="#e8e4da" opacity=".8"/><path d="M85 82v46M62 105h46" stroke="#d83a2a" stroke-width="12"/><rect x="250" y="80" width="110" height="140" fill="#2a4a5a" stroke="#4a6a7a" stroke-width="3"/><path d="M305 80v140M250 150h110" stroke="#4a6a7a" stroke-width="3"/>'),
+    mail: back('#2a2420', '#0e0c0a', Array.from({ length: 30 }, (_, i) => `<rect x="${24 + (i % 10) * 36}" y="${50 + Math.floor(i / 10) * 60}" width="30" height="50" fill="#3a2a1a" stroke="#5a4a3a"/>${i % 4 === 0 ? `<rect x="${28 + (i % 10) * 36}" y="${60 + Math.floor(i / 10) * 60}" width="22" height="14" fill="#f4ecd8"/>` : ''}`).join('')),
+    messengers: back('#0e2a2e', '#04100e', Array.from({ length: 14 }, (_, i) => `<path d="M${(i * 53) % 400} ${(i * 97) % 300 + 30}l16 -6 4 12z" fill="#f4ecd8" opacity=".3" transform="rotate(${i * 25} ${(i * 53) % 400} ${(i * 97) % 300 + 30})"/>`).join('')),
+    blubcats: back('#3a2a3a', '#140c14', '<rect x="0" y="260" width="400" height="160" fill="#4a3a4a"/>' + [[60, 120], [180, 90], [320, 140]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="28" ry="10" fill="#6a4a6a"/><path d="M${x - 20} ${y - 30}q20 -20 40 0" stroke="#8a6a8a" stroke-width="3" fill="none"/>`).join('') + '<text x="200" y="50" font-size="20" text-anchor="middle" fill="#f2b8d8" font-family="cursive">please feed the cats</text>'),
+    facelings: back('#d8d8c0', '#8a8a78', shelf(140, '#6a6a5a') + shelf(220, '#6a6a5a') + Array.from({ length: 24 }, (_, i) => `<rect x="${24 + (i % 12) * 30}" y="${(i < 12 ? 140 : 220) - 30}" width="22" height="30" fill="${['#c84a3a', '#3a7ac8', '#e8c048', '#4a9a4a'][i % 4]}"/>`).join('') + '<rect x="0" y="0" width="400" height="30" fill="#f4f4e8"/>'),
+    malt: back('#202a3a', '#0a0e16', '<rect x="0" y="0" width="400" height="420" fill="#0a0e16" opacity=".3"/>' + Array.from({ length: 12 }, (_, i) => `<rect x="${20 + i * 32}" y="${60 + (i * 41) % 120}" width="20" height="${180 - (i * 41) % 120}" fill="#2a3448"/>${Array.from({ length: 4 }, (_, j) => `<rect x="${24 + i * 32}" y="${70 + (i * 41) % 120 + j * 22}" width="5" height="7" fill="${(i + j) % 3 ? '#ffd88a' : '#2a3448'}"/>`).join('')}`).join('')),
+    memory: back('#1a0820', '#06020a', Array.from({ length: 40 }, (_, i) => `<circle cx="${(i * 97) % 400}" cy="${(i * 53) % 420}" r="${1 + (i % 3) * 0.6}" fill="#e8b8ff" opacity="${0.2 + (i % 4) * 0.15}"/>`).join('')),
+    husks: back('#2a2620', '#0e0c0a', shelf(150, '#4a3a2a') + '<path d="M0 40l40 20 40-20 40 20 40-20 40 20 40-20 40 20 40-20 40 20 40-20" stroke="#5a5a64" stroke-width="2" fill="none"/>' + [30, 130, 230, 330].map((x) => `<path d="M${x} 50l14 30-28 0z" fill="#3b74d4" opacity=".55" transform="rotate(180 ${x} 65)"/>`).join('') + '<text x="200" y="210" font-size="18" text-anchor="middle" fill="#8aa8d8" font-family="monospace">NO PARTIES HERE</text>'),
+    smiler: back('#0a0a08', '#000', '<rect x="0" y="0" width="400" height="420" fill="#000" opacity=".4"/>'),
+  };
+
+  /* ---------------------------------------------------------------- the 15 shops */
+  const SHOPS = [
+    { id: 'partypooper', n: "The Partypooper's Stall", who: 'THE PARTYPOOPER', where: 'Level Fun, the quiet end', src: 'Level Fun fan lore', lore: "The hooded figure in the frowning blue mask. He hates parties and loves a sale. He's back at his stall with the basics.", tags: ['SUPPLIES', 'UPGRADES'], ctr: ['NO PARTIES · NO REFUNDS'], th: ['#2f63c4', '#e8eef8', '#0b1430', '#05070e', '#ffd84a', '#7a4a2a', '#4a2a16'],
+      voice: [150, [600, 1000], 0.11], music: { bpm: 152, meter: 3, scale: 'major', root: 60, prog: [0, 3, 4, 0, 0, 3, 4, 4], dens: 0.55, lead: { type: 'square', g: 0.011, filt: 2600, leg: 0.7, oct2: true }, bass: { pat: 'oompah', g: 0.028, type: 'triangle' }, drums: { c: 'x.....', g: 0.004, cf: 2600 } } },
+    { id: 'meg', n: 'M.E.G. Quartermaster', who: 'THE QUARTERMASTER', where: 'Base Alpha, Level 1', src: 'M.E.G. · Backrooms Wiki', lore: 'The Major Explorer Group keeps Base Alpha stocked for wanderers who just noclipped in. The quartermaster pays bounties per specimen, as always.', tags: ['ENDLESS GEAR', 'BOUNTY'], ctr: ['REQUISITIONS · BOUNTIES'], th: ['#4c5a33', '#c8b040', '#1a2010', '#080a04', '#e8d878', '#4a4a32', '#262618'],
+      voice: [120, [500, 1200], 0.14], music: { bpm: 112, meter: 4, sub: 4, scale: 'minor', root: 55, prog: [0, 0, 5, 4, 0, 3, 4, 0], dens: 0.4, lead: { type: 'sawtooth', g: 0.009, filt: 1500, leg: 0.8 }, bass: { pat: 'root', g: 0.024, type: 'sawtooth', filt: 320 }, drums: { s: 'X..x..x.x.x.x.xx', k: 'x.......x.......', g: 0.007, sf: 2400 } } },
+    { id: 'bntg', n: 'B.N.T.G. Exchange', who: 'THE EXCHANGE CLERK', where: "Trader's Keep, Level 1", src: 'B.N.T.G. · Backrooms Wiki', lore: 'The Backrooms Nonaligned Trade Group trades with everyone and sides with no one. They prefer presses. They will take your dollars, at a rate.', tags: ['UPGRADES', 'REROLLS'], ctr: ['PEACE THROUGH PROSPERITY'], th: ['#6c1e2c', '#e8c048', '#22180a', '#0a0804', '#e8c048', '#5a3a1a', '#2a1a0a'],
+      voice: [135, [650, 1300], 0.12], music: { bpm: 118, meter: 4, scale: 'dorian', root: 57, prog: [0, 3, 0, 3, 4, 3, 0, 6], dens: 0.45, lead: { type: 'triangle', g: 0.017, echo: 0.38 }, bass: { pat: 'bossa', g: 0.03, type: 'sine', oct: -2 }, pad: { type: 'sine', g: 0.004, oct: 0, attack: 0.4 }, drums: { c: 'x.xx.x.x', k: 'x...x...', g: 0.006, cf: 4200 } } },
+    { id: 'moley', n: "Moley's Comedy Club & Bar", who: 'MOLEY', where: 'Wherever the bar landed tonight', src: 'Entity 65 · Backrooms Wiki', lore: 'A bar that hops between levels. Moley, the tall rabbit-headed bartender, mixes any drink you ask for. Mickey the comedian is on in five.', tags: ['DRINKS', 'CHALLENGE'], ctr: ["MOLEY'S · LIVE COMEDY NIGHTLY"], th: ['#7a1a32', '#ffd84a', '#2a0a16', '#0a0206', '#ffd84a', '#3a1a0a', '#1a0a04'],
+      voice: [210, [800, 1500], 0.1], music: { bpm: 132, meter: 4, swing: 0.33, scale: 'dorian', root: 50, prog: [0, 3, 0, 3, 4, 3, 0, 4], dens: 0.5, lead: { type: 'sawtooth', g: 0.01, filt: 1200, vib: [5, 4], leg: 0.85 }, bass: { pat: 'walk', g: 0.032, type: 'triangle', oct: -1 }, pad: { type: 'square', g: 0.0028, filt: 800, attack: 0.02 }, drums: { h: 'X.xxX.xx', g: 0.006 } } },
+    { id: 'blanche', n: "Blanche's Tea Room", who: 'BLANCHE', where: 'The Cygnus Archive, Level 906', src: 'Entity 140 · Backrooms Wiki', lore: 'A kind, pale librarian in a white dress. Visitors are invited in for tea. She insists on good manners, and on asking before you touch the books.', tags: ['TEA', 'ENDLESS GEAR'], ctr: ['THE CYGNUS ARCHIVE · TEA AT ALL HOURS'], th: ['#6a4a2a', '#f2ead8', '#2a2016', '#0e0a06', '#f2ead8', '#6a4a2a', '#3a2614'],
+      voice: [260, [900, 1900], 0.12], music: { bpm: 104, meter: 3, scale: 'major', root: 62, prog: [0, 4, 0, 3, 1, 4, 0, 0], dens: 0.6, lead: { type: 'square', g: 0.009, filt: 2000, leg: 0.42, oct2: true }, bass: { pat: 'root', g: 0.014, type: 'square', filt: 700, oct: -1 } } },
+    { id: 'catmaster', n: 'The Catmaster', who: 'THE CATMASTER', where: 'The Hub', src: 'Entity 220 · Backrooms Wiki', lore: 'A black cat with glowing white eyes and ooze dripping from its ears. Irritable. Holds keys to every level. Food is the best way to get one.', tags: ['KEYS', 'CHALLENGE'], ctr: ['KEYS · NO PETTING'], th: ['#2a2a44', '#e8c048', '#12121e', '#030306', '#cfe8ff', '#2a2a3a', '#121218'],
+      voice: [330, [1200, 2600], 0.08], music: { bpm: 76, meter: 4, scale: 'whole', root: 54, prog: [0, 0, 1, 1, 0, 0, 2, 1], dens: 0.35, lead: { type: 'sine', g: 0.016, echo: 0.4, vib: [4, 3] }, bass: { pat: 'drone', g: 0.026, type: 'sine', oct: -2 }, drums: { c: 'x.......', g: 0.005, cf: 1200 } } },
+    { id: 'wheelfolk', n: 'Wheelfolk Aid Station', who: 'THE WHEELFOLK', where: 'Level 9, the suburbs', src: 'Entity 250 · Backrooms Wiki', lore: 'Wheelchairs that roll on their own. They carry injured wanderers to safety and trade supplies with whoever needs them. Shy, but very helpful.', tags: ['MEDICAL', 'SECOND CHANCES'], ctr: ['FIRST AID · NO CHARGE FOR KINDNESS'], th: ['#3a5a8a', '#e8e4da', '#162430', '#060a10', '#e85a7a', '#3a4a5a', '#1a2430'],
+      creak: true, music: { bpm: 84, meter: 3, scale: 'major', root: 60, prog: [0, 3, 0, 4, 0, 3, 4, 0], dens: 0.45, lead: { type: 'triangle', g: 0.016, leg: 1 }, bass: { pat: 'root', g: 0.02, type: 'sine' }, pad: { type: 'sine', g: 0.004, attack: 0.8 }, drums: { c: 'x.....', g: 0.004, cf: 520 } } },
+    { id: 'mail', n: 'The Mail Carrier', who: 'THE MAIL CARRIER', where: 'A drop box near the Frontrooms', src: 'Entity 133 · Backrooms Wiki', lore: 'Very tall, very shy, in a butler suit and top hat. It only speaks in sticky notes. Order now, and it delivers to your office at 5:00 AM. Cheaper, too.', tags: ['MAIL-ORDER', 'UPGRADES'], ctr: ['SPECIAL DELIVERY · 5:00 AM'], th: ['#2a1a12', '#f4ecd8', '#1e1814', '#0a0806', '#ffe680', '#3a2a1a', '#1a120a'],
+      note: true, music: { bpm: 140, meter: 4, scale: 'major', root: 58, prog: [0, 0, 3, 3, 0, 4, 0, 4], dens: 0.68, lead: { type: 'square', g: 0.009, filt: 3000, leg: 0.6 }, bass: { pat: 'oompah', g: 0.02, type: 'square', filt: 600 }, drums: { c: 'x.x.x.x.', g: 0.0035, cf: 1800 } } },
+    { id: 'messengers', n: 'The Masked Messengers', who: 'A MASKED MESSENGER', where: 'The roost, somewhere above', src: 'Entity 182 · Backrooms Wiki', lore: 'Harmless peacock-like birds with flowery crests, masks and quill feathers. They carry sealed letters for clients who would rather stay anonymous.', tags: ['SEALED CHALLENGES'], ctr: ['LETTERS · SEALED · ANONYMOUS'], th: ['#1a8a7a', '#f4ecd8', '#0e2a2e', '#02100e', '#7ae8c8', '#1a3a3a', '#0a1a1a'],
+      chirp: true, music: { bpm: 96, meter: 4, scale: 'lyd', root: 65, prog: [0, 1, 0, 1, 4, 1, 0, 0], dens: 0.4, lead: { type: 'sine', g: 0.018, vib: [5.5, 6], attack: 0.05, leg: 1 }, bass: { pat: 'half', g: 0.022, type: 'sine' }, pad: { type: 'triangle', g: 0.004, attack: 0.6 },
+        extra: (ev, k) => { for (let i = 0; i < 6; i++) { const at = k.r() * k.len, f = 2200 + k.r() * 1200; ev.push({ at, f, slide: f * 1.5, dur: 0.08, g: 0.006, type: 'sine', attack: 0.004 }); ev.push({ at: at + 0.11, f: f * 1.1, slide: f * 1.7, dur: 0.07, g: 0.005, type: 'sine', attack: 0.004 }); } } } },
+    { id: 'blubcats', n: 'Blub Cat Shelter', who: 'THE BLUB CATS', where: 'A cardboard box, Level 11', src: 'Entity 29 · Backrooms Wiki', lore: 'Round, cat-eared blobs with enormous eyes. Very loving. Feed one and it is your friend for life, and it tends to bring you things.', tags: ['CAT FOOD', 'MONEY'], ctr: ['PLEASE FEED THE CATS'], th: ['#c85aa0', '#f2efe8', '#2a1a2a', '#0c060c', '#f2b8d8', '#5a3a4a', '#2a1a24'],
+      blub: true, music: { bpm: 126, meter: 4, scale: 'penta', root: 67, prog: [0, 0, 3, 3, 0, 0, 2, 0], dens: 0.55, lead: { type: 'triangle', g: 0.017, leg: 0.32 }, bass: { pat: 'root', g: 0.026, type: 'sine', oct: -2 }, drums: { k: 'x...x...', c: '..x...x.', g: 0.005, cf: 900 } } },
+    { id: 'facelings', n: 'Faceling Corner Store', who: 'THE CASHIER', where: 'Level 11, a quiet street', src: 'Entity 9 · Backrooms Wiki', lore: 'The cashier has no face and copies how humans run a shop. It does not understand money. Its prices are whatever it felt like today.', tags: ['RANDOM PRICES', 'ANYTHING'], ctr: ['OPEN 24 HOURS · ALL PRICES FINAL?'], th: ['#2a7a4a', '#f4f4e8', '#2a2e26', '#0e100c', '#8aff8a', '#4a5a4a', '#262e26'],
+      voice: [150, [700, 900], 0.2], music: { bpm: 100, meter: 4, scale: 'major', root: 60, prog: [0, 5, 3, 4, 0, 5, 3, 4], dens: 0.45, lead: { type: 'sine', g: 0.016, vib: [6, 9], det: 70 }, bass: { pat: 'bossa', g: 0.026, type: 'sine' }, pad: { type: 'triangle', g: 0.005, det: 14 }, drums: { h: 'x.x.x.x.', k: 'x...x...', g: 0.004 } } },
+    { id: 'malt', n: 'Malt Marters Drop', who: 'A MALT MARTER', where: 'A back alley, Level 11', src: 'Malt Marters · Level 11, Backrooms Wiki', lore: 'A charity group that leaves supplies for wanderers with anonymous notes. Take one, free. They could also use a hand tonight.', tags: ['FREEBIE', 'CHALLENGE'], ctr: ['FREE · TAKE ONE · PASS IT ON'], th: ['#9a5a2a', '#e8e0c0', '#16202e', '#06080e', '#ffd88a', '#4a3a2a', '#221a10'],
+      voice: [140, [550, 1100], 0.16], music: { bpm: 70, meter: 4, sub: 1, scale: 'major', root: 55, prog: [0, 3, 0, 4, 5, 3, 4, 0], dens: 0.75, lead: { type: 'sine', g: 0.014, leg: 1 }, bass: { pat: 'half', g: 0.022, type: 'triangle' }, pad: { type: 'triangle', g: 0.008, attack: 0.5 } } },
+    { id: 'memory', n: 'The Memory Merchant', who: 'THE MEMORY MERCHANT', where: 'Level 227', src: 'Entity 124 · Backrooms Wiki', lore: 'A floating star of magenta glass with a lime glow. Neutral, unless you upset it. It trades for memories. You will not remember what you gave.', tags: ['TRADES', 'RISKY'], ctr: ['ALL SALES FORGOTTEN'], th: ['#a82a8a', '#7aff2a', '#1a0820', '#040108', '#c8ff7a', '#3a1a3a', '#1a081a'],
+      eerie: true, chime: true, music: { bpm: 90, meter: 4, sub: 4, scale: 'phryg', root: 52, prog: [0, 1, 0, 6, 0, 1, 5, 1], dens: 0.22, lead: { type: 'sine', g: 0.012, echo: 0.5, oct: 1, leg: 1.2 }, bass: { pat: 'arp', g: 0.011, type: 'sine', oct: 0 }, pad: { type: 'sine', g: 0.005, attack: 1.2, det: 9 } } },
+    { id: 'husks', n: "The Frowning Husks' Commune", who: 'A FROWNING HUSK', where: 'Level 231', src: 'Entity 68 · Backrooms Wiki', lore: "Former people in blue frowning masks who live together and fight the Partygoers. They cook, they craft, and they'd love to see a Partygoer lose.", tags: ['POWER GEAR', 'CHALLENGE'], ctr: ['NO PARTIES HERE'], th: ['#3b74d4', '#5a6070', '#22201a', '#0a0806', '#8aa8d8', '#5a4a3a', '#2a2018'],
+      voice: [125, [550, 1000], 0.13], music: { bpm: 160, meter: 4, scale: 'harm', root: 57, prog: [0, 0, 4, 4, 0, 3, 4, 0], dens: 0.62, lead: { type: 'sawtooth', g: 0.009, filt: 1700, vib: [6, 5], leg: 0.75 }, bass: { pat: 'oompah', g: 0.02, type: 'sawtooth', filt: 450 }, drums: { k: 'x...x...', s: '..x...x.', g: 0.005 } } },
+    { id: 'smiler', n: 'The Merchant Smiler', who: '...', where: 'A dark corner of Level 0', src: 'Entity 3-B · Backrooms Wiki (Fandom)', lore: 'A Smiler that set up shop. It trades the strongest items it has collected across the levels. Only its grin is visible. It never stops smiling.', tags: ['RARE ITEMS', 'CHALLENGE'], ctr: ['(IT IS SMILING)'], th: ['#111', '#f4f4f0', '#050505', '#000', '#f4f4f0', '#141414', '#050505'],
+      voice: [70, [400, 800], 0.3], music: { bpm: 70, meter: 4, scale: 'phryg', root: 45, prog: [0, 0, 1, 0, 0, 0, 6, 1], dens: 0.18, lo: 7, hi: 16, lead: { type: 'sine', g: 0.008, oct: 1, echo: 0.6, leg: 0.5 }, bass: { pat: 'drone', g: 0.018, type: 'sawtooth', filt: 160, oct: -1 }, drums: { k: 'x.x.....', g: 0.006 } } },
+  ];
+  const BY = Object.fromEntries(SHOPS.map((s) => [s.id, s]));
+  S.SHOPS = SHOPS; S.BY = BY;
+
+  /* ---------------------------------------------------------------- what they say */
+  const L = {
+    meg: { hi: ['Researcher. The quartermaster is open. Sign the sheet.', 'Base Alpha sends its regards. And a requisition form.', "Still alive? The paperwork says that's unusual."], buy: ['Logged. Lose it and it comes out of my budget.', 'Signed, stamped, yours.', 'Good. Field-tested. Mostly.'], poor: ['Requisition denied. Not enough cash.', "Come back with more. M.E.G. doesn't do credit."], max: ["You're already cleared for that."], bye: ['Report back by 6 AM.', 'Stay on the clock, Researcher.'], acc: ['Bounty logged. Bring it back alive. Well. Bring YOURSELF back alive.'] },
+    bntg: { hi: ["Welcome to Trader's Keep. Presses or dollars, we're not picky. Well, a little.", "B.N.T.G. Exchange. Everything's for sale, nothing's free.", 'Neutral prices for neutral parties. Have a look.'], buy: ['Pleasure doing business.', 'Peace through prosperity.', 'Receipt is in the bag. No refunds without it. No refunds with it either.'], poor: ["The exchange rate isn't THAT bad. You're just broke.", 'Come back when your pockets jingle.'], max: ['You already own that one.'], bye: ['The Keep thanks you for your custom.', 'Stay neutral out there.'] },
+    moley: { hi: ['Pull up a stool, hon. What are we drinking?', "Welcome to Moley's! Mickey's on in five. Brace yourself.", 'Ooh, a regular. The bar remembers you.'], buy: ['One for the road. Mind the ice.', 'On the house? Ha! No.', 'Shaken, not noclipped.'], poor: ["Your tab's run dry, sweetie.", "Can't pour on an empty tab."], max: ['One of each per night, hon. House rules.'], bye: ['Drink responsibly. Survive irresponsibly.', "Don't be a stranger. The bar won't be here tomorrow, but I will."], acc: ["MICKEY: Is this thing on? Survive my set and the tip jar's yours!"] },
+    blanche: { hi: ["Oh, a visitor! Do sit down. The kettle's just boiled.", 'Welcome to the Archive. Shoes off the rugs, please.', 'Tea first. Then we may talk about dreadful things.'], buy: ['Lovely choice. Drink it while it is hot.', 'Steeped exactly four minutes. I timed it.', 'Thank you, dear. And thank you for asking first.'], poor: ['Oh dear. Perhaps on your next visit.', 'Manners cost nothing. Tea, I am afraid, does.'], max: ["You've had that already. One cup is plenty."], bye: ['Do mind the books on your way out.', 'Come back and tell me how it went.'] },
+    catmaster: { hi: ['...You again. Did you bring food?', 'Hm. A mortal. Speak quickly.', 'I hold every key there is. Some of them are for sale.'], buy: ['Take it. Do not thank me.', 'Fine. Go.', '...Acceptable.'], poor: ['You smell of poverty.', 'No. Bring more.'], max: ['You already have that one. Greedy.'], bye: ['Shut the door on your way out.', 'Leave. I am napping.'], acc: ['An offering. ...Good. Survive, and the clock is yours.'] },
+    wheelfolk: { hi: ['*squeak, squeak* (A wheelchair rolls up and parks itself beside you.)', '*the brakes click on* (It seems glad you made it.)', '*a slow, friendly creak*'], buy: ['*it rolls a happy little circle*', '*click* (The first-aid bag on its back pops open for you.)'], poor: ['*a sad squeak*'], full: ['*it bumps your pockets* (Too full.)'], max: ['*it nudges your leg gently* (You already have that.)'], bye: ['*it rolls with you to the door*', '*creak* (It waits until you are out of sight.)'] },
+    mail: { hi: ['(sticky note) hello. you have mail.', '(sticky note) welcome. please write your address clearly.', '(a very small sticky note) hi'], buy: ['(sticky note) it will arrive at 5:00 AM. sign for it.', '(sticky note) thank you :)', '(sticky note) postage paid.'], poor: ['(sticky note) insufficient postage.'], full: ['(sticky note) your mailbox is full.'], max: ['(sticky note) already delivered.'], bye: ['(sticky note) drive safe. ("drive" is crossed out. it says "hide")', '(sticky note) see you at 5.'] },
+    messengers: { hi: ['*SKREE* Letters for you. Several, actually. Choose one.', 'The sender wishes to remain anonymous. *ruffles feathers*', 'Sealed letters, fresh from the roost. One per customer.'], buy: ['*a pleased trill*', 'Delivered. *it bows*'], poor: ['*it tucks the letter back under its wing*'], max: ['*it tilts its masked head* You have that already.'], bye: ['*SKREE* Fly safe.', 'Your reply will be delivered. Eventually.'], acc: ['The seal is broken. No backing out now. *trill*'] },
+    blubcats: { hi: ['blub.', 'blub blub? (Three of them roll toward you.)', '(A Blub Cat stares at you. It looks hungry.) blub.'], buy: ['BLUB! (Delighted.)', 'blub~ (It is purring.)', '(It rolls over.) blub.'], poor: ['blub... (It looks at your wallet, then at you.)'], full: ['blub. (Your pockets are full. It sits on them anyway.)'], max: ['blub. (You already have that.)'], bye: ['blub. (One tries to follow you out.)', 'blub blub. (Goodbye.)'] },
+    facelings: { hi: ['HELLO. WELCOME. I AM THE CASHIER. WHAT IS MONEY.', 'Good evening! Prices are... prices. I picked them myself.', 'Welcome to the store. Everything here is a number.'], buy: ['THANK YOU. I WILL PUT THIS PAPER IN THE BOX.', 'Transaction! I love transactions.', 'Have a nice. Day? Night. Have a nice.'], poor: ['That is not enough paper. I think.', 'The machine says no. I do not know why.'], max: ['You have this. I have seen you have this.'], bye: ['Please come back. Or do not. Both are allowed.', 'GOODBYE. I AM SMILING. (It is not. It cannot.)'] },
+    malt: { hi: ['(a note on the crate) FOR WHOEVER NEEDS IT. TAKE ONE. :)', "Shh. We're not here. Take what you need.", 'Malt Marters drop. No names, no thanks needed.'], buy: ['Glad it found you.', 'Pass it on someday.'], poor: ['Sorry, that one costs. Supplies are thin.'], max: ['You already have that.'], bye: ["Stay safe. Somebody out there is rooting for you.", '(The volunteer is already gone.)'], acc: ["Thanks for helping. The crates are heavy and the air's bad. You'll manage."] },
+    memory: { hi: ['We remember you. Do you remember us?', 'Everything has a price. Memories are cheap. For us.', 'Come closer, small one. Trade.'], buy: ["Done. You won't miss it. You won't remember to.", 'A fair trade. We think. We forget.'], poor: ['You have nothing we want. Yet.'], max: ['That is already gone.'], bye: ['You were never here.', 'We will remember it for you.'], acc: ['Your name, spread through the dark. They will come looking. Tonight.'] },
+    husks: { hi: ["Oh! A guest. Stew's on. Don't mind the masks.", "Welcome to the commune. We don't party here.", 'Sit, sit. Anyone who hates Partygoers is a friend.'], buy: ['Made it myself. Out of a door hinge and spite.', "Good choice. It's held up against worse."], poor: ['Bit short, friend. Come back after a night of pay.'], max: ['Already built you one of those.'], bye: ['Keep your doors shut and your hat off.', 'No parties. Stay safe.'], acc: ["Ha! Let them come. Survive the guest and we'll build you something nice."] },
+    smiler: { hi: ['...', '(Only its grin is visible. It widens.)', '(Something in the dark taps the counter twice.)'], buy: ['(The grin widens.)', '(Long fingers slide the item toward you.)'], poor: ['(It taps the price tag. Twice.)'], full: ['(It looks at your pockets. Too full.)'], max: ['(It shakes its grin. You have that.)'], bye: ['(The grin hangs in the dark long after you leave.)'], acc: ['(The grin splits wider than any face should allow.)'] },
+  };
+  const line = (id, k) => { const s = id === 'partypooper' ? Object.assign({}, X.SAY, { acc: ['Good luck. Seriously.'] }) : L[id] || {}; const arr = s[k] || X.SAY[k] || s.buy; return U.pick(arr); };
+
+  /* ---------------------------------------------------------------- prices and wares */
+  const PLUS = { 'repel+': 290, 'bank+': 230, 'laser+': 200, 'doc+': 240, 'resin+': 210, 'clock+': 520 };
+  const consP = (id) => (CONS[id] && CONS[id].p) || PLUS[id] || 150;
+  const UPOOL = (R) => UPG.map((u) => u.id).filter((id) => !R.up.includes(id) && !X.NOUSE.includes(id));
+  const pickN = (arr, n) => U.shuffle(arr.slice()).slice(0, n);
+  const base = (key, R) => {
+    const [k, id] = key.split(':');
+    if (k === 'c') return consP(id); if (k === 'u') return UPGBY[id].p; if (k === 'e') return X.eupPrice(X.EUPBY[id], R); if (k === 'b') return BUFF[id].p;
+    if (k === 'm') return r10(consP(id) * 0.7); if (k === 'g') return 45; if (k === 'free') return 0;
+    if (k === 'f') return id === 'forget' ? r10(110 + 15 * R.round) : 0; return 100;
+  };
+  S.price = (key, R) => { const D = R.deals || {}, p = base(key, R) * ((D.pm && D.pm[key]) || 1) * (BY[D.id] && BY[D.id].pm ? BY[D.id].pm : 1); return Math.max(0, R.up.includes('discount') ? Math.round(p * 0.85 / 5) * 5 : Math.round(p)); };
+  const ICONF = { g: () => TILE('<ellipse cx="24" cy="30" rx="14" ry="6" fill="none" stroke="#fff" stroke-width="2.6"/><path d="M10 30c0 6 28 6 28 0" fill="#fff" opacity=".25"/><path d="M16 22c4-6 12-6 16 0l4-4v8l-4-4" fill="#ffb84a"/><circle cx="20" cy="21" r="1.2" fill="#000"/>', '#c85aa0', '#3a0e2e'),
+    f: (c) => TILE(`<path d="M24 8l5 12 12 3-12 3-5 14-5-14-12-3 12-3z" fill="${c || '#e868c8'}" stroke="#c8ff7a" stroke-width="1.2"/>`, '#5a1a5a', '#14041a') };
+  // name / desc / icon for a ware
+  S.info = (key, R) => {
+    const [k, id] = key.split(':'), D = R.deals || {};
+    if (k === 'c') return { icon: ITEMICON(id), n: CONS[id].n, d: CONS[id].d, badge: CONS[id].uses ? CONS[id].uses + ' USES' : '' };
+    if (k === 'u') return { icon: UPICON(id), n: UPGBY[id].n, d: UPGBY[id].d };
+    if (k === 'e') { const u = X.EUPBY[id], lv = R.lv[id] || 0; return { icon: TILE(u.ic, ...(UPFAM[{ wide: 'vision', calm: 'defense', late: 'power', hazard: 'money', interest: 'money', scout: 'vision', reroll: 'lamp', banish: 'defense', life: 'body' }[id]] || UPFAM.money)), n: u.n, d: u.d, badge: u.tok ? (R.tok[id] ? 'HAVE ' + R.tok[id] : '') : u.max > 1 ? 'LV ' + lv + '/' + u.max : '' }; }
+    if (k === 'b') return { icon: BUFF[id].ic(), n: BUFF[id].n, d: BUFF[id].d, badge: 'TONIGHT ONLY' };
+    if (k === 'm') return { icon: ITEMICON(id), n: CONS[id].n, d: 'Arrives in your office at 5:00 AM tonight. ' + CONS[id].d, badge: 'MAIL-ORDER' };
+    if (k === 'g') return { icon: ICONF.g(), n: 'Feed the Blub Cats', d: 'A bowl of whatever you have. A grateful cat brings you a random item. Sometimes a really good one.', badge: 'MYSTERY' };
+    if (k === 'free') return { icon: ITEMICON(id), n: CONS[id].n, d: CONS[id].d, badge: 'FREE · TAKE ONE' };
+    if (k === 'f' && id === 'sell') { const u = UPGBY[D.memUp]; return { icon: ICONF.f('#f08ad8'), n: u ? 'Forget: ' + u.n : 'Forget an upgrade', d: u ? `Give up your ${u.n} for good. It pays $${D.memPay}.` : 'You have no upgrades it wants.', badge: 'TRADE' }; }
+    if (k === 'f' && id === 'forget') { const d = ENT.find((x) => x.id === D.memEnt); return { icon: d && portraits[d.id] ? `<img src="${portraits[d.id]}" alt="">` : ICONF.f('#a82a8a'), n: d ? 'Make it forget you: ' + d.name.replace(/\s*=\)$/, '') : 'Make a specimen forget you', d: d ? 'It leaves your roster for good. You will not remember it either.' : 'Your roster is empty.', badge: 'TRADE' }; }
+    return { icon: '', n: key, d: '' };
+  };
+  // can this be bought right now? true | 'full' | 'max' | 'own' | 'have' | 'taken' | 'none'
+  S.can = (key, R) => {
+    const [k, id] = key.split(':'), D = R.deals || {};
+    if (k === 'c' || k === 'g' || k === 'free') { if (k === 'free' && D.freeUsed) return 'taken'; return R.inv.length < INV_MAX ? true : 'full'; }
+    if (k === 'u') return R.up.includes(id) ? 'own' : true;
+    if (k === 'e') { const u = X.EUPBY[id]; return !u.tok && (R.lv[id] || 0) >= u.max ? 'max' : true; }
+    if (k === 'b') return (R.buff || []).includes(id) ? 'have' : true;
+    if (k === 'm') return (R.mail || []).length >= 3 ? 'full' : true;
+    if (k === 'f' && id === 'sell') return D.memUp && R.up.includes(D.memUp) ? true : 'none';
+    if (k === 'f' && id === 'forget') return D.memEnt && R.roster.includes(D.memEnt) ? true : 'none';
+    return true;
+  };
+  const freeUp = (R) => { const p = UPOOL(R); if (!p.length) return null; const id = U.pick(p); R.up.push(id); return id; };
+  const feed = (R) => { const pool = ['repel', 'bank', 'laser', 'doc', 'resin', 'clock'], c = U.pick(pool); const plus = Math.random() < 0.25 && c !== 'clock'; const id = plus ? c + '+' : c; R.inv.push(id); return id; };
+  S.give = (key, R) => {
+    const [k, id] = key.split(':'), D = R.deals;
+    if (k === 'c' || k === 'free') { R.inv.push(id); if (k === 'free') D.freeUsed = true; return; }
+    if (k === 'u') { R.up.push(id); return; }
+    if (k === 'e') { const u = X.EUPBY[id]; if (u.tok) R.tok[id] = (R.tok[id] || 0) + 1; else R.lv[id] = (R.lv[id] || 0) + 1; return; }
+    if (k === 'b') { R.buff = (R.buff || []).concat(id); return; }
+    if (k === 'm') { R.mail = (R.mail || []).concat(id); return; }
+    if (k === 'g') { const got = feed(R); return 'blub! (It drops a ' + CONS[got].n + ' in your lap.)'; }
+    if (k === 'f' && id === 'sell') { R.up = R.up.filter((x) => x !== D.memUp); R.money += D.memPay; D.memUp = null; return; }
+    if (k === 'f' && id === 'forget') { R.roster = R.roster.filter((x) => x !== D.memEnt); if (D.memEnt === 'rodney' && typeof RDN !== 'undefined') RDN.deathcoin(); D.memEnt = null; return; }
+  };
+
+  /* ---------------------------------------------------------------- tonight's offers (challenges and bounties) */
+  const RW = { cash: (n) => ({ cash: r10(n) }), up: () => ({ up: 1 }), item: (id) => ({ item: id }) };
+  const rwTxt = (rw) => (rw.cash ? '$' + rw.cash : rw.up ? 'A FREE UPGRADE' : rw.item ? CONS[rw.item].n.toUpperCase() : '');
+  const chal = (from, id, n, d, rule, reward, o = {}) => Object.assign({ from, id, n, d, rule: rule || [], extra: [], reward }, o);
+  const offers = (s, R) => {
+    const rd = R.round, out = [];
+    if (s.id === 'meg') { const pool = ENT.map((d) => d.id).filter((id) => !R.roster.includes(id) && id !== 'rodney'); pickN(pool, 3).forEach((id) => { const d = ENT.find((x) => x.id === id); out.push(chal('meg', 'bounty-' + id, 'BOUNTY: ' + d.name.replace(/\s*=\)$/, '').toUpperCase(), 'It joins tonight\'s shift only, at tonight\'s AI. Survive and M.E.G. pays the bounty.', [], RW.cash(70 + (PAY[id] || 100) * 0.9 + 12 * rd), { extra: [id], bounty: true, ent: id })); }); }
+    if (s.id === 'moley') { const r = U.pick(['jam', 'rush', 'heat']); out.push(chal('moley', 'open-mic', "MICKEY'S OPEN MIC", 'Mickey tests his new material on you, all night. ' + RULE[r].d + ' Survive his set and he hands over the tip jar.', [r], RW.cash(110 + 25 * rd))); }
+    if (s.id === 'catmaster') out.push(chal('catmaster', 'offering', 'AN OFFERING', 'Leave two of tonight\'s almond waters in its bowl. ' + RULE.dry.d + ' Survive, and it gives you a Null Clock.', ['dry'], RW.item('clock')));
+    if (s.id === 'messengers') { const rs = pickN(['drain', 'heat', 'stale', 'low', 'angry', 'rush', 'jam'], 3); const rws = U.shuffle([RW.cash(150 + 30 * rd), RW.up(), RW.item(U.pick(['repel+', 'bank+', 'laser+', 'doc+']))]); rs.forEach((r, i) => out.push(chal('messengers', 'letter-' + r, 'SEALED LETTER: ' + RULE[r].n, '"' + RULE[r].d + ' Survive it, and the reward is yours." Unsigned.', [r], rws[i]))); }
+    if (s.id === 'malt') out.push(chal('malt', 'volunteer', 'VOLUNTEER SHIFT', 'Help carry crates through the night. ' + RULE.stale.d + ' Survive, and the Marters build you a free upgrade.', ['stale'], RW.up()));
+    if (s.id === 'memory') out.push(chal('memory', 'fame', 'SELL YOUR FAME', 'It pays $' + r10(140 + 20 * rd) + ' right now. In return everything in the dark learns your name: ' + RULE.angry.d.toLowerCase(), ['angry'], RW.cash(140 + 20 * rd), { paid: true }));
+    if (s.id === 'husks') { const has = R.roster.includes('partygoer'); out.push(chal('husks', 'crashers', 'PARTY CRASHERS', has ? 'Your Partygoers are 4 AI angrier tonight. Survive them and the Husks build you a free upgrade.' : 'A Partygoer crashes tonight\'s shift, 3 AI angrier than the rest. Survive it and the Husks build you a free upgrade.', [], RW.up(), { extra: ['partygoer'], aiPlus: has ? 4 : 3 })); }
+    if (s.id === 'smiler') { const has = R.roster.includes('smiler'); out.push(chal('smiler', 'smile', 'A SMILE FOR A SMILE', has ? 'Your Smilers grin wider tonight: 4 AI angrier. Survive and it pays you.' : 'A Smiler follows you home tonight, 2 AI angrier than the rest. Survive and it pays you.', [], RW.cash(150 + 30 * rd), { extra: ['smiler'], aiPlus: has ? 4 : 2 })); }
+    return out;
+  };
+
+  /* ---------------------------------------------------------------- one visit's stock */
+  const deals = (s, R) => {
+    if (R.deals && R.deals.id === s.id && Array.isArray(R.deals.list)) return R.deals;
+    const D = { id: s.id, list: [], pm: {}, off: offers(s, R), spent: 0 }, up = UPOOL(R);
+    const ups = (ids, n) => pickN(ids.filter((id) => up.includes(id)), n).map((id) => 'u:' + id);
+    if (s.id === 'partypooper') D.list = ['c:repel', 'c:bank', 'c:resin', 'c:box'].concat(pickN(up, 2).map((id) => 'u:' + id));
+    else if (s.id === 'meg') D.list = ['e:wide', 'e:calm', 'e:scout', 'e:banish'];
+    else if (s.id === 'bntg') D.list = pickN(up, 4).map((id) => 'u:' + id).concat('e:reroll');
+    else if (s.id === 'moley') D.list = ['b:chill', 'b:charge', 'b:water', 'b:slow'];
+    else if (s.id === 'blanche') D.list = ['b:calm', 'b:vent', 'b:earl', 'e:interest'].concat(ups(['quiet', 'steady'], 1));
+    else if (s.id === 'catmaster') D.list = ['e:late', 'c:clock', 'c:clock+'];
+    else if (s.id === 'wheelfolk') D.list = ['e:life', 'c:doc'].concat(ups(['salts', 'visor', 'filter', 'qmask', 'gloves', 'booster'], 2));
+    else if (s.id === 'mail') D.list = ['m:repel', 'm:bank', 'm:laser', 'm:doc'].concat(ups(['care', 'overtime'], 1));
+    else if (s.id === 'messengers') D.list = ups(['motion', 'nightcam', 'qmon', 'lurepro'], 2);
+    else if (s.id === 'blubcats') D.list = ['g:feed', 'e:hazard'].concat(ups(['purifier', 'care', 'water'], 1));
+    else if (s.id === 'facelings') { D.list = pickN(['c:repel', 'c:bank', 'c:laser', 'c:doc', 'c:resin', 'c:box', 'c:clock'], 3).concat(pickN(up, 3).map((id) => 'u:' + id)); D.list.forEach((k) => (D.pm[k] = Math.round(U.rand(0.3, 1.6) * 20) / 20)); }
+    else if (s.id === 'malt') D.list = pickN(['repel', 'bank', 'laser', 'doc', 'resin'], 3).map((id) => 'free:' + id).concat(ups(['water', 'purifier'], 1));
+    else if (s.id === 'memory') { D.list = ['f:sell', 'f:forget']; const own = R.up.filter((id) => UPGBY[id]); D.memUp = own.length ? U.pick(own) : null; D.memPay = D.memUp ? r10(UPGBY[D.memUp].p * 1.25) : 0; D.memEnt = R.roster.length ? U.pick(R.roster) : null; }
+    else if (s.id === 'husks') D.list = ['c:laser'].concat(ups(['battery', 'doors', 'hydro', 'saver', 'lowmon', 'led', 'reserve', 'second'], 3));
+    else if (s.id === 'smiler') D.list = pickN(['c:repel+', 'c:bank+', 'c:laser+', 'c:resin+', 'c:doc+'], 3);
+    R.deals = D; X.save(); return D;
+  };
+
+  /* ---------------------------------------------------------------- the four doors */
+  const SEEN = () => U.store.get('endShopsSeen', []) || [];
+  const draw = (R) => { let pool = SHOPS.map((s) => s.id).filter((id) => id !== R.last); return pickN(pool, 4); };
+  const theme = (s) => { const [a1, a2, b1, b2, acc, c1, c2] = s.th; return `--aw1:${a1};--aw2:${a2};--bg1:${b1};--bg2:${b2};--acc:${acc};--ct1:${c1};--ct2:${c2}`; };
+  E.shops = () => {
+    const R = E.run; E.phase = 'shops'; G.state = 'endless'; R.at = 'shops'; R.shopAt = null;
+    if (!Array.isArray(R.shops) || R.shops.length !== 4 || R.shops.some((id) => !BY[id])) R.shops = draw(R);
+    X.save(); X.hideAll(); ['#win', '#death', '#hud'].forEach((q) => (q$(q).hidden = true));
+    const o = q$('#endShop'); if (o) o.innerHTML = ''; // a hidden copy of the same SVG gradients would blank the visible art
+    E.music(true); E.setTrack(null); S.renderDoors(); FADE.to(0, 0.5);
+  };
+  S.renderDoors = () => {
+    const R = E.run, el = X.overlay('endShops'), seen = SEEN();
+    const tag = (t) => `<span class="${/CHALLENGE|BOUNTY|RISKY/.test(t) ? 'hot' : ''}">${t}</span>`;
+    el.innerHTML = `<div class="ehd"><div><div class="k">ENDLESS · ${X.DNAME[R.diff]} · BEFORE ROUND ${R.round}</div><h2>FOUR DOORS OPEN</h2></div><div class="cash">$${R.money}</div></div>
+      <p class="sub">The Backrooms shifted while you slept. Four shops are within reach tonight. You only have time for one. <span class="dim">(Hover a door to hear what's playing inside.)</span></p>
+      <div class="dgrid4">${R.shops.map((id, i) => { const s = BY[id]; return `<button type="button" class="door" data-shop="${id}" style="${theme(s)}"><div class="dart"><div class="dawn"></div>${BACK[id]}${ART[id]}${seen.includes(id) ? '' : '<b class="new">NEW</b>'}</div>
+        <div class="dtx"><div class="wh">${esc(s.where)}</div><b>${esc(s.n)}</b><p>${esc(s.lore)}</p><div class="tg">${s.tags.map(tag).join('')}</div><div class="src">${esc(s.src)}</div></div><kbd>${i + 1}</kbd></button>`; }).join('')}</div>
+      <div class="ebtns"><button type="button" class="btn" data-a="quit">SAVE & QUIT</button></div>
+      <p class="keys">KEYS · 1–4 ENTER A SHOP</p>`;
+    el.querySelectorAll('.door').forEach((b) => {
+      b.onclick = () => S.enter(b.dataset.shop);
+      const prev = () => { AU.init(); E.music(true); E.setTrack(S.track(b.dataset.shop)); };
+      b.onmouseenter = prev; b.onfocus = prev;
+    });
+    el.querySelector('.dgrid4').onmouseleave = () => E.setTrack(null);
+    el.querySelector('[data-a="quit"]').onclick = () => E.quit();
+  };
+  S.enter = (id) => {
+    const R = E.run; if (!BY[id] || E.phase !== 'shops') return; AU.init();
+    R.shopAt = id; R.last = id; R.deals = null; deals(BY[id], R);
+    const seen = SEEN(); if (!seen.includes(id)) { seen.push(id); U.store.set('endShopsSeen', seen); if (seen.length >= SHOPS.length && typeof ACH !== 'undefined') ACH.give('shops15'); }
+    AU.tone({ freq: 220, slide: 330, dur: 0.3, gain: 0.05, type: 'triangle' }); AU.noise({ dur: 0.4, gain: 0.03, filter: { type: 'bandpass', freq: 700 } });
+    FADE.to(1, 0.3).then(() => E.on && E.shop());
+  };
+
+  /* ---------------------------------------------------------------- the shop */
+  const SH = { say: '' };
+  E.shop = (say) => {
+    const R = E.run; if (!R.shopAt || !BY[R.shopAt]) { E.shops(); return; }
+    const s = BY[R.shopAt]; E.phase = 'shop'; G.state = 'endless'; R.at = 'shop'; X.save(); X.hideAll(); ['#win', '#death', '#hud'].forEach((q) => (q$(q).hidden = true));
+    const dd = q$('#endShops'); if (dd) dd.innerHTML = '';
+    deals(s, R); SH.say = say || line(s.id, 'hi'); E.music(true); E.setTrack(S.track(s.id)); E.renderShop(true); FADE.to(0, 0.5);
+  };
+  const speak = (s) => {
+    if (s.voice) { AU.voice && AU.voice(0, s.voice[0], 3 + Math.floor(Math.random() * 3), 0.05, s.voice[1], s.voice[2]); return; }
+    if (s.creak) [0, 0.18].forEach((d) => AU.tone({ freq: 900, slide: 1300, dur: 0.12, gain: 0.02, type: 'triangle', delay: d }));
+    if (s.note) AU.noise({ dur: 0.18, gain: 0.03, filter: { type: 'highpass', freq: 3000 } });
+    if (s.chirp) [0, 0.1, 0.22].forEach((d, i) => AU.tone({ freq: 2200 + i * 300, slide: 3400, dur: 0.08, gain: 0.025, type: 'sine', delay: d }));
+    if (s.blub) [0, 0.2].forEach((d) => AU.tone({ freq: 260, slide: 620, dur: 0.14, gain: 0.05, type: 'sine', delay: d }));
+    if (s.chime) [0, 0.15, 0.3].forEach((d, i) => AU.tone({ freq: [1318, 1568, 1760][i], dur: 1.2, gain: 0.02, type: 'sine', delay: d }));
+  };
+  const tonight = (R) => {
+    const bits = [];
+    if (R.chal) bits.push(`<span class="hot">${esc(R.chal.n)}${R.chal.paid ? '' : ' → ' + esc(rwTxt(R.chal.reward))}</span>`);
+    (R.buff || []).forEach((b) => bits.push(`<span>${esc(BUFF[b].n)}</span>`));
+    (R.mail || []).forEach((c) => bits.push(`<span>MAIL: ${esc(CONS[c].n)}</span>`));
+    return bits.length ? `<div class="tonight"><span class="k">TONIGHT</span>${bits.join('')}</div>` : '';
+  };
+  E.renderShop = (talk) => {
+    const R = E.run, s = BY[R.shopAt], D = deals(s, R), el = X.overlay('endShop'), wl0 = el.querySelector('.wlist'), keepY = wl0 ? wl0.scrollTop : 0;
+    el.className = 'endScr th sh-' + s.id; el.setAttribute('style', theme(s));
+    const nextNeed = Math.min(Math.floor((R.acc || 0) + X.RATE[R.diff] + 1e-6), ENT.length - R.roster.length);
+    const stateTag = { own: '✓ OWNED', max: 'MAXED', have: '✓ TONIGHT', taken: 'TAKEN', none: 'NOTHING TO TRADE' };
+    const ware = (key) => {
+      const inf = S.info(key, R), st = S.can(key, R), pr = S.price(key, R), [k, id] = key.split(':'), deal = D.pm[key] ? (D.pm[key] < 0.75 ? 'DEAL!' : D.pm[key] > 1.25 ? 'PRICEY' : '') : '';
+      let btn;
+      if (st !== true && st !== 'full') btn = SHOPUI.tag(stateTag[st] || st, 'ok');
+      else if (k === 'free') btn = st === 'full' ? SHOPUI.buy(0, R.money, `data-buy="${key}"`, { full: true }) : `<button type="button" class="sb" data-buy="${key}"><small>FREE</small><strong>TAKE</strong></button>`;
+      else if (k === 'f' && id === 'sell') btn = `<button type="button" class="sb" data-buy="${key}"><small>FORGET</small><strong>+$${D.memPay}</strong></button>`;
+      else if (k === 'm' && st === 'full') btn = SHOPUI.tag('3 PER NIGHT');
+      else btn = SHOPUI.buy(pr, R.money, `data-buy="${key}"`, { full: st === 'full' });
+      return SHOPUI.card({ cls: (st !== true && st !== 'full' ? 'own' : '') + (k === 'f' ? ' trade' : ''), icon: inf.icon, name: esc(inf.n), badge: [inf.badge, deal].filter(Boolean).join(' · '), desc: esc(inf.d), btn });
+    };
+    const offer = (c) => {
+      const on = R.chal && R.chal.id === c.id && R.chal.from === c.from, busy = R.chal && !on;
+      const icon = c.ent && portraits[c.ent] ? `<img src="${portraits[c.ent]}" alt="">` : c.extra.length && portraits[c.extra[0]] ? `<img src="${portraits[c.extra[0]]}" alt="">` : c.rule[0] ? ricon(c.rule[0]) : '';
+      const btn = on ? (c.paid ? SHOPUI.tag('✓ DEAL', 'ok') : `<button type="button" class="sb on" data-off="${c.id}"><small>ACCEPTED</small><strong>UNDO</strong></button>`) : busy ? SHOPUI.tag('ONE A NIGHT') : `<button type="button" class="sb" data-off="${c.id}"><small>${c.paid ? 'TAKE' : 'ACCEPT'}</small><strong>${c.paid ? '+$' + c.reward.cash : 'DEAL'}</strong></button>`;
+      return SHOPUI.card({ cls: 'offer' + (on ? ' on' : ''), icon, name: esc(c.n), badge: c.paid ? 'PAID NOW' : (c.bounty ? 'BOUNTY ' : 'REWARD ') + esc(rwTxt(c.reward)), desc: esc(c.d), btn });
+    };
+    const inv = Array.from({ length: INV_MAX }, (_, i) => (R.inv[i] ? `<i title="${esc(CONS[R.inv[i]] ? CONS[R.inv[i]].n : '')}">${ITEMICON(R.inv[i])}</i>` : '<i class="emp"></i>')).join('');
+    const canBack = !D.spent && !(R.chal && R.chal.from === s.id) && !D.freeUsed;
+    const bubCls = s.note ? ' note' : s.eerie ? ' eerie' : '';
+    const offTitle = s.id === 'meg' ? 'BOUNTIES <small>· pick one, or none</small>' : s.id === 'messengers' ? 'SEALED LETTERS <small>· open one, or none</small>' : s.id === 'memory' ? 'A BIGGER TRADE' : 'CHALLENGE <small>· survive it tonight</small>';
+    el.innerHTML = `<div class="awn"></div><div class="stall">
+      <div class="keeper${talk ? ' talk' : ''}">${BACK[s.id]}${ART[s.id]}<div class="bubble${bubCls}">${esc(SH.say)}</div><div class="counter"><span>${esc(s.n.toUpperCase())}</span><em>${esc(s.ctr[0])}</em></div></div>
+      <div class="wares"><div class="whd"><div><div class="k">${esc(s.where.toUpperCase())} · BEFORE ROUND ${R.round}</div><h2>${esc(s.n.replace(/^The /, '').toUpperCase())}</h2><div class="nx">NEXT ROUND · AI ${X.ai(R.round)} · +${nextNeed} SPECIMEN${nextNeed === 1 ? '' : 'S'} · ${R.roster.length} ON ROSTER</div></div><div class="cash${SH.paid ? ' paid' : ''}">$${R.money}</div></div>
+        <div class="wlist">${D.list.length ? '<h3>WARES</h3>' + D.list.map(ware).join('') : ''}${D.off.length ? `<h3>${offTitle}</h3>` + D.off.map(offer).join('') : ''}${tonight(R)}<p class="lsrc">${esc(s.who)} · ${esc(s.src)}</p></div>
+        <div class="wft"><div class="inv"><span class="k">POCKETS</span>${inv}</div><div class="eb"><button type="button" class="btn" data-a="quit">SAVE & QUIT</button>${canBack ? '<button type="button" class="btn" data-a="back">◄ OTHER DOORS</button>' : ''}<button type="button" class="begin" data-a="leave">LEAVE ►</button></div></div></div></div>`;
+    if (talk) { const kp = el.querySelector('.keeper'); setTimeout(() => kp && kp.classList.remove('talk'), 900); speak(s); }
+    SH.paid = false; const wl = el.querySelector('.wlist'); if (wl) wl.scrollTop = keepY;
+    el.querySelectorAll('[data-buy]').forEach((b) => (b.onclick = () => E.buy(b.dataset.buy)));
+    el.querySelectorAll('[data-off]').forEach((b) => (b.onclick = () => S.accept(b.dataset.off)));
+    el.querySelector('[data-a="leave"]').onclick = () => { SH.say = line(s.id, 'bye'); R.at = 'pick'; R.shopAt = null; X.save(); E.setTrack(null); FADE.to(1, 0.4).then(() => E.on && E.pick()); };
+    const bk = el.querySelector('[data-a="back"]'); if (bk) bk.onclick = () => { R.shopAt = null; R.deals = null; FADE.to(1, 0.3).then(() => E.on && E.shops()); };
+    el.querySelector('[data-a="quit"]').onclick = () => E.quit();
+  };
+  const no = () => AU.tone({ freq: 120, dur: 0.15, gain: 0.06, type: 'square' });
+  const ka = () => { [1568, 2093].forEach((f, i) => AU.tone({ freq: f, dur: 0.18, gain: 0.04, type: 'triangle', delay: 0.14 + i * 0.07 })); AU.tone({ freq: 880, dur: 0.06, gain: 0.05, type: 'square' }); AU.tone({ freq: 1320, dur: 0.12, gain: 0.05, type: 'square', delay: 0.07 }); };
+  E.buy = (key) => {
+    const R = E.run, s = BY[R.shopAt], D = deals(s, R); if (!D.list.includes(key)) return;
+    const st = S.can(key, R); if (st !== true) { SH.say = line(s.id, st === 'full' ? 'full' : 'max'); no(); E.renderShop(true); return; }
+    const pr = key === 'f:sell' ? 0 : S.price(key, R); if (R.money < pr) { SH.say = line(s.id, 'poor'); no(); E.renderShop(true); return; }
+    R.money -= pr; D.spent += pr || 1; const msg = S.give(key, R); X.save(); SH.say = msg || line(s.id, 'buy'); SH.paid = true; ka(); E.renderShop(true);
+  };
+  S.accept = (cid) => {
+    const R = E.run, s = BY[R.shopAt], D = deals(s, R), c = D.off.find((x) => x.id === cid); if (!c) return;
+    if (R.chal && R.chal.id === c.id && R.chal.from === c.from) { if (c.paid) return; R.chal = null; X.save(); SH.say = line(s.id, 'bye'); AU.tone({ freq: 500, slide: 300, dur: 0.15, gain: 0.05, type: 'triangle' }); E.renderShop(true); return; }
+    if (R.chal) { SH.say = 'One deal a night.'; no(); E.renderShop(true); return; }
+    R.chal = JSON.parse(JSON.stringify(c)); if (c.paid) { R.money += c.reward.cash; SH.paid = true; }
+    X.save(); SH.say = line(s.id, 'acc'); AU.sting ? AU.sting(0.12) : ka(); E.renderShop(true);
+  };
+
+  /* ---------------------------------------------------------------- the night: tonight's drinks, rules, deliveries */
+  S.aiMod = (R) => { let m = 0; (R.buff || []).forEach((b) => (m += BUFF[b] && BUFF[b].ai ? BUFF[b].ai : 0)); ((R.chal && R.chal.rule) || []).forEach((r) => (m += RULE[r] && RULE[r].ai ? RULE[r].ai : 0)); return m; };
+  S.nightSetup = (R) => {
+    S.jamT = 50; S.rushed = false; S.mailN = 0; S.mailWait = false;
+    (R.buff || []).forEach((b) => BUFF[b] && BUFF[b].on && BUFF[b].on());
+    ((R.chal && R.chal.rule) || []).forEach((r) => RULE[r] && RULE[r].on && RULE[r].on());
+    const bits = []; if (R.chal) bits.push(R.chal.n); (R.buff || []).forEach((b) => bits.push(BUFF[b].n.toUpperCase())); if ((R.mail || []).length) bits.push('MAIL AT 5:00');
+    if (bits.length) setTimeout(() => { if (E.on && E.phase === 'night' && G.state === 'playing') G.toast(bits.join(' · '), 3.2); }, 2200);
+  };
+  S.tick = (dt) => {
+    if (!E.on || E.phase !== 'night' || G.state !== 'playing' || G.freeze || G.bossMode || !E.run) return;
+    const R = E.run, rules = (R.chal && R.chal.rule) || [];
+    if (rules.includes('jam')) { S.jamT -= dt; if (S.jamT <= 0) { S.jamT = 50; const sd = U.pick(['L', 'R']); G.door[sd].jam = 5; G.door[sd].closed = false; AU.zap && AU.zap(sd === 'L' ? -1 : 1, 0.2); G.toast((sd === 'L' ? 'LEFT' : 'RIGHT') + ' DOOR SHORTED', 2); } }
+    if (rules.includes('rush') && !S.rushed && G.hour >= 5) { S.rushed = true; G.ents.forEach((e) => (e.ai = Math.min(20, e.ai + 3))); G.toast('LAST CALL · EVERYTHING IS ANGRIER', 2.4); AU.tone({ freq: 196, dur: 1.2, gain: 0.07, type: 'sawtooth', filter: { freq: 600 } }); }
+    const mail = R.mail || [];
+    if (mail.length && S.mailN < mail.length && G.hour >= 5) {
+      if (G.inv.length < INV_MAX) { const c = mail[S.mailN++]; G.inv.push(c); renderInv(); G.toast('SPECIAL DELIVERY: ' + CONS[c].n.toUpperCase(), 2.6); AU.noise({ dur: 0.25, gain: 0.05, filter: { type: 'highpass', freq: 2500 } }); [880, 1175].forEach((f, i) => AU.tone({ freq: f, dur: 0.25, gain: 0.04, type: 'triangle', delay: 0.1 + i * 0.12 })); }
+      else if (!S.mailWait) { S.mailWait = true; G.toast('A PARCEL IS WAITING · POCKETS FULL', 2.4); }
+    }
+  };
+  // after a won night: pay the challenge, then tonight's drinks, deals and deliveries wear off
+  S.nightWon = (R) => {
+    let cash = 0, txt = ''; const c = R.chal;
+    if (c && !c.paid && c.reward) {
+      const rw = c.reward;
+      if (rw.cash) { cash += rw.cash; txt += ' · +$' + rw.cash + (c.bounty ? ' BOUNTY' : ' CHALLENGE'); }
+      if (rw.up) { const id = freeUp(R); if (id) txt += ' · FREE ' + UPGBY[id].n.toUpperCase(); else { cash += 150; txt += ' · +$150 CHALLENGE'; } }
+      if (rw.item) { if (R.inv.length < INV_MAX) { R.inv.push(rw.item); txt += ' · ' + CONS[rw.item].n.toUpperCase(); } else { const v = r10(consP(rw.item) * 0.6); cash += v; txt += ' · +$' + v + ' (POCKETS FULL)'; } }
+      if (typeof ACH !== 'undefined' && !c.bounty) ACH.give('shopchal');
+    }
+    R.chal = null; R.buff = []; R.mail = [];
+    return { cash, txt };
+  };
+  E.shopsTxt = rwTxt;
+
+  /* ---------------------------------------------------------------- hooks */
+  const st0 = step; step = function (dt) { const r = st0.apply(this, arguments); try { S.tick(dt); } catch (e) { console.warn(e); } return r; }; // eslint-disable-line no-global-assign
+  addEventListener('keydown', (ev) => {
+    if (!E.on || ev.repeat || E.phase !== 'shops') return; const el = q$('#endShops'); if (!el || el.hidden) return;
+    const n = parseInt(ev.key, 10); if (n >= 1 && n <= 4) { const d = el.querySelectorAll('.door')[n - 1]; if (d) { d.click(); ev.preventDefault(); } }
+  }, true);
+  if (typeof ACH !== 'undefined') ACH.LIST.push({ id: 'shops15', n: 'Window Shopper', d: 'Visit all 15 shops in Endless.' }, { id: 'shopchal', n: 'Dared and Done', d: "Survive a shop's challenge in Endless." });
+
+  /* ---------------------------------------------------------------- styles */
+  const css = document.createElement('style'); css.textContent = `
+#endShops{background:radial-gradient(120% 90% at 0% 0%,#1a160b 0,#0b0a07 58%);padding:18px max(16px,env(safe-area-inset-left,0px)) 24px}
+#endShops .dgrid4{max-width:1180px;margin:14px auto 0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+#endShops .door{position:relative;display:flex;flex-direction:column;text-align:left;padding:0;background:var(--panel);border:1px solid var(--line);color:var(--text);font-family:inherit;cursor:pointer;animation:rise .4s ease-out both;transition:border-color .12s,transform .12s}
+#endShops .door:nth-child(2){animation-delay:.06s} #endShops .door:nth-child(3){animation-delay:.12s} #endShops .door:nth-child(4){animation-delay:.18s}
+#endShops .door:hover,#endShops .door:focus-visible{border-color:var(--acc);transform:translateY(-3px);outline:none}
+#endShops .dart{position:relative;height:230px;overflow:hidden;background:linear-gradient(180deg,var(--bg1),var(--bg2));display:flex;align-items:flex-end;justify-content:center;isolation:isolate}
+#endShops .dart .ppBack{position:absolute;inset:18px 0 0;width:100%;height:calc(100% - 18px);z-index:0;opacity:.9}
+#endShops .dart .pp2d{position:relative;z-index:1;height:205px;width:auto;margin-bottom:-6px;transition:transform .25s}
+#endShops .door:hover .pp2d{transform:translateY(-5px) scale(1.03)}
+#endShops .dawn{position:absolute;left:0;right:0;top:0;height:18px;z-index:2;background:repeating-linear-gradient(90deg,var(--aw1) 0 22px,var(--aw2) 22px 44px)}
+#endShops .new{position:absolute;right:8px;top:26px;z-index:3;font-weight:400;font-size:14px;letter-spacing:2px;background:var(--acc);color:#111;padding:1px 7px}
+#endShops .dtx{padding:10px 12px 12px;display:flex;flex-direction:column;gap:4px;flex:1;border-top:3px solid var(--acc)}
+#endShops .dtx .wh{font:var(--lbl);font-size:10.5px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+#endShops .dtx b{font-weight:400;font-size:25px;line-height:1;color:var(--acc)} #endShops .dtx p{margin:2px 0 0;font-family:var(--doc);font-size:13px;line-height:1.4;color:var(--text);flex:1}
+#endShops .tg{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px} #endShops .tg span{font-size:13px;letter-spacing:1.5px;border:1px solid var(--line2);padding:0 6px;color:var(--text)} #endShops .tg span.hot{border-color:#b8402a;color:#ff9a7a}
+#endShops .src{font-family:var(--doc);font-size:10.5px;opacity:.5;margin-top:4px}
+#endShops .door kbd{position:absolute;left:8px;top:26px;z-index:3;font-family:var(--osd);font-size:16px;background:rgba(0,0,0,.6);color:#fff;border:1px solid rgba(255,255,255,.4);padding:0 6px}
+@media (max-width:1000px){#endShops .dgrid4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){#endShops .dgrid4{grid-template-columns:minmax(0,1fr)} #endShops .dart{height:170px} #endShops .dart .pp2d{height:150px}}
+#endShop.th{background:linear-gradient(180deg,var(--bg1),var(--bg2) 60%)}
+#endShop.th .awn{background:repeating-linear-gradient(90deg,var(--aw1) 0 44px,var(--aw2) 44px 88px)}
+#endShop.th .awn::after{background:radial-gradient(circle at 22px 0,var(--aw1) 21px,transparent 22px) 0 0/88px 16px,radial-gradient(circle at 66px 0,var(--aw2) 21px,transparent 22px) 0 0/88px 16px}
+#endShop.th .counter{background:linear-gradient(180deg,var(--ct1),var(--ct2));border-top-color:var(--acc)} #endShop.th .counter span{color:var(--acc)}
+#endShop.th .wares{border-color:var(--acc);background:rgba(8,8,10,.9)} #endShop.th h3{color:var(--acc)} #endShop.th .whd .nx{color:var(--acc);opacity:.8}
+#endShop.th .bubble.note{background:#ffe680;color:#3a3010;border-radius:2px;transform:rotate(-1.5deg);box-shadow:0 6px 10px rgba(0,0,0,.4)} #endShop.th .bubble.note::after{display:none}
+#endShop.th .bubble.eerie{background:#14061a;color:#f0c8ff;font-style:italic;border:1px solid #c050e0;box-shadow:0 0 24px rgba(200,80,224,.35)} #endShop.th .bubble.eerie::after{border-top-color:#14061a}
+#endShop.th .sc.offer{border-color:#6a2a1e;background:linear-gradient(100deg,#2a120c,#140806)} #endShop.th .sc.offer .sc-tx b em{color:#ffb09a;border-color:#8a3a2a}
+#endShop.th .sc.offer.on{border-color:#5a8a3a;background:linear-gradient(100deg,#16240e,#0a1206)} #endShop.th .sc.offer .sb.on{background:linear-gradient(180deg,#a8e08a,#6ab04a);box-shadow:0 4px 0 #2a5a1a}
+#endShop.th .sc.trade{border-color:#6a2a6a;background:linear-gradient(100deg,#24102a,#100614)}
+#endShop.th .sc-ic img{width:100%;height:100%;object-fit:cover;display:block}
+#endShop.th .tonight{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin:12px 0 4px;padding:8px 10px;border:1px dashed var(--acc);border-radius:8px} #endShop.th .tonight span:not(.k){font-size:15px;letter-spacing:1px;padding:0 7px;background:rgba(255,255,255,.07);border-radius:4px} #endShop.th .tonight span.hot{color:#ffb09a}
+#endShop.th .lsrc{font-family:var(--doc);font-size:11px;opacity:.45;margin:10px 0 0}
+#endShop.th .eb .btn{min-height:40px}
+#endShop .steam path{animation:stm 2.4s ease-in-out infinite} #endShop .steam path:nth-child(2){animation-delay:.6s} #endShop .steam path:nth-child(3){animation-delay:1.2s} @keyframes stm{0%{opacity:0;transform:translateY(6px)}50%{opacity:.8}100%{opacity:0;transform:translateY(-8px)}}
+#endShop .mmStar,#endShops .mmStar{transform-box:fill-box;transform-origin:50% 50%;animation:mmSpin 6s ease-in-out infinite} @keyframes mmSpin{50%{transform:translateY(-8px) rotate(4deg)}}
+#endShop .motes{animation:ppBulb 2.6s ease-in-out infinite}
+#endShop.sh-smiler .keeper .ppEyes{animation:smBlink 5s infinite} @keyframes smBlink{0%,90%,100%{opacity:1}93%,96%{opacity:0}}
+#endShop.sh-wheelfolk .spokes{transform-box:fill-box;transform-origin:50% 50%} #endShop.sh-wheelfolk .keeper.talk .spokes{animation:whl .9s linear}
+@keyframes whl{to{transform:rotate(60deg)}}
+`; document.head.appendChild(css);
+  return S;
+})();
 
 </script>
 <script>

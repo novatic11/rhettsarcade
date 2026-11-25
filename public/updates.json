@@ -1,5 +1,20 @@
 [
   {
+    "id": "backrooms-endless-shops",
+    "gameId": "backrooms-for-science",
+    "date": "2026-11-25T02:17:41.241Z",
+    "title": "Backrooms: For Science: Endless shops",
+    "summary": "Endless mode now sends you to one of four shops after every night, picked from fifteen keepers out of Backrooms lore.",
+    "changes": [
+      "After each Endless night, four shops open and you choose one. There are 15 in all, each with its own keeper, wares and music.",
+      "The keepers come from the Backrooms wikis: M.E.G. Base Alpha, the B.N.T.G., Moley's bar, Blanche's tea room, the Catmaster, the Wheelfolk, the Mail Carrier, the Blub Cats, the Memory Merchant and more.",
+      "The Partypooper now sells only the basics. His other wares moved to the new shops, along with tonight-only drinks and teas, mail-order items that arrive at 5:00 AM, and risky memory trades.",
+      "Some shops offer a challenge for the night, like a heat wave or sticky doors. Survive it for cash, a free upgrade or an item.",
+      "M.E.G. pays bounties: add one extra specimen to tonight's shift for a cash reward.",
+      "Two new achievements, and the Discount Card now works in every Endless shop."
+    ]
+  },
+  {
     "id": "backrooms-ui-redesign",
     "gameId": "backrooms-for-science",
     "date": "2026-11-25T00:28:22.636Z",
