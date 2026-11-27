@@ -1,5 +1,18 @@
 [
   {
+    "id": "backrooms-shops-redrawn",
+    "gameId": "backrooms-for-science",
+    "date": "2026-11-27T21:47:23.251Z",
+    "title": "Backrooms: For Science: Endless shops redrawn",
+    "summary": "Every Endless shopkeeper got the same care as the Partypooper.",
+    "changes": [
+      "All 14 new Endless shopkeepers are redrawn with full shading and detail, and their hands now rest on the counter like the Partypooper's.",
+      "Each shop has a proper backroom behind it: Base Alpha's supply wall, Trader's Keep's rate board, Moley's curtained stage, the Cygnus Archive's shelves, the Hub's doors and more.",
+      "Keepers blink, talk, sway and glow. Lamps swing, neon flickers, tea steams, the Catmaster's ears drip and the Memory Merchant turns slowly.",
+      "Every shop has its own counter and speech-bubble style, and the keepers have about twice as many things to say."
+    ]
+  },
+  {
     "id": "backrooms-fairness-pass",
     "gameId": "backrooms-for-science",
     "date": "2026-11-25T03:08:23.945Z",
